@@ -17,10 +17,10 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="pb-16">
-      <h1 className="text-2xl font-bold mb-10">Finance Assistant</h1>
+    <div className="flex flex-col items-center justify-center min-h-[80vh] pb-16">
+      <h1 className="text-2xl font-bold mb-10 text-center">Finance Assistant</h1>
       
-      <div className="flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center w-full">
         <div className="relative mb-12">
           {/* Central circle */}
           <div className="w-32 h-32 rounded-full bg-gradient-to-br from-white to-white/20 flex items-center justify-center shadow-lg backdrop-blur-sm z-10 relative animate-pulse-gentle">
@@ -56,9 +56,9 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <Card className="tr-card w-full max-w-md mt-10 backdrop-blur-sm bg-white/10 border-white/20 animate-fade-in">
-          <h2 className="text-lg font-medium mb-4">Finance Overview</h2>
-          <p className="text-muted-foreground text-sm">
+        <Card className="tr-card w-full max-w-md mt-10 backdrop-blur-sm bg-white/10 border-white/20 animate-fade-in mx-auto">
+          <h2 className="text-lg font-medium mb-4 text-center">Finance Overview</h2>
+          <p className="text-muted-foreground text-sm text-center">
             Welcome to your personal finance assistant. Select any category to manage your finances.
           </p>
         </Card>
