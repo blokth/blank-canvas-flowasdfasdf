@@ -4,16 +4,16 @@ import { Card } from '@/components/ui/card';
 import { CircleDollarSign } from 'lucide-react';
 
 const Dashboard = () => {
-  // Finance categories with colors
+  // Finance categories with monochrome colors
   const categories = [
-    { label: 'Budget', color: 'bg-tr-purple' },
-    { label: 'Investments', color: 'bg-[#4CAF50]' },
-    { label: 'Expenses', color: 'bg-[#FF9800]' },
-    { label: 'Income', color: 'bg-[#2196F3]' },
-    { label: 'Savings', color: 'bg-[#E91E63]' },
-    { label: 'Goals', color: 'bg-[#9C27B0]' },
-    { label: 'Categories', color: 'bg-[#607D8B]' },
-    { label: 'Overview', color: 'bg-[#FF5722]' },
+    { label: 'Budget', color: 'bg-black/80' },
+    { label: 'Investments', color: 'bg-black/75' },
+    { label: 'Expenses', color: 'bg-black/70' },
+    { label: 'Income', color: 'bg-black/65' },
+    { label: 'Savings', color: 'bg-black/60' },
+    { label: 'Goals', color: 'bg-black/55' },
+    { label: 'Categories', color: 'bg-black/50' },
+    { label: 'Overview', color: 'bg-black/45' },
   ];
 
   return (
@@ -23,10 +23,10 @@ const Dashboard = () => {
       <div className="flex flex-col items-center justify-center">
         <div className="relative mb-12">
           {/* Central circle */}
-          <div className="w-32 h-32 rounded-full bg-gradient-to-br from-tr-purple to-tr-purple/40 flex items-center justify-center shadow-lg backdrop-blur-sm z-10 relative animate-pulse-gentle">
+          <div className="w-32 h-32 rounded-full bg-gradient-to-br from-white to-white/20 flex items-center justify-center shadow-lg backdrop-blur-sm z-10 relative animate-pulse-gentle">
             <div className="text-center">
-              <CircleDollarSign className="w-12 h-12 text-white mx-auto" />
-              <p className="text-sm font-medium mt-1 text-white">Finance</p>
+              <CircleDollarSign className="w-12 h-12 text-black mx-auto" />
+              <p className="text-sm font-medium mt-1 text-black">Finance</p>
             </div>
           </div>
           
@@ -56,7 +56,7 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <Card className="tr-card w-full max-w-md mt-10 backdrop-blur-sm bg-card/80 border-tr-purple/20 animate-fade-in">
+        <Card className="tr-card w-full max-w-md mt-10 backdrop-blur-sm bg-white/10 border-white/20 animate-fade-in">
           <h2 className="text-lg font-medium mb-4">Finance Overview</h2>
           <p className="text-muted-foreground text-sm">
             Welcome to your personal finance assistant. Select any category to manage your finances.
