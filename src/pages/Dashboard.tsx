@@ -9,7 +9,7 @@ import {
   TrendingUp,
   CirclePercent,
   LayoutGrid,
-  Category
+  BarChart
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -21,7 +21,7 @@ const Dashboard = () => {
     { icon: <TrendingUp size={24} />, label: 'Income', color: 'bg-[#2196F3]' },
     { icon: <CircleDollarSign size={24} />, label: 'Savings', color: 'bg-[#E91E63]' },
     { icon: <CirclePercent size={24} />, label: 'Goals', color: 'bg-[#9C27B0]' },
-    { icon: <Category size={24} />, label: 'Categories', color: 'bg-[#607D8B]' },
+    { icon: <BarChart size={24} />, label: 'Categories', color: 'bg-[#607D8B]' },
     { icon: <LayoutGrid size={24} />, label: 'Overview', color: 'bg-[#FF5722]' },
   ];
 
