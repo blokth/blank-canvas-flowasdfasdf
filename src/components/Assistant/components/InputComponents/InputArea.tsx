@@ -1,9 +1,10 @@
 
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import SuggestionPopup from './SuggestionPopup';
+import InputDisplay from './InputDisplay';
 
 interface InputAreaProps {
   query: string;
@@ -66,50 +67,6 @@ const InputArea: React.FC<InputAreaProps> = ({
     // Fall back to default handling if no suggestions or other key
     handleKeyDown(e);
   };
-
-  // Function to highlight template fields
-  const highlightTemplateFields = () => {
-    if (!query) return null;
-    
-    const parts = [];
-    const pattern = /(\{\{(stock|timeframe|sector)\}\})/g;
-    let lastIndex = 0;
-    let match;
-    
-    while ((match = pattern.exec(query)) !== null) {
-      // Add text before match
-      if (match.index > lastIndex) {
-        parts.push(
-          <span key={`text-${lastIndex}`}>
-            {query.substring(lastIndex, match.index)}
-          </span>
-        );
-      }
-      
-      // Add highlighted template field
-      parts.push(
-        <span 
-          key={`field-${match.index}`} 
-          className="bg-primary/20 text-primary rounded px-1"
-        >
-          {match[0]}
-        </span>
-      );
-      
-      lastIndex = match.index + match[0].length;
-    }
-    
-    // Add any remaining text
-    if (lastIndex < query.length) {
-      parts.push(
-        <span key={`text-${lastIndex}`}>
-          {query.substring(lastIndex)}
-        </span>
-      );
-    }
-    
-    return parts;
-  };
   
   return (
     <div className="relative">
@@ -136,13 +93,7 @@ const InputArea: React.FC<InputAreaProps> = ({
         />
         
         {/* Visible div for highlighting */}
-        <div className="resize-none text-sm border-0 focus-visible:ring-0 shadow-none min-h-10 py-3 bg-transparent pr-10 whitespace-pre-wrap">
-          {highlightTemplateFields() || 
-            <span className="text-muted-foreground">
-              Ask about your finances or portfolio... (Type / for commands)
-            </span>
-          }
-        </div>
+        <InputDisplay query={query} />
       </div>
       
       <Button 
