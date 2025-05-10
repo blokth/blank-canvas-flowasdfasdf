@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { VisualizationType } from '../Assistant/components/VisualizationManager';
-import AssistantInput from '../Assistant/components/AssistantInput';
 import ConversationView from '../Assistant/components/ConversationView';
 
 interface DashboardAssistantProps {
@@ -9,7 +8,7 @@ interface DashboardAssistantProps {
   setResponse: (response: string | null) => void;
   query?: string;
   setQuery?: (query: string) => void;
-  onSubmit?: (fullscreen?: boolean) => void;
+  onSubmit?: (e: React.FormEvent) => void;
   isConnected?: boolean;
   isLoading?: boolean;
   chunks?: string[];
@@ -39,7 +38,7 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
     if (!query.trim()) return;
 
     if (parentOnSubmit) {
-      parentOnSubmit();
+      parentOnSubmit(e);
     } else {
       setInternalIsLoading(true);
       
@@ -59,13 +58,14 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
   };
 
   return (
-    <div className="relative">
-      {/* Only the input component */}
-      <AssistantInput
+    <div className="relative h-full">
+      {/* Full conversation view with input */}
+      <ConversationView
+        chunks={chunks}
+        isLoading={isLoading}
         query={query}
         setQuery={setQuery}
         onSubmit={handleSubmit}
-        isLoading={isLoading}
       />
     </div>
   );

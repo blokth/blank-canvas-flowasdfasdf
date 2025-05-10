@@ -12,7 +12,7 @@ export const processStream = (
   decoder: TextDecoder,
   processChunk: ProcessChunkFn
 ): void => {
-  console.log('Starting to process FastAPI stream (non-blocking)...');
+  console.log('Starting to process stream (non-blocking)...');
   
   // Function to process chunks without awaiting
   function pump(): void {

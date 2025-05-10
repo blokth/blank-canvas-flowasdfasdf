@@ -1,9 +1,5 @@
-
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkHtml from 'remark-html';
 
 export const useChunkProcessor = () => {
   const [response, setResponse] = useState<string | null>(null);
@@ -38,8 +34,11 @@ export const useChunkProcessor = () => {
       
       // Update chunks for streaming display
       setChunks(prev => {
-        // Simple approach for now - if we're getting a continuous stream
-        // from a single response, just update the last chunk
+        // If this is a continuation of a response, replace the last chunk
+        if (prev.length > 0) {
+          return [...prev.slice(0, -1), chunk];
+        }
+        // Otherwise add as new chunk
         return [...prev, chunk];
       });
     }
