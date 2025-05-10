@@ -66,9 +66,6 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
     }, 550); // Changed from 1100ms to 550ms (slightly longer than animation duration)
   };
 
-  // Determine if we're actively streaming (have chunks and are loading)
-  const isStreaming = chunks.length > 0;
-
   return (
     <div className="relative">
       <AssistantInput
@@ -76,8 +73,6 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
         setQuery={setQuery}
         onSubmit={handleSubmit}
         isLoading={isLoading}
-        streamingChunks={chunks}
-        isStreaming={isStreaming}
       />
     </div>
   );

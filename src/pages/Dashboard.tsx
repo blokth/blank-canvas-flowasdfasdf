@@ -125,7 +125,6 @@ const Dashboard = () => {
               handleAssistantSubmit({ preventDefault: () => {} } as React.FormEvent);
             }}
             isLoading={isLoading}
-            chunks={chunks}
           />
         </div>
       )}

@@ -52,10 +52,6 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   
   // Reset transitioning state after animation completes
   useEffect(() => {
-    const transitionEndHandler = () => {
-      setIsTransitioning(false);
-    };
-    
     const timeout = setTimeout(() => {
       setIsTransitioning(false);
     }, 550); // Changed from 1100ms to 550ms (slightly longer than animation duration to ensure it completes)
