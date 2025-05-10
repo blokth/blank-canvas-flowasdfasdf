@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { VisualizationType } from '../Assistant/components/VisualizationManager';
 import VisualizationDisplay from '../Assistant/components/VisualizationDisplay';
 import AssistantInput from '../Assistant/components/AssistantInput';
@@ -16,6 +16,9 @@ interface DashboardVisualizationProps {
   isLoading?: boolean;
 }
 
+// Use memo to prevent re-renders when props don't change
+const MemoizedVisualizationManager = memo(VisualizationManager);
+
 const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   response,
   activeVisualization,
@@ -26,6 +29,14 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
 }) => {
   // Add preloaded state to track when the visualization is ready
   const [isPreloaded, setIsPreloaded] = useState(false);
+  
+  // Use ref to prevent unnecessary re-renders
+  const visualizationRef = useRef<VisualizationType>(activeVisualization);
+  
+  // Only update the ref when activeVisualization actually changes
+  useEffect(() => {
+    visualizationRef.current = activeVisualization;
+  }, [activeVisualization]);
   
   // Preload the visualization component as soon as we have a response
   useEffect(() => {
@@ -45,7 +56,7 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
       {/* Hidden preloader that renders offscreen */}
       {response && !isPreloaded && (
         <div className="fixed opacity-0 pointer-events-none" aria-hidden="true">
-          <VisualizationManager activeVisualization={activeVisualization} />
+          <MemoizedVisualizationManager activeVisualization={visualizationRef.current} />
         </div>
       )}
       
@@ -53,7 +64,7 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
         {/* Display visualization if available */}
         <div>
           <VisualizationDisplay
-            visualization={<VisualizationManager activeVisualization={activeVisualization} />}
+            visualization={<MemoizedVisualizationManager activeVisualization={activeVisualization} />}
             minimal={true}
             response={response}
           />
@@ -63,4 +74,4 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   );
 };
 
-export default DashboardVisualization;
+export default memo(DashboardVisualization);

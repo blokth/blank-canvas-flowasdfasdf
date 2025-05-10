@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { ChartRenderer, ChartType } from '@/components/Charts';
 
 // Sample chart data - would be replaced with LLM data in real implementation
@@ -149,6 +149,7 @@ const VisualizationManager: React.FC<VisualizationManagerProps> = ({ activeVisua
   if (!visualConfig) return null;
   
   const { chartType, getData, config } = visualConfig;
+  // Memoize data generation by moving it outside the component
   const data = getData();
   
   return (
@@ -163,4 +164,5 @@ const VisualizationManager: React.FC<VisualizationManagerProps> = ({ activeVisua
   );
 };
 
-export default VisualizationManager;
+// Use React.memo to prevent re-renders when props don't change
+export default memo(VisualizationManager);
