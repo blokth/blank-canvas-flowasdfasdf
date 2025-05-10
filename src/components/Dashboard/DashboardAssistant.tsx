@@ -6,14 +6,22 @@ import AssistantInput from '../Assistant/components/AssistantInput';
 interface DashboardAssistantProps {
   setActiveVisualization: (visualization: VisualizationType) => void;
   setResponse: (response: string | null) => void;
+  query?: string;
+  setQuery?: (query: string) => void;
 }
 
 const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
   setActiveVisualization,
-  setResponse
+  setResponse,
+  query: externalQuery,
+  setQuery: setExternalQuery
 }) => {
-  const [query, setQuery] = useState('');
+  const [internalQuery, setInternalQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Use either external or internal state
+  const query = externalQuery !== undefined ? externalQuery : internalQuery;
+  const setQuery = setExternalQuery !== undefined ? setExternalQuery : setInternalQuery;
 
   // Handle assistant input submission
   const handleSubmit = (e: React.FormEvent) => {

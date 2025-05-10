@@ -65,6 +65,8 @@ const Dashboard = () => {
         <DashboardAssistant
           setActiveVisualization={setActiveVisualization}
           setResponse={setResponse}
+          query={query}
+          setQuery={setQuery}
         />
       </div>
     </div>

@@ -4,31 +4,11 @@ import { PieChart, LineChart, BarChart2, Wallet, BarChart, TrendingUp, Calendar,
 import { Button } from '@/components/ui/button';
 
 interface ActionPillsProps {
-  onPortfolioBreakdown: () => void;
-  onPerformanceTrend: () => void;
-  onStockComparison: () => void;
-  onExpenseCategories: () => void;
-  onIncomeSources: () => void;
-  onFinancialForecast: () => void;
-  onMonthlySpending: () => void;
-  onCashManagement: () => void;
-  onWealthOverview: () => void;
-  onInvestmentAllocation: () => void;
-  onSavingsGoals: () => void;
+  onPillClick: (templateQuery: string) => void;
 }
 
 const ActionPills: React.FC<ActionPillsProps> = ({
-  onPortfolioBreakdown,
-  onPerformanceTrend,
-  onStockComparison,
-  onExpenseCategories,
-  onIncomeSources,
-  onFinancialForecast,
-  onMonthlySpending,
-  onCashManagement,
-  onWealthOverview,
-  onInvestmentAllocation,
-  onSavingsGoals,
+  onPillClick
 }) => {
   const [showAllPills, setShowAllPills] = useState(false);
 
@@ -38,7 +18,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onPortfolioBreakdown}
+        onClick={() => onPillClick("Show me my portfolio breakdown by sector")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <PieChart size={14} className="mr-1" /> Portfolio
@@ -46,7 +26,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onPerformanceTrend}
+        onClick={() => onPillClick("Show me my performance trend")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <LineChart size={14} className="mr-1" /> Trends
@@ -54,7 +34,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onStockComparison}
+        onClick={() => onPillClick("Compare my top stocks")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <BarChart2 size={14} className="mr-1" /> Stocks
@@ -62,7 +42,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onWealthOverview}
+        onClick={() => onPillClick("Show me my wealth overview")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <BadgeDollarSign size={14} className="mr-1" /> Wealth
@@ -70,7 +50,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onExpenseCategories}
+        onClick={() => onPillClick("Show me my expense categories")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <Wallet size={14} className="mr-1" /> Expenses
@@ -78,7 +58,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onIncomeSources}
+        onClick={() => onPillClick("Show me my income sources")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <BarChart size={14} className="mr-1" /> Income
@@ -92,7 +72,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onPortfolioBreakdown}
+        onClick={() => onPillClick("Show me my portfolio breakdown by sector")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <PieChart size={14} className="mr-1" /> Portfolio
@@ -100,7 +80,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onPerformanceTrend}
+        onClick={() => onPillClick("Show me my performance trend")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <LineChart size={14} className="mr-1" /> Trends
@@ -108,7 +88,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onStockComparison}
+        onClick={() => onPillClick("Compare my top stocks")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <BarChart2 size={14} className="mr-1" /> Stocks
@@ -116,7 +96,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onWealthOverview}
+        onClick={() => onPillClick("Show me my wealth overview")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <BadgeDollarSign size={14} className="mr-1" /> Wealth
@@ -124,7 +104,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onCashManagement}
+        onClick={() => onPillClick("Show me my cash accounts")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <Coins size={14} className="mr-1" /> Cash
@@ -132,7 +112,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onInvestmentAllocation}
+        onClick={() => onPillClick("Show me my investment allocation")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <WalletCards size={14} className="mr-1" /> Invest
@@ -140,7 +120,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onSavingsGoals}
+        onClick={() => onPillClick("Show me my savings goals")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <PiggyBank size={14} className="mr-1" /> Goals
@@ -148,7 +128,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onExpenseCategories}
+        onClick={() => onPillClick("Show me my expense categories")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <Wallet size={14} className="mr-1" /> Expenses
@@ -156,7 +136,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onIncomeSources}
+        onClick={() => onPillClick("Show me my income sources")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <BarChart size={14} className="mr-1" /> Income
@@ -164,7 +144,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onFinancialForecast}
+        onClick={() => onPillClick("Show me a financial forecast")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <TrendingUp size={14} className="mr-1" /> Forecast
@@ -172,7 +152,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={onMonthlySpending}
+        onClick={() => onPillClick("Show me my monthly spending")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <Calendar size={14} className="mr-1" /> Budget
