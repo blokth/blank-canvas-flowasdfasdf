@@ -46,7 +46,7 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   
   return (
     <div 
-      className={`origin-bottom transition-all duration-700 ease-in-out 
+      className={`origin-bottom transition-all duration-1000 ease-in-out 
       ${isFullscreen 
         ? 'fixed inset-0 z-50 bg-background p-4 scale-100 opacity-100' 
         : 'mb-20 scale-95 opacity-100'}`}
@@ -72,7 +72,7 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
       </div>
       
       {/* Display visualization if available */}
-      <div className={`transition-all duration-700 ${isFullscreen ? 'h-[calc(100%-120px)]' : ''}`}>
+      <div className={`transition-all duration-1000 ${isFullscreen ? 'h-[calc(100%-120px)]' : ''}`}>
         <VisualizationDisplay
           response={response}
           visualization={<VisualizationManager activeVisualization={activeVisualization} />}
