@@ -94,14 +94,16 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
       )}
       
       <div 
-        className={`origin-bottom transition-all duration-1000 ease-in-out will-change-transform will-change-opacity
+        className={`transition-all duration-1000 ease-in-out will-change-transform will-change-opacity
         ${isFullscreen 
           ? 'fixed inset-0 z-50 bg-background p-4 scale-100 opacity-100' 
-          : 'mb-20 scale-95 opacity-100'}`}
+          : 'mb-20 scale-100 opacity-100 transform translate-y-0'}`}
         style={{
           transformOrigin: 'bottom center',
           backfaceVisibility: 'hidden',
           willChange: 'transform, opacity',
+          transform: isFullscreen ? 'translateY(0)' : 'translateY(20px)',
+          opacity: isFullscreen || isPreloaded ? 1 : 0,
         }}
       >
         <div className="flex justify-between items-center mb-2">
