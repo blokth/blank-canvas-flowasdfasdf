@@ -17,12 +17,12 @@ const ConversationView: React.FC<ConversationViewProps> = ({ chunks, isLoading }
     }
   }, [chunks]);
 
-  if (chunks.length === 0 && !isLoading) {
+  if (chunks.length === 0) {
     return null;
   }
 
   return (
-    <div className="mt-4 border border-border/20 rounded-lg p-4 bg-background/80">
+    <div className="border border-border/20 rounded-lg p-4 bg-background/80">
       <div 
         ref={scrollRef}
         className="max-h-[300px] overflow-y-auto"
@@ -35,17 +35,6 @@ const ConversationView: React.FC<ConversationViewProps> = ({ chunks, isLoading }
             <div className="text-sm whitespace-pre-wrap">
               {chunks.join('')}
             </div>
-          </div>
-        )}
-        
-        {isLoading && chunks.length === 0 && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "200ms" }}></div>
-              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "400ms" }}></div>
-            </div>
-            <span>Assistant is thinking...</span>
           </div>
         )}
       </div>

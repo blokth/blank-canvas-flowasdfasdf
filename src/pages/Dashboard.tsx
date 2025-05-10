@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 import PortfolioOverview from '../components/Dashboard/PortfolioOverview';
 import DashboardActions from '../components/Dashboard/DashboardActions';
 import DashboardVisualization from '../components/Dashboard/DashboardVisualization';
-import DashboardAssistant from '../components/Dashboard/DashboardAssistant';
 import AssistantInput from '../components/Assistant/components/AssistantInput';
+import ConversationView from '../components/Assistant/components/ConversationView';
 import { generateChartData, generatePersonalFinanceData } from '../utils/chartDataGenerators';
 import { useMCPConnection } from '../hooks/useMCPConnection';
 
@@ -104,16 +105,9 @@ const Dashboard = () => {
       {/* Conversation View (including streaming chunks) now appears here after action pills */}
       {!showFullscreenChart && (
         <div className="mt-4">
-          <DashboardAssistant
-            setActiveVisualization={setVisualizationType}
-            setResponse={setResponse}
-            query={query}
-            setQuery={setQuery}
-            onSubmit={() => {
-              handleAssistantSubmit({ preventDefault: () => {} } as React.FormEvent);
-            }}
-            isLoading={isLoading}
+          <ConversationView
             chunks={chunks}
+            isLoading={isLoading}
           />
         </div>
       )}
