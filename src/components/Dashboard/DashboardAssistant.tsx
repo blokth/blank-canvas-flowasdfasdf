@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { VisualizationType } from '../Assistant/components/VisualizationManager';
 import ConversationView from '../Assistant/components/ConversationView';
 
@@ -39,10 +39,18 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
     
     const currentQuery = query; // Store current query before it gets cleared
 
+    // Clear response immediately to prevent seeing the previous response
+    setResponse(null);
+
     if (parentOnSubmit) {
       parentOnSubmit(e);
+      // Clear query right after submission
+      if (setExternalQuery) {
+        setExternalQuery('');
+      }
     } else {
       setInternalIsLoading(true);
+      setInternalQuery(''); // Clear internal query immediately
       
       // Simulate AI response delay
       setTimeout(() => {
