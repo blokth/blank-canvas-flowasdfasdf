@@ -36,31 +36,7 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  
-  body {
-    @apply bg-tr-dark text-foreground antialiased;
-  }
-  
-  /* Custom scrollbar for the app */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    @apply bg-black/30 rounded-none; /* Changed to black with opacity */
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-black/50;
-  }
+  /* ... keep existing code */
 }
 
 @layer components {
@@ -94,5 +70,27 @@
       0 5px, 3px 0, calc(100% - 3px) 0, 100% 4px, 100% calc(100% - 5px), 
       calc(100% - 4px) 100%, 5px 100%, 0 calc(100% - 3px)
     );
+  }
+  
+  /* Add rough tab styles */
+  .rough-tabs {
+    @apply border border-black/20 rounded-none;
+  }
+  
+  .rough-tabs-list {
+    @apply bg-white border-b border-black/20 p-0 h-auto;
+  }
+  
+  .rough-tab {
+    @apply border border-black/20 m-0 rounded-none transform skew-x-1 bg-gray-100 px-4 py-2 text-sm font-medium;
+    clip-path: polygon(
+      2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px),
+      calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px
+    );
+  }
+  
+  .rough-tab[data-state="active"] {
+    @apply bg-white border-b-white shadow-sm;
+    transform: skew(-1deg);
   }
 }

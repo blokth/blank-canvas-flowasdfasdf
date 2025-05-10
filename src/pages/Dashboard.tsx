@@ -35,17 +35,23 @@ const Dashboard = () => {
     <div className="pb-16 max-w-md mx-auto">
       <h1 className="text-xl font-medium mb-6 text-center">Portfolio Overview</h1>
       
-      <Tabs defaultValue="portfolio" className="w-full mb-6">
-        <TabsList className="w-full grid grid-cols-2 h-11 rounded-full p-1 bg-muted/30">
-          <TabsTrigger value="portfolio" className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm">
+      <Tabs defaultValue="portfolio" className="w-full mb-6 rough-tabs">
+        <TabsList className="w-full grid grid-cols-2 h-auto rounded-none p-1 bg-muted/30 rough-tabs-list">
+          <TabsTrigger 
+            value="portfolio" 
+            className="rough-tab data-[state=active]:bg-white data-[state=active]:shadow-sm"
+          >
             Portfolio
           </TabsTrigger>
-          <TabsTrigger value="personal" className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm">
+          <TabsTrigger 
+            value="personal" 
+            className="rough-tab data-[state=active]:bg-white data-[state=active]:shadow-sm"
+          >
             Personal Finance
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="portfolio" className="mt-4 space-y-6">
+        <TabsContent value="portfolio" className="mt-4 space-y-6 p-2">
           <PortfolioSummary 
             totalValue={portfolioValue}
             changePercentage={portfolioChangePercent}
@@ -60,7 +66,7 @@ const Dashboard = () => {
           </div>
         </TabsContent>
         
-        <TabsContent value="personal" className="mt-4">
+        <TabsContent value="personal" className="mt-4 p-2">
           <PersonalFinance />
         </TabsContent>
       </Tabs>
