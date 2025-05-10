@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { VisualizationType } from '../Assistant/components/VisualizationManager';
 import AssistantInput from '../Assistant/components/AssistantInput';
+import { MessageSquare } from 'lucide-react';
 
 interface DashboardAssistantProps {
   setActiveVisualization: (visualization: VisualizationType) => void;
@@ -9,6 +10,8 @@ interface DashboardAssistantProps {
   query?: string;
   setQuery?: (query: string) => void;
   onSubmit?: (fullscreen?: boolean) => void;
+  isConnected?: boolean;
+  isLoading?: boolean;
 }
 
 const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
@@ -16,16 +19,18 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
   setResponse,
   query: externalQuery,
   setQuery: setExternalQuery,
-  onSubmit: parentOnSubmit
+  onSubmit: parentOnSubmit,
+  isConnected = false,
+  isLoading: externalIsLoading = false
 }) => {
   const [internalQuery, setInternalQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  // Add transition state to prevent multiple rapid submissions
+  const [internalIsLoading, setInternalIsLoading] = useState(false);
   const [isInTransition, setIsInTransition] = useState(false);
   
   // Use either external or internal state
   const query = externalQuery !== undefined ? externalQuery : internalQuery;
   const setQuery = setExternalQuery !== undefined ? setExternalQuery : setInternalQuery;
+  const isLoading = externalIsLoading || internalIsLoading;
 
   // Handle submit - if parent provided onSubmit use that, otherwise handle locally
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,7 +44,7 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
     if (parentOnSubmit) {
       parentOnSubmit();
     } else {
-      setIsLoading(true);
+      setInternalIsLoading(true);
       
       // Simulate AI response delay
       setTimeout(() => {
@@ -51,7 +56,7 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
           setActiveVisualization(null);
           setResponse("I can help you analyze your finances. Try asking about portfolio breakdowns.");
         }
-        setIsLoading(false);
+        setInternalIsLoading(false);
       }, 1000);
     }
     
@@ -62,12 +67,21 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
   };
 
   return (
-    <AssistantInput
-      query={query}
-      setQuery={setQuery}
-      onSubmit={handleSubmit}
-      isLoading={isLoading}
-    />
+    <div className="relative">
+      {isConnected && (
+        <div className="absolute -top-6 left-2 text-xs text-green-600 flex items-center">
+          <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
+          <MessageSquare size={12} className="mr-1" />
+          MCP Ready
+        </div>
+      )}
+      <AssistantInput
+        query={query}
+        setQuery={setQuery}
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+      />
+    </div>
   );
 };
 
