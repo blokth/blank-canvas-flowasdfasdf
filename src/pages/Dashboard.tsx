@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import PortfolioSummary from '../components/Dashboard/PortfolioSummary';
 import PerformanceChart from '../components/Dashboard/PerformanceChart';
@@ -35,6 +34,10 @@ type VisualizationType =
   'expense-categories' | 
   'income-sources' | 
   'forecast' | 
+  'wealth-overview' |
+  'cash-management' |
+  'investment-allocation' |
+  'savings-goals' |
   null;
 
 const Dashboard = () => {
@@ -78,6 +81,18 @@ const Dashboard = () => {
       } else if (query.toLowerCase().includes('forecast') || query.toLowerCase().includes('prediction')) {
         setActiveVisualization('forecast');
         setResponse("Based on your current financial patterns, here's a 6-month forecast:");
+      } else if (query.toLowerCase().includes('wealth') || query.toLowerCase().includes('overview')) {
+        setActiveVisualization('wealth-overview');
+        setResponse("Here's an overview of your total wealth:");
+      } else if (query.toLowerCase().includes('cash') || query.toLowerCase().includes('management')) {
+        setActiveVisualization('cash-management');
+        setResponse("Here's a summary of your cash accounts:");
+      } else if (query.toLowerCase().includes('investment') || query.toLowerCase().includes('allocation')) {
+        setActiveVisualization('investment-allocation');
+        setResponse("Here's how your investments are allocated:");
+      } else if (query.toLowerCase().includes('savings') || query.toLowerCase().includes('goals')) {
+        setActiveVisualization('savings-goals');
+        setResponse("Here's your progress towards savings goals:");
       } else {
         setActiveVisualization(null);
         setResponse("I can help you analyze your finances. Try asking about portfolio breakdowns, performance trends, stock comparisons, expense categories, income sources, or financial forecasts.");
@@ -86,7 +101,7 @@ const Dashboard = () => {
     }, 1000);
   };
 
-  // Action handlers
+  // Action handlers for existing pills
   const handlePortfolioBreakdown = () => {
     setQuery("Show me my portfolio breakdown by sector");
     setActiveVisualization('portfolio-breakdown');
@@ -129,6 +144,31 @@ const Dashboard = () => {
     setResponse("Here's your monthly spending pattern:");
   };
 
+  // New action handlers for personal finance pills
+  const handleWealthOverview = () => {
+    setQuery("Show me my wealth overview");
+    setActiveVisualization('wealth-overview');
+    setResponse("Here's an overview of your total wealth:");
+  };
+
+  const handleCashManagement = () => {
+    setQuery("Show me my cash accounts");
+    setActiveVisualization('cash-management');
+    setResponse("Here's a summary of your cash accounts:");
+  };
+
+  const handleInvestmentAllocation = () => {
+    setQuery("Show me my investment allocation");
+    setActiveVisualization('investment-allocation');
+    setResponse("Here's how your investments are allocated:");
+  };
+
+  const handleSavingsGoals = () => {
+    setQuery("Show me my savings goals");
+    setActiveVisualization('savings-goals');
+    setResponse("Here's your progress towards savings goals:");
+  };
+
   return (
     <div className="pb-16 max-w-lg mx-auto">
       <div className="bg-background/50 rounded-xl p-6 my-4 shadow-sm">
@@ -157,6 +197,10 @@ const Dashboard = () => {
           onIncomeSources={handleIncomeSources}
           onFinancialForecast={handleFinancialForecast}
           onMonthlySpending={handleMonthlySpending}
+          onWealthOverview={handleWealthOverview}
+          onCashManagement={handleCashManagement}
+          onInvestmentAllocation={handleInvestmentAllocation}
+          onSavingsGoals={handleSavingsGoals}
         />
       </div>
       

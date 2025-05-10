@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { PieChart, LineChart, BarChart2, Wallet, BarChart, TrendingUp, Calendar } from 'lucide-react';
+import { PieChart, LineChart, BarChart2, Wallet, BarChart, TrendingUp, Calendar, PiggyBank, BadgeDollarSign, Coins, WalletCards, Banknote, Currency } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ActionPillsProps {
@@ -11,6 +10,10 @@ interface ActionPillsProps {
   onIncomeSources: () => void;
   onFinancialForecast: () => void;
   onMonthlySpending: () => void;
+  onCashManagement?: () => void;
+  onWealthOverview?: () => void;
+  onInvestmentAllocation?: () => void;
+  onSavingsGoals?: () => void;
 }
 
 const ActionPills: React.FC<ActionPillsProps> = ({
@@ -21,6 +24,10 @@ const ActionPills: React.FC<ActionPillsProps> = ({
   onIncomeSources,
   onFinancialForecast,
   onMonthlySpending,
+  onCashManagement,
+  onWealthOverview,
+  onInvestmentAllocation,
+  onSavingsGoals,
 }) => {
   return (
     <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
@@ -48,6 +55,51 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       >
         <BarChart2 size={14} className="mr-1" /> Compare Stocks
       </Button>
+      
+      {onWealthOverview && (
+        <Button 
+          size="sm" 
+          variant="outline" 
+          onClick={onWealthOverview}
+          className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
+        >
+          <BadgeDollarSign size={14} className="mr-1" /> Wealth Overview
+        </Button>
+      )}
+      
+      {onCashManagement && (
+        <Button 
+          size="sm" 
+          variant="outline" 
+          onClick={onCashManagement}
+          className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
+        >
+          <Coins size={14} className="mr-1" /> Cash Management
+        </Button>
+      )}
+      
+      {onInvestmentAllocation && (
+        <Button 
+          size="sm" 
+          variant="outline" 
+          onClick={onInvestmentAllocation}
+          className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
+        >
+          <WalletCards size={14} className="mr-1" /> Investment Allocation
+        </Button>
+      )}
+      
+      {onSavingsGoals && (
+        <Button 
+          size="sm" 
+          variant="outline" 
+          onClick={onSavingsGoals}
+          className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
+        >
+          <PiggyBank size={14} className="mr-1" /> Savings Goals
+        </Button>
+      )}
+      
       <Button 
         size="sm" 
         variant="outline" 
