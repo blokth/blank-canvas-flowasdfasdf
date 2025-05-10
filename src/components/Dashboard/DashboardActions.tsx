@@ -28,12 +28,13 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
     }
   };
 
-  return <div className="my-4 overflow-x-auto pb-2">
-      {/* Original Action Pills */}
+  return (
+    <div className="my-4 overflow-x-auto pb-2">
       <div className="mb-4">
         <ActionPills onPillClick={handlePillClick} />
       </div>
-    </div>;
+    </div>
+  );
 };
 
 export default DashboardActions;

@@ -24,6 +24,15 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
   
+  // Command buttons for quick access
+  const commandButtons = [
+    { label: "Stock", command: "stock:" },
+    { label: "Compare", command: "compare stock:" },
+    { label: "Timeframe", command: "timeframe:" },
+    { label: "Sector", command: "sector:" },
+    { label: "Forecast", command: "forecast stock:" },
+  ];
+  
   // Sample data for suggestions
   const suggestions = {
     stock: ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'TSLA', 'JPM', 'V', 'WMT'],
@@ -189,6 +198,24 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     setShowSuggestions(false);
   };
 
+  // Handle click on a command button
+  const handleCommandClick = (command: string) => {
+    // Insert command at cursor position or at the end if no cursor
+    const insertPosition = cursorPosition || query.length;
+    const newQuery = query.substring(0, insertPosition) + command + query.substring(insertPosition);
+    setQuery(newQuery);
+    
+    // Set cursor position after the inserted command
+    setTimeout(() => {
+      if (textareaRef.current) {
+        const newPosition = insertPosition + command.length;
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newPosition, newPosition);
+        setCursorPosition(newPosition);
+      }
+    }, 0);
+  };
+
   // Filter suggestions based on search term
   const filteredSuggestions = suggestionType 
     ? suggestions[suggestionType].filter(item => 
@@ -196,37 +223,21 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     : ['stock', 'compare', 'forecast', 'sector'].filter(item => 
         item.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  // Set a template in the assistant input
-  const setTemplate = (template: string) => {
-    setQuery(template);
-    if (textareaRef.current) {
-      setTimeout(() => {
-        textareaRef.current?.focus();
-      }, 0);
-    }
-  };
-
-  // Quick template buttons
-  const quickTemplates = [
-    { label: "Stock", template: "Show me stock:AAPL performance for timeframe:3m" },
-    { label: "Forecast", template: "Forecast for stock:MSFT" }
-  ];
-
   return (
     <form onSubmit={onSubmit} className="bg-background border border-border/20 rounded-xl shadow-sm">
       <div className="flex flex-col gap-2 p-2">
-        {/* Quick templates */}
-        <div className="flex gap-2 px-1">
-          {quickTemplates.map((template, index) => (
+        {/* Command buttons row */}
+        <div className="flex flex-wrap gap-2 px-1">
+          {commandButtons.map((btn, index) => (
             <Button 
               key={index}
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="h-6 px-2 text-xs"
-              onClick={() => setTemplate(template.template)}
+              className="h-7 px-2 text-xs"
+              onClick={() => handleCommandClick(btn.command)}
             >
-              /{template.label}
+              {btn.label}
             </Button>
           ))}
         </div>
