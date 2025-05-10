@@ -54,6 +54,10 @@ const InputArea: React.FC<InputAreaProps> = ({
         // Apply the currently selected suggestion
         handleSuggestionSelect(filteredSuggestions[selectedIndex]);
         return;
+      } else if (e.key === 'Escape') {
+        // Close suggestions on Escape
+        e.preventDefault();
+        return;
       }
     }
     
