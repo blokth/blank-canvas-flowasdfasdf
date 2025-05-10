@@ -28,7 +28,6 @@ const ConversationView: React.FC<ConversationViewProps> = ({
   onSubmit = () => {}
 }) => {
   const { toast } = useToast();
-  const conversationEndRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentAssistantMessage, setCurrentAssistantMessage] = useState<string>('');
   
@@ -90,15 +89,6 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     // Call the provided onSubmit
     onSubmit(e);
   };
-  
-  // Simple scroll to bottom when messages change
-  useEffect(() => {
-    if (conversationEndRef.current) {
-      setTimeout(() => {
-        conversationEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    }
-  }, [messages, currentAssistantMessage]);
 
   return (
     <div className="flex flex-col h-full border border-border/20 rounded-xl bg-background/80 shadow-sm overflow-hidden">
@@ -145,7 +135,6 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                 </div>
               </div>
             )}
-            <div ref={conversationEndRef} />
           </div>
         )}
       </ScrollArea>
