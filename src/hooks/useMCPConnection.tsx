@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
@@ -69,9 +68,6 @@ export const useMCPConnection = () => {
     mutationFn: async (query: string) => {
       if (!query.trim()) throw new Error('Empty query');
       
-      // Clear chunks array on new message
-      setChunks([]);
-      
       // Use query parameters instead of JSON body for the message
       const url = new URL(`${MCP_CONFIG.baseUrl}${MCP_CONFIG.chatEndpoint}`);
       url.searchParams.append('message', query);
@@ -118,39 +114,12 @@ export const useMCPConnection = () => {
         return;
       }
       
-      // For streaming responses
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      const partialData = { text: '' };
-      let completeResponse = '';
       
       try {
         console.log('Starting to process stream...');
-        
-        // Process stream chunk by chunk for real-time updates
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) {
-            console.log('Stream complete');
-            break;
-          }
-          
-          const chunk = decoder.decode(value, { stream: true });
-          console.log('Processing stream chunk:', chunk);
-          completeResponse += chunk;
-          processChunk(chunk, partialData);
-          
-          // Allow UI to update between chunks
-          await new Promise(resolve => setTimeout(resolve, 0));
-        }
-        
-        // Process any remaining partial data
-        if (partialData.text.trim()) {
-          processChunk('\n', partialData);
-        }
-        
-        console.log('Complete streamed response:', completeResponse);
-        return completeResponse;
+        return reader;
       } catch (error) {
         console.error('Error reading stream:', error);
         setResponse("Error streaming the response.");
@@ -159,6 +128,37 @@ export const useMCPConnection = () => {
     onError: (error) => {
       console.error('Error sending message to MCP server:', error);
       setResponse("Failed to connect to the server.");
+    },
+    onProgress: ({ data }) => {
+      if (!data) return;
+      
+      try {
+        // Get the chunk as string
+        const chunk = typeof data === 'string' ? data : decoder.decode(data, { stream: true });
+        console.log('Streaming chunk:', chunk);
+        
+        // Add chunk to chunks array for real-time display
+        setChunks(prevChunks => [...prevChunks, chunk]);
+        
+        // Try to parse as JSON
+        try {
+          const jsonData = JSON.parse(chunk);
+          console.log('Parsed JSON data:', jsonData);
+          
+          if (jsonData.content) {
+            setResponse(jsonData.content);
+          }
+          
+          if (jsonData.visualization) {
+            setVisualizationType(jsonData.visualization);
+          }
+        } catch (e) {
+          // If not valid JSON, treat as plain text
+          console.log('Using chunk as plain text');
+        }
+      } catch (error) {
+        console.error('Error processing chunk:', error);
+      }
     }
   });
 
