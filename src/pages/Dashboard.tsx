@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import PortfolioOverview from '../components/Dashboard/PortfolioOverview';
 import { generateChartData, generatePersonalFinanceData } from '../utils/chartDataGenerators';
-import StockList from '../components/Stocks/StockList';
 
 const Dashboard = () => {
   // Memoize chart data to prevent regeneration on every render
@@ -35,11 +34,6 @@ const Dashboard = () => {
         activeDataType={activeDataType} 
         setActiveDataType={setActiveDataType} 
       />
-      
-      {/* Stocks List */}
-      <div className="mt-6 mb-6">
-        <StockList />
-      </div>
     </div>
   );
 };
