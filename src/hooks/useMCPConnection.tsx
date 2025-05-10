@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 
@@ -28,7 +28,7 @@ export const useMCPConnection = () => {
     // Log each raw chunk received
     console.log('Raw chunk received:', chunk);
     
-    // Add chunk to chunks state for display
+    // Add chunk to chunks state for real-time display
     setChunks(prevChunks => [...prevChunks, chunk]);
     
     // Process any complete messages that end with newlines
@@ -126,30 +126,31 @@ export const useMCPConnection = () => {
       
       try {
         console.log('Starting to process stream...');
-        const processStream = async () => {
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) {
-              console.log('Stream complete');
-              break;
-            }
-            
-            const chunk = decoder.decode(value, { stream: true });
-            console.log('Processing stream chunk:', chunk);
-            completeResponse += chunk;
-            processChunk(chunk, partialData);
-          }
-          
-          // Process any remaining partial data
-          if (partialData.text.trim()) {
-            processChunk('\n', partialData);
-          }
-          
-          console.log('Complete streamed response:', completeResponse);
-          return completeResponse;
-        };
         
-        await processStream();
+        // Process stream chunk by chunk for real-time updates
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) {
+            console.log('Stream complete');
+            break;
+          }
+          
+          const chunk = decoder.decode(value, { stream: true });
+          console.log('Processing stream chunk:', chunk);
+          completeResponse += chunk;
+          processChunk(chunk, partialData);
+          
+          // Allow UI to update between chunks
+          await new Promise(resolve => setTimeout(resolve, 0));
+        }
+        
+        // Process any remaining partial data
+        if (partialData.text.trim()) {
+          processChunk('\n', partialData);
+        }
+        
+        console.log('Complete streamed response:', completeResponse);
+        return completeResponse;
       } catch (error) {
         console.error('Error reading stream:', error);
         setResponse("Error streaming the response.");
@@ -161,11 +162,38 @@ export const useMCPConnection = () => {
     }
   });
 
+  // Add a health check for the MCP server
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        console.log(`Checking MCP connection at ${MCP_CONFIG.baseUrl}${MCP_CONFIG.healthEndpoint}`);
+        const response = await fetch(`${MCP_CONFIG.baseUrl}${MCP_CONFIG.healthEndpoint}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('MCP health check response:', data);
+        } else {
+          console.error('MCP health check failed:', response.status);
+        }
+      } catch (error) {
+        console.error('MCP health check error:', error);
+      }
+    };
+    
+    // Check health on component mount
+    checkHealth();
+  }, []);
+
   return {
     response,
     visualizationType,
     isLoading,
-    chunks, // Expose chunks array for display
+    chunks,
     sendMessage: (query: string) => {
       if (query.trim()) {
         sendMessage(query);

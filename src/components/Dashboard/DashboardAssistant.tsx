@@ -67,7 +67,7 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
   };
 
   // Determine if we're actively streaming (have chunks and are loading)
-  const isStreaming = isLoading && chunks && chunks.length > 0;
+  const isStreaming = chunks.length > 0;
 
   return (
     <div className="relative">
