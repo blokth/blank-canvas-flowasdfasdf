@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -61,9 +62,42 @@ const STOCKS = [{
   change: 0.87,
   changePercent: 0.20
 }];
+
 const StockList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const filteredStocks = STOCKS.filter(stock => stock.name.toLowerCase().includes(searchQuery.toLowerCase()) || stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()));
-  return;
+  
+  const filteredStocks = STOCKS.filter(stock => 
+    stock.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    stock.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  return (
+    <div className="mb-6">
+      <h2 className="text-xl font-medium mb-4">Stocks</h2>
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          className="pl-9"
+          placeholder="Search stocks..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+      <div className="border rounded-lg overflow-hidden">
+        {filteredStocks.map(stock => (
+          <StockCard
+            key={stock.id}
+            id={stock.id}
+            name={stock.name}
+            symbol={stock.symbol}
+            price={stock.price}
+            change={stock.change}
+            changePercent={stock.changePercent}
+          />
+        ))}
+      </div>
+    </div>
+  );
 };
+
 export default StockList;
