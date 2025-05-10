@@ -1,6 +1,5 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import CommandButtons from './InputComponents/CommandButtons';
 import InputArea from './InputComponents/InputArea';
 import { useSuggestions, suggestions } from './InputComponents/useSuggestions';
 
@@ -20,13 +19,6 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
-  
-  // Command buttons for quick access
-  const commandButtons = [
-    { label: "Stock", command: "{{stock}}" },
-    { label: "Timeframe", command: "{{timeframe}}" },
-    { label: "Sector", command: "{{sector}}" },
-  ];
   
   // Use the extracted suggestions hook
   const { suggestionType, searchTerm, setSearchTerm, templateField } = useSuggestions({
@@ -224,23 +216,6 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     setShowSuggestions(false);
   };
 
-  // Handle click on a command button
-  const handleCommandClick = (command: string) => {
-    // Insert command at cursor position or at the end if no cursor
-    const insertPosition = cursorPosition || query.length;
-    const newQuery = query.substring(0, insertPosition) + command + query.substring(insertPosition);
-    setQuery(newQuery);
-    
-    // Set cursor position to the inserted template field
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(insertPosition, insertPosition + command.length);
-        setCursorPosition(insertPosition);
-      }
-    }, 0);
-  };
-
   // Filter suggestions based on search term
   const filteredSuggestions = suggestionType 
     ? suggestions[suggestionType].filter(item => 
@@ -251,12 +226,6 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   return (
     <form onSubmit={onSubmit} className="bg-background border border-border/20 rounded-xl shadow-sm">
       <div className="flex flex-col gap-2 p-2">
-        {/* Command buttons row */}
-        <CommandButtons 
-          commandButtons={commandButtons} 
-          onCommandClick={handleCommandClick} 
-        />
-
         <InputArea
           query={query}
           setQuery={setQuery}
