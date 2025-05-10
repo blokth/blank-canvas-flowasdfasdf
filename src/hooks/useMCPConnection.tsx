@@ -9,6 +9,12 @@ type MCPResponse = {
   visualization?: VisualizationType | null;
 };
 
+// Type for streaming response
+type StreamResponse = {
+  reader: ReadableStreamDefaultReader<Uint8Array>;
+  decoder: TextDecoder;
+};
+
 // MCP configuration with default values
 const MCP_CONFIG = {
   baseUrl: import.meta.env.VITE_APP_MCP_URL || 'http://localhost:8000',
@@ -51,7 +57,7 @@ export const useMCPConnection = () => {
   }, []);
 
   // Helper function to make the streaming request
-  const makeStreamRequest = useCallback(async (query: string) => {
+  const makeStreamRequest = useCallback(async (query: string): Promise<MCPResponse | StreamResponse> => {
     if (!query.trim()) throw new Error('Empty query');
     
     // Use query parameters instead of JSON body for the message
@@ -77,18 +83,9 @@ export const useMCPConnection = () => {
       try {
         const data: MCPResponse = await response.json();
         console.log('MCP non-streaming response:', data);
-        
-        // Update state with server response
-        setResponse(data.content || "I didn't get a proper response from the server.");
-        
-        // Handle visualization type if provided
-        if (data.visualization) {
-          setVisualizationType(data.visualization);
-        }
         return data;
       } catch (error) {
         console.error('Error parsing non-streaming response:', error);
-        setResponse("Error processing the response.");
         throw error;
       }
     }
@@ -112,43 +109,52 @@ export const useMCPConnection = () => {
       setChunks([]);
     },
     onSuccess: async (result) => {
-      if (!result || !result.reader) return;
-      
-      // Process the stream
-      const { reader, decoder } = result;
-      
-      try {
-        console.log('Starting to process stream...');
-        let buffer = '';
-        
-        while (true) {
-          const { done, value } = await reader.read();
-          
-          if (done) {
-            console.log('Stream finished.');
-            // Process any remaining data in the buffer
-            if (buffer.trim()) {
-              console.log('Processing remaining buffer:', buffer);
-              processChunk(buffer);
-            }
-            break;
-          }
-          
-          const text = decoder.decode(value, { stream: true });
-          console.log('Received chunk:', text);
-          buffer += text;
-          
-          // Process complete lines in the buffer
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || ''; // Keep the last incomplete line in the buffer
-          
-          for (const line of lines.filter(Boolean)) {
-            processChunk(line);
-          }
+      // Handle non-streaming response (MCPResponse type)
+      if ('content' in result) {
+        setResponse(result.content);
+        if (result.visualization) {
+          setVisualizationType(result.visualization);
         }
-      } catch (error) {
-        console.error('Error reading stream:', error);
-        setResponse("Error streaming the response.");
+        return;
+      }
+      
+      // Handle streaming response (StreamResponse type)
+      if ('reader' in result && 'decoder' in result) {
+        const { reader, decoder } = result;
+        
+        try {
+          console.log('Starting to process stream...');
+          let buffer = '';
+          
+          while (true) {
+            const { done, value } = await reader.read();
+            
+            if (done) {
+              console.log('Stream finished.');
+              // Process any remaining data in the buffer
+              if (buffer.trim()) {
+                console.log('Processing remaining buffer:', buffer);
+                processChunk(buffer);
+              }
+              break;
+            }
+            
+            const text = decoder.decode(value, { stream: true });
+            console.log('Received chunk:', text);
+            buffer += text;
+            
+            // Process complete lines in the buffer
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || ''; // Keep the last incomplete line in the buffer
+            
+            for (const line of lines.filter(Boolean)) {
+              processChunk(line);
+            }
+          }
+        } catch (error) {
+          console.error('Error reading stream:', error);
+          setResponse("Error streaming the response.");
+        }
       }
     },
     onError: (error) => {
