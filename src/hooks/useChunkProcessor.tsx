@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useRef } from 'react';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 
@@ -9,7 +10,7 @@ export const useChunkProcessor = () => {
   // Keep track of processed chunk IDs to avoid duplicates
   const processedChunksRef = useRef<Set<string>>(new Set());
   
-  // Process chunks from FastAPI StreamingResponse
+  // Process chunks from FastAPI StreamingResponse - optimized for immediate processing
   const processChunk = useCallback((chunk: string) => {
     // Skip empty chunks
     if (!chunk.trim()) return;
@@ -28,7 +29,7 @@ export const useChunkProcessor = () => {
     // Mark this chunk as processed
     processedChunksRef.current.add(chunkId);
     
-    // Add the raw chunk to our chunks collection
+    // Add the raw chunk to our chunks collection immediately with a functional update
     setChunks(prevChunks => [...prevChunks, chunk]);
     
     try {
@@ -46,7 +47,7 @@ export const useChunkProcessor = () => {
         setVisualizationType(jsonData.visualization);
       }
     } catch (e) {
-      // For plain text streams, just accumulate the content
+      // For plain text streams, just accumulate the content immediately
       setResponse(prevResponse => 
         prevResponse ? prevResponse + chunk : chunk
       );

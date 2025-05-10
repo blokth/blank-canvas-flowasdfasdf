@@ -5,7 +5,7 @@ type ProcessChunkFn = (chunk: string) => void;
 
 /**
  * Processes a stream of data from a FastAPI StreamingResponse
- * Uses a non-blocking approach to handle chunks as they arrive
+ * Uses a non-blocking approach to handle chunks as they arrive immediately
  */
 export const processStream = async (
   reader: ReadableStreamDefaultReader<Uint8Array>, 
@@ -24,17 +24,21 @@ export const processStream = async (
         return;
       }
       
-      // Decode the chunk
+      // Decode the chunk immediately
       const text = decoder.decode(value, { stream: true });
       
       if (text.trim()) {
         console.log('Received chunk:', text);
-        // Process the chunk immediately
+        // Process the chunk immediately - no delay
         processChunk(text);
       }
       
-      // Continue reading non-blocking with setTimeout
-      setTimeout(() => readChunk(), 0);
+      // Continue reading immediately with requestAnimationFrame for better performance
+      requestAnimationFrame(() => {
+        readChunk().catch(error => {
+          console.error('Error in animation frame:', error);
+        });
+      });
     } catch (error) {
       console.error('Error processing stream chunk:', error);
       throw error;

@@ -32,9 +32,12 @@ const ConversationView: React.FC<ConversationViewProps> = ({
   // Track current streaming message to accumulate chunks
   const [streamingMessage, setStreamingMessage] = useState<string>('');
 
-  // Process chunks into messages with streaming support
+  // Process chunks into messages with streaming support - optimize for immediate rendering
   useEffect(() => {
-    if (chunks.length === 0) return;
+    // Exit early if there are no chunks
+    if (!chunks.length) return;
+    
+    console.log('Processing chunks in ConversationView:', chunks);
     
     // Add user query if it doesn't exist yet
     let newMessages = [...messages];
@@ -46,8 +49,13 @@ const ConversationView: React.FC<ConversationViewProps> = ({
       newMessages = [...newMessages, { type: 'user', content: query }];
     }
 
-    // Accumulate streaming chunks into one message or update it
+    // Get the latest chunk as it arrives
+    const latestChunk = chunks[chunks.length - 1];
+    
+    // Accumulate all chunks into the current message
     const currentMessageContent = chunks.join('');
+    
+    // Update the streaming message immediately for each new chunk
     if (currentMessageContent !== streamingMessage) {
       setStreamingMessage(currentMessageContent);
       
@@ -57,7 +65,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
       );
       
       if (streamingMessageIndex >= 0) {
-        // Update existing streaming message
+        // Update existing streaming message immediately with new content
         newMessages[streamingMessageIndex] = {
           ...newMessages[streamingMessageIndex],
           content: currentMessageContent
@@ -74,6 +82,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
         ];
       }
       
+      // Update messages immediately to show streaming content
       setMessages(newMessages);
     }
     
@@ -85,14 +94,14 @@ const ConversationView: React.FC<ConversationViewProps> = ({
         )
       );
     }
-  }, [chunks, query, isLoading, streamingMessage]);
+  }, [chunks, query, isLoading, streamingMessage, messages]);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom when new messages arrive or chunks update
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, isLoading]);
+  }, [messages, chunks, isLoading]);
 
   // Handle pill click - memoize to prevent rerenders
   const handlePillClick = useCallback((templateQuery: string) => {
