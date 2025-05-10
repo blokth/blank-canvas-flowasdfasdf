@@ -16,33 +16,50 @@ export const moveToNextTemplateField = (
   let firstMatch = null;
   let nextMatch = null;
   
-  // Find the next template field after the cursor
+  // Find all the template fields
+  const matches = [];
   while ((match = fieldPattern.exec(query)) !== null) {
-    if (firstMatch === null) {
-      firstMatch = match;
-    }
+    matches.push({
+      fieldType: match[1] as 'stock' | 'timeframe' | 'sector',
+      position: match.index + match[0].length,
+      index: match.index
+    });
+  }
+  
+  // If no matches, return the current cursor position
+  if (matches.length === 0) {
+    return cursorPosition;
+  }
+  
+  // Find the current field based on cursor position
+  let currentFieldIndex = -1;
+  for (let i = 0; i < matches.length; i++) {
+    const fieldStart = matches[i].index;
+    const fieldEnd = i < matches.length - 1 ? matches[i + 1].index : query.length;
     
-    if (match.index > cursorPosition) {
-      nextMatch = match;
+    if (cursorPosition >= fieldStart && cursorPosition < fieldEnd) {
+      currentFieldIndex = i;
       break;
     }
   }
   
-  // If no next match but we have a first match, cycle back to beginning
-  if (!nextMatch && firstMatch) {
-    nextMatch = firstMatch;
-  }
+  // Determine the next field index (wrap around if necessary)
+  const nextFieldIndex = currentFieldIndex === -1 || currentFieldIndex === matches.length - 1 
+    ? 0 
+    : currentFieldIndex + 1;
   
-  // Move cursor to the beginning of the next template field
-  if (nextMatch && textareaRef.current) {
-    const fieldType = nextMatch[1] as 'stock' | 'timeframe' | 'sector';
-    const newPosition = nextMatch.index + nextMatch[0].length;
+  // Navigate to the next field
+  const nextField = matches[nextFieldIndex];
+  
+  // Move cursor to the beginning of the next field
+  if (nextField && textareaRef.current) {
+    const newPosition = nextField.position;
     textareaRef.current.focus();
     textareaRef.current.setSelectionRange(newPosition, newPosition);
     
     // Show suggestions for this field type if the callbacks are provided
     if (setShowSuggestions && setSuggestionType) {
-      setSuggestionType(fieldType);
+      setSuggestionType(nextField.fieldType);
       setShowSuggestions(true);
     }
     

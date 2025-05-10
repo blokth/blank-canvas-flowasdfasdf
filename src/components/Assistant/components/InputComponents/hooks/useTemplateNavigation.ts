@@ -1,6 +1,6 @@
 
 import { RefObject } from 'react';
-import { moveToNextTemplateField } from '../TemplateNavigator';
+import { moveToNextTemplateField, findFirstTemplateField, getAllTemplateFields } from '../TemplateNavigator';
 
 interface TemplateNavigationProps {
   query: string;
@@ -34,18 +34,16 @@ export const useTemplateNavigation = ({
 
   // Navigate to the first field in the template
   const navigateToFirstField = () => {
-    const fieldPattern = /(stock|timeframe|sector):/g;
-    const match = fieldPattern.exec(query);
+    const firstField = findFirstTemplateField(query);
     
-    if (match && textareaRef.current) {
-      const fieldType = match[1] as 'stock' | 'timeframe' | 'sector';
-      const newPosition = match.index + match[0].length;
+    if (firstField && textareaRef.current) {
+      const newPosition = firstField.position;
       
       textareaRef.current.focus();
       textareaRef.current.setSelectionRange(newPosition, newPosition);
       
       // Show suggestions for this field type
-      setSuggestionType(fieldType);
+      setSuggestionType(firstField.fieldType);
       setShowSuggestions(true);
       
       setCursorPosition(newPosition);

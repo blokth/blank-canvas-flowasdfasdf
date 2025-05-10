@@ -132,7 +132,13 @@ export const useKeyboardHandling = ({
         
         if (matches.length > 0) {
           handleSuggestionSelect(matches[0]);
+        } else {
+          // If no matches, just navigate to next field
+          navigateToNextField();
         }
+      } else {
+        // If no suggestion type or search term, navigate to next field
+        navigateToNextField();
       }
     }
     

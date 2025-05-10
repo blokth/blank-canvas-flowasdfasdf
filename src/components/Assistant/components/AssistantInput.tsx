@@ -20,6 +20,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
+  const prevQueryRef = useRef(query);
   
   // Process query for display (show only values) while maintaining original for submission
   const processedQuery = useMemo(() => {
@@ -79,21 +80,17 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
 
   // When a template is pasted or selected, navigate to the first field
   useEffect(() => {
-    if (query.includes(':') && (query !== prevQueryRef.current)) {
-      // Use a short timeout to allow the DOM to update
-      const timeoutId = setTimeout(() => {
+    // Check if query has changed and contains template patterns
+    if (query !== prevQueryRef.current && query.includes(':')) {
+      // Use a short timeout to ensure the DOM is updated
+      setTimeout(() => {
         navigateToFirstField();
       }, 50);
-      
-      return () => clearTimeout(timeoutId);
     }
-  }, [query, navigateToFirstField]);
-  
-  // Ref to track previous query for comparison
-  const prevQueryRef = useRef(query);
-  useEffect(() => {
+    
+    // Update the previous query ref
     prevQueryRef.current = query;
-  }, [query]);
+  }, [query, navigateToFirstField]);
 
   // Memoize filtered suggestions to prevent re-rendering
   const filteredSuggestions = useMemo(() => getFilteredSuggestions(), [getFilteredSuggestions]);
