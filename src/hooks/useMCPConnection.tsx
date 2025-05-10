@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
@@ -170,13 +171,15 @@ export const useMCPConnection = () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch(`${MCP_CONFIG.baseUrl}${MCP_CONFIG.chatEndpoint}`, {
+      // Change here: Use query parameters instead of JSON body for the message
+      const url = new URL(`${MCP_CONFIG.baseUrl}${MCP_CONFIG.chatEndpoint}`);
+      url.searchParams.append('message', query);
+      
+      const response = await fetch(url.toString(), {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'text/event-stream',
         },
-        body: JSON.stringify({ message: query }),
         mode: 'cors', // Explicitly request CORS
       });
       
