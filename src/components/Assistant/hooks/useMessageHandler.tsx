@@ -55,11 +55,12 @@ export const useMessageHandler = (chunks: string[] = []) => {
         return prev;
       });
     } else {
-      // Update existing assistant message with the new accumulated content
+      // Update existing assistant message with the complete content
       setCurrentAssistantMessage(latestChunk);
       setMessages(prev => {
         const newMessages = [...prev];
         if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
+          // Replace with the complete message from the stream
           newMessages[newMessages.length - 1].content = latestChunk;
         }
         return newMessages;

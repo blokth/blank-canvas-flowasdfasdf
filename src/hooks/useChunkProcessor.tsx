@@ -32,27 +32,26 @@ export const useChunkProcessor = () => {
         setVisualizationType(jsonData.visualization);
       }
     } catch (e) {
-      // For plain text, accumulate the chunks
-      // Add the new chunk to our accumulated text
-      accumulatedTextRef.current += chunk;
+      // For plain text, use the complete chunk from the stream
+      // This is the full message so far
       
-      // Update response with accumulated text
-      setResponse(accumulatedTextRef.current);
+      // Update response with the current chunk (which contains the full message so far)
+      setResponse(chunk);
       
       // Update chunks for streaming display
       setChunks(prev => {
         // Start fresh if we're in a new conversation or if we explicitly reset
         if (processingRef.current === false) {
           processingRef.current = true;
-          return [accumulatedTextRef.current];
+          return [chunk];
         }
         
-        // Update the last chunk with the accumulated text
+        // Replace the last chunk with the complete accumulated text so far
         const newChunks = [...prev];
         if (newChunks.length > 0) {
-          newChunks[newChunks.length - 1] = accumulatedTextRef.current;
+          newChunks[newChunks.length - 1] = chunk;
         } else {
-          newChunks.push(accumulatedTextRef.current);
+          newChunks.push(chunk);
         }
         return newChunks;
       });

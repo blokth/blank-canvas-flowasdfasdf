@@ -43,11 +43,11 @@ export const processStream = (
           accumulatedText = '';
         } catch (e) {
           // Not valid JSON, could be partial or plain text
-          // Instead of waiting for complete sentences, process more frequently
-          // This ensures the UI gets updated with partial chunks
+          // Process the current accumulated text but don't clear it
+          // This way we keep building the complete message
           console.log('Processing partial text chunk:', accumulatedText);
           processChunk(accumulatedText);
-          // Don't reset accumulatedText since we want to keep building on it
+          // Don't reset accumulatedText - we're building the complete message incrementally
         }
       }
       
