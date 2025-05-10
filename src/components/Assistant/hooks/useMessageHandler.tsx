@@ -55,7 +55,7 @@ export const useMessageHandler = (chunks: string[] = []) => {
         return prev;
       });
     } else {
-      // Update existing assistant message
+      // Update existing assistant message with the new accumulated content
       setCurrentAssistantMessage(latestChunk);
       setMessages(prev => {
         const newMessages = [...prev];

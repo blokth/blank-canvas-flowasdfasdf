@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useRef } from 'react';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 
@@ -6,6 +7,7 @@ export const useChunkProcessor = () => {
   const [visualizationType, setVisualizationType] = useState<VisualizationType | null>(null);
   const [chunks, setChunks] = useState<string[]>([]);
   const processingRef = useRef<boolean>(false);
+  const accumulatedTextRef = useRef<string>('');
   
   // Process chunk function that updates chunks array
   const processChunk = useCallback((chunk: string) => {
@@ -30,23 +32,27 @@ export const useChunkProcessor = () => {
         setVisualizationType(jsonData.visualization);
       }
     } catch (e) {
-      // For plain text, just set it directly
-      setResponse(chunk);
+      // For plain text, accumulate the chunks
+      // Add the new chunk to our accumulated text
+      accumulatedTextRef.current += chunk;
+      
+      // Update response with accumulated text
+      setResponse(accumulatedTextRef.current);
       
       // Update chunks for streaming display
       setChunks(prev => {
         // Start fresh if we're in a new conversation or if we explicitly reset
         if (processingRef.current === false) {
           processingRef.current = true;
-          return [chunk];
+          return [accumulatedTextRef.current];
         }
         
-        // Otherwise replace the last chunk for continuous updating
+        // Update the last chunk with the accumulated text
         const newChunks = [...prev];
         if (newChunks.length > 0) {
-          newChunks[newChunks.length - 1] = chunk;
+          newChunks[newChunks.length - 1] = accumulatedTextRef.current;
         } else {
-          newChunks.push(chunk);
+          newChunks.push(accumulatedTextRef.current);
         }
         return newChunks;
       });
@@ -60,6 +66,7 @@ export const useChunkProcessor = () => {
     setVisualizationType(null);
     setChunks([]);
     processingRef.current = false;
+    accumulatedTextRef.current = '';
   }, []);
   
   return {
