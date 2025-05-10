@@ -20,7 +20,7 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   if (!response) return null;
   
   return (
-    <div className="mb-20"> {/* Added bottom margin to make space for assistant input */}
+    <div className="mb-20"> {/* Bottom margin to make space for assistant input */}
       {/* Display visualization if available */}
       <VisualizationDisplay
         response={response}
@@ -36,7 +36,9 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
         onOpenChange={setShowFullscreenChart}
         title={response || ""}
       >
-        <VisualizationManager activeVisualization={activeVisualization} />
+        <div className="p-4">
+          <VisualizationManager activeVisualization={activeVisualization} />
+        </div>
       </AssistantDialog>
     </div>
   );
