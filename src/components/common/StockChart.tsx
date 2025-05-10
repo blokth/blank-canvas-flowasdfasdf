@@ -9,6 +9,13 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface DataPoint {
   name: string;
@@ -25,6 +32,15 @@ interface StockChartProps {
     'All': DataPoint[];
   };
   isPositive: boolean;
+  cashData?: {
+    '1D': DataPoint[];
+    '1W': DataPoint[];
+    '1M': DataPoint[];
+    '3M': DataPoint[];
+    '1Y': DataPoint[];
+    'All': DataPoint[];
+  };
+  isCashPositive?: boolean;
 }
 
 interface PeriodButtonProps {
@@ -57,16 +73,39 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-const StockChart: React.FC<StockChartProps> = ({ data, isPositive }) => {
+const StockChart: React.FC<StockChartProps> = ({ 
+  data, 
+  isPositive, 
+  cashData, 
+  isCashPositive = true 
+}) => {
   const periods = ['1D', '1W', '1M', '3M', '1Y', 'All'] as const;
   const [activePeriod, setActivePeriod] = useState<typeof periods[number]>('1D');
+  const [activeDataType, setActiveDataType] = useState<'wealth' | 'cash'>('wealth');
   
   const gradientId = "stockChartGradient";
-  const chartColor = isPositive ? "#4CAF50" : "#F44336";
+  const chartColor = activeDataType === 'wealth' 
+    ? (isPositive ? "#4CAF50" : "#F44336") 
+    : (isCashPositive ? "#4CAF50" : "#F44336");
+  
+  const activeData = activeDataType === 'wealth' ? data : cashData || data;
   
   return (
     <Card className="border-border/20 p-3">
-      <div className="flex items-center justify-center mb-4">
+      <div className="flex items-center justify-between mb-4">
+        <Select 
+          value={activeDataType} 
+          onValueChange={(value) => setActiveDataType(value as 'wealth' | 'cash')}
+        >
+          <SelectTrigger className="w-[140px] h-8 text-xs">
+            <SelectValue placeholder="Select view" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="wealth">Total Wealth</SelectItem>
+            <SelectItem value="cash">Cash Balance</SelectItem>
+          </SelectContent>
+        </Select>
+        
         <div className="flex gap-1 p-1 bg-muted/30 rounded-full">
           {periods.map((period) => (
             <PeriodButton
@@ -83,7 +122,7 @@ const StockChart: React.FC<StockChartProps> = ({ data, isPositive }) => {
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={data[activePeriod]}
+            data={activeData[activePeriod]}
             margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
           >
             <defs>

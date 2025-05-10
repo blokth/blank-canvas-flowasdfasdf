@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import PortfolioSummary from '../components/Dashboard/PortfolioSummary';
 import PerformanceChart from '../components/Dashboard/PerformanceChart';
@@ -254,7 +253,7 @@ const Dashboard = () => {
   return (
     <div className="pb-16 max-w-lg mx-auto">
       <div className="bg-background/50 rounded-xl p-6 my-4 shadow-sm">
-        {/* Wealth Summary */}
+        {/* Financial dashboard with StockChart */}
         <PortfolioSummary 
           totalValue={portfolioValue}
           changePercentage={portfolioChangePercent}
@@ -264,24 +263,14 @@ const Dashboard = () => {
           type="wealth"
         />
         
-        {/* Wealth Chart */}
+        {/* StockChart for both wealth and cash data */}
         <div className="mb-6">
-          <StockChart data={stockChartData} isPositive={isPositive} />
-        </div>
-
-        {/* Personal Finance Summary */}
-        <PortfolioSummary 
-          totalValue={personalFinanceValue}
-          changePercentage={personalFinanceChangePercent}
-          changeValue={personalFinanceChange}
-          className="mb-4 mt-6"
-          minimal={true}
-          type="cash"
-        />
-        
-        {/* Personal Finance Chart */}
-        <div className="mb-6">
-          <StockChart data={personalFinanceChartData} isPositive={isPersonalFinancePositive} />
+          <StockChart 
+            data={stockChartData} 
+            isPositive={isPositive} 
+            cashData={personalFinanceChartData}
+            isCashPositive={isPersonalFinancePositive}
+          />
         </div>
       </div>
       
