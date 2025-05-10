@@ -1,13 +1,16 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkHtml from 'remark-html';
 
 export const useChunkProcessor = () => {
   const [response, setResponse] = useState<string | null>(null);
   const [visualizationType, setVisualizationType] = useState<VisualizationType | null>(null);
   const [chunks, setChunks] = useState<string[]>([]);
   
-  // Simplified process chunk function that just updates the response
+  // Process chunk function that updates chunks array
   const processChunk = useCallback((chunk: string) => {
     // Skip empty chunks
     if (!chunk.trim()) return;
@@ -22,6 +25,7 @@ export const useChunkProcessor = () => {
       // Handle structured content if available
       if (jsonData.content) {
         setResponse(jsonData.content);
+        setChunks(prev => [...prev, jsonData.content]);
       }
       
       // Handle visualization type if provided
@@ -31,6 +35,13 @@ export const useChunkProcessor = () => {
     } catch (e) {
       // For plain text, just set it directly
       setResponse(chunk);
+      
+      // Update chunks for streaming display
+      setChunks(prev => {
+        // Simple approach for now - if we're getting a continuous stream
+        // from a single response, just update the last chunk
+        return [...prev, chunk];
+      });
     }
   }, []);
   

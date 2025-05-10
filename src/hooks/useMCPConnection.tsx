@@ -45,15 +45,7 @@ export const useMCPConnection = () => {
           result.reader, 
           result.decoder, 
           processChunk
-        ).catch(error => {
-          console.error("Stream processing error:", error);
-          setResponse("Error streaming the response.");
-          toast({
-            title: "Error",
-            description: "There was a problem connecting to the server",
-            variant: "destructive",
-          });
-        });
+        );
       }
     },
     onError: (error) => {

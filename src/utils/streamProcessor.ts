@@ -5,36 +5,38 @@ type ProcessChunkFn = (chunk: string) => void;
 
 /**
  * Processes a stream of data from a FastAPI StreamingResponse
- * Simplified approach to avoid re-render issues
+ * Non-blocking approach for real-time streaming
  */
-export const processStream = async (
+export const processStream = (
   reader: ReadableStreamDefaultReader<Uint8Array>, 
   decoder: TextDecoder,
   processChunk: ProcessChunkFn
-): Promise<void> => {
-  console.log('Starting to process FastAPI stream...');
+): void => {
+  console.log('Starting to process FastAPI stream (non-blocking)...');
   
-  try {
-    let done = false;
-    
-    while (!done) {
-      const { value, done: isDone } = await reader.read();
-      done = isDone;
-      
+  // Function to process chunks without awaiting
+  function pump(): void {
+    reader.read().then(({ value, done }) => {
       if (done) {
         console.log('Stream finished.');
-        break;
+        return;
       }
       
       const text = decoder.decode(value, { stream: true });
       
       if (text.trim()) {
         console.log('Received chunk:', text);
+        // Process chunk immediately without awaiting
         processChunk(text);
       }
-    }
-  } catch (error) {
-    console.error('Error processing stream:', error);
-    throw error;
+      
+      // Continue reading the next chunk
+      pump();
+    }).catch(error => {
+      console.error('Error processing stream:', error);
+    });
   }
+  
+  // Start the pumping process
+  pump();
 };
