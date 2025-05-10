@@ -71,7 +71,7 @@ const Message: React.FC<MessageProps> = ({ role, content, id }) => {
         "px-4 py-3 rounded-lg max-w-[80%] shadow-sm",
         role === 'user' 
           ? "bg-primary text-primary-foreground rounded-br-none" 
-          : "bg-muted rounded-bl-none"
+          : "bg-white rounded-bl-none" // Changed from bg-muted to bg-white
       )}>
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <ReactMarkdown

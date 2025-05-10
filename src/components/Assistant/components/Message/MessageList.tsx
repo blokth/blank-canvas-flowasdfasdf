@@ -32,7 +32,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading }) => {
       
       {/* Typing indicator shown when loading */}
       {isLoading && messages.length > 0 && (
-        <div className="flex items-center space-x-2 px-4 py-3 rounded-lg bg-muted rounded-bl-none max-w-[80%] w-20">
+        <div className="flex items-center space-x-2 px-4 py-3 rounded-lg bg-white rounded-bl-none max-w-[80%] w-20">
           <div className="flex space-x-1">
             <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
             <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
