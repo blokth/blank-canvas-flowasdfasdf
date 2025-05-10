@@ -30,13 +30,38 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   // Add preloaded state to track when the visualization is ready
   const [isPreloaded, setIsPreloaded] = useState(false);
+  // Add transition state to ensure smooth animation
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   // Effect to handle automatic fullscreen when showFullscreenChart changes
   useEffect(() => {
-    if (showFullscreenChart) {
-      setIsFullscreen(true);
+    if (showFullscreenChart && !isFullscreen) {
+      // Set transitioning state first
+      setIsTransitioning(true);
+      
+      // Then set fullscreen after a very small delay to ensure
+      // the browser applies the transition correctly
+      requestAnimationFrame(() => {
+        setIsFullscreen(true);
+      });
+    } else if (!showFullscreenChart && isFullscreen) {
+      setIsTransitioning(true);
+      setIsFullscreen(false);
     }
-  }, [showFullscreenChart]);
+  }, [showFullscreenChart, isFullscreen]);
+  
+  // Reset transitioning state after animation completes
+  useEffect(() => {
+    const transitionEndHandler = () => {
+      setIsTransitioning(false);
+    };
+    
+    const timeout = setTimeout(() => {
+      setIsTransitioning(false);
+    }, 1100); // slightly longer than animation duration to ensure it completes
+    
+    return () => clearTimeout(timeout);
+  }, [isFullscreen]);
   
   // Preload the visualization component as soon as we have a response
   useEffect(() => {
@@ -52,9 +77,11 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   if (!response) return null;
   
   const toggleFullscreen = () => {
+    // Always go through the showFullscreenChart prop to ensure
+    // we trigger the animation effect
     const newFullscreenState = !isFullscreen;
-    setIsFullscreen(newFullscreenState);
     setShowFullscreenChart(newFullscreenState);
+    // Note: setIsFullscreen is now handled by the effect above
   };
   
   return (

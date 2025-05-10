@@ -37,11 +37,29 @@ const InputArea: React.FC<InputAreaProps> = ({
 }) => {
   // Track currently selected suggestion
   const [selectedIndex, setSelectedIndex] = React.useState(0);
+  // Track if we're in transition state
+  const [isInTransition, setIsInTransition] = React.useState(false);
   
   // Reset selected index when suggestions change
   React.useEffect(() => {
     setSelectedIndex(0);
   }, [filteredSuggestions]);
+  
+  // Form submit handler with animation protection
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Prevent rapid repeated submissions 
+    if (isInTransition) return;
+    
+    setIsInTransition(true);
+    handleSubmit(e);
+    
+    // Reset transition state after animation would complete
+    setTimeout(() => {
+      setIsInTransition(false);
+    }, 1100);
+  };
   
   // Enhanced keyboard navigation
   const handleKeyDownWithSuggestion = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -69,7 +87,7 @@ const InputArea: React.FC<InputAreaProps> = ({
   };
   
   return (
-    <div className="relative">
+    <form onSubmit={handleFormSubmit} className="relative">
       {/* Suggestion popup ABOVE the input */}
       {showSuggestions && (
         <SuggestionPopup 
@@ -99,13 +117,13 @@ const InputArea: React.FC<InputAreaProps> = ({
       <Button 
         type="submit" 
         size="icon" 
-        disabled={isLoading || !query.trim()}
+        disabled={isLoading || !query.trim() || isInTransition}
         className="absolute right-1 bottom-1 shrink-0 h-8 w-8 rounded-full"
         variant="ghost"
       >
-        <Send size={16} className={isLoading ? 'opacity-50' : ''} />
+        <Send size={16} className={isLoading || isInTransition ? 'opacity-50' : ''} />
       </Button>
-    </div>
+    </form>
   );
 };
 

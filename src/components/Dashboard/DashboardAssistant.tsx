@@ -20,6 +20,8 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
 }) => {
   const [internalQuery, setInternalQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // Add transition state to prevent multiple rapid submissions
+  const [isInTransition, setIsInTransition] = useState(false);
   
   // Use either external or internal state
   const query = externalQuery !== undefined ? externalQuery : internalQuery;
@@ -27,28 +29,36 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
 
   // Handle submit - if parent provided onSubmit use that, otherwise handle locally
   const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!query.trim() || isInTransition) return;
+    
+    // Set transition state to prevent multiple submissions during animation
+    setIsInTransition(true);
+
     if (parentOnSubmit) {
       parentOnSubmit();
-      return;
+    } else {
+      setIsLoading(true);
+      
+      // Simulate AI response delay
+      setTimeout(() => {
+        // Demo responses based on certain keywords (simplified from the original)
+        if (query.toLowerCase().includes('portfolio')) {
+          setActiveVisualization('portfolio-breakdown');
+          setResponse("Here's your portfolio breakdown by sector:");
+        } else {
+          setActiveVisualization(null);
+          setResponse("I can help you analyze your finances. Try asking about portfolio breakdowns.");
+        }
+        setIsLoading(false);
+      }, 1000);
     }
     
-    e.preventDefault();
-    if (!query.trim()) return;
-    
-    setIsLoading(true);
-    
-    // Simulate AI response delay
+    // Reset transition state after animation would complete
     setTimeout(() => {
-      // Demo responses based on certain keywords (simplified from the original)
-      if (query.toLowerCase().includes('portfolio')) {
-        setActiveVisualization('portfolio-breakdown');
-        setResponse("Here's your portfolio breakdown by sector:");
-      } else {
-        setActiveVisualization(null);
-        setResponse("I can help you analyze your finances. Try asking about portfolio breakdowns.");
-      }
-      setIsLoading(false);
-    }, 1000);
+      setIsInTransition(false);
+    }, 1100); // slightly longer than animation duration
   };
 
   return (

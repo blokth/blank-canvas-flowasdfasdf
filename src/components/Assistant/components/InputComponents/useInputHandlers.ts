@@ -1,3 +1,4 @@
+
 import { useState, useEffect, RefObject } from 'react';
 import { moveToNextTemplateField } from './TemplateNavigator';
 import { suggestions } from './useSuggestions';
@@ -31,6 +32,8 @@ export const useInputHandlers = ({
   cursorPosition,
   setCursorPosition
 }: InputHandlersProps) => {
+  // Add transitioning state to prevent multiple rapid submissions
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   // Auto-resize textarea height
   useEffect(() => {
@@ -60,11 +63,24 @@ export const useInputHandlers = ({
         return;
       }
       
+      // Don't submit during transitions
+      if (isTransitioning) {
+        e.preventDefault();
+        return;
+      }
+      
       // Only submit if there are no suggestions showing
       if (!showSuggestions) {
         e.preventDefault();
         if (query.trim() && !isLoading) {
+          // Set transitioning state to prevent multiple submissions
+          setIsTransitioning(true);
           onSubmit(e as unknown as React.FormEvent);
+          
+          // Reset after animation would complete
+          setTimeout(() => {
+            setIsTransitioning(false);
+          }, 1100);
         }
       }
       return;
