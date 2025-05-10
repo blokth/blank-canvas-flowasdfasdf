@@ -27,11 +27,11 @@ const Dashboard = () => {
   const [activeDataType, setActiveDataType] = useState<'wealth' | 'cash'>('wealth');
   const [showFullscreenChart, setShowFullscreenChart] = useState(false);
 
-  // MCP connection
+  // MCP connection using the updated hook
   const { 
     response, 
     visualizationType, 
-    isLoading: mcpLoading, 
+    isLoading, 
     sendMessage,
     setResponse,
     setVisualizationType
@@ -60,11 +60,9 @@ const Dashboard = () => {
   };
 
   // Handle assistant submission with fullscreen toggle
-  const handleAssistantSubmit = async (e: React.FormEvent) => {
+  const handleAssistantSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query.trim()) return;
-    
-    const success = await sendMessage(query);
+    const success = sendMessage(query);
       
     // Show fullscreen on successful response
     if (success && response) {
@@ -104,7 +102,7 @@ const Dashboard = () => {
         query={query}
         setQuery={setQuery}
         onSubmit={handleAssistantSubmit}
-        isLoading={mcpLoading}
+        isLoading={isLoading}
       />
       
       {/* Assistant Input - shown when not in fullscreen mode */}
@@ -118,7 +116,7 @@ const Dashboard = () => {
             onSubmit={() => {
               handleAssistantSubmit({ preventDefault: () => {} } as React.FormEvent);
             }}
-            isLoading={mcpLoading}
+            isLoading={isLoading}
           />
         </div>
       )}
