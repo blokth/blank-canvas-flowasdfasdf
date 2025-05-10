@@ -109,7 +109,7 @@ const InputArea: React.FC<InputAreaProps> = ({
         />
       )}
       
-      <div className="relative">
+      <div className="relative border rounded-md focus-within:ring-1 focus-within:ring-ring">
         {/* Hidden textarea for actual input */}
         <Textarea
           ref={textareaRef}
@@ -118,12 +118,14 @@ const InputArea: React.FC<InputAreaProps> = ({
           onChange={handleInputChange}
           onClick={handleClick}
           onKeyDown={handleKeyDownWithSuggestion}
-          className="resize-none text-sm border-0 focus-visible:ring-0 shadow-none min-h-10 py-3 bg-transparent pr-10 absolute inset-0 opacity-0"
+          className="resize-none text-sm border-0 focus-visible:ring-0 shadow-none min-h-10 py-3 pr-10 opacity-100 z-10"
           rows={1}
         />
         
-        {/* Visible div for highlighting */}
-        <InputDisplay query={query} cursorPosition={visualCursorPosition} />
+        {/* Visual display layer positioned behind the textarea */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <InputDisplay query={query} cursorPosition={visualCursorPosition} />
+        </div>
       </div>
       
       <Button 
