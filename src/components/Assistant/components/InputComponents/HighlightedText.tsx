@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 interface HighlightedTextProps {
@@ -13,22 +14,20 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ query }) => {
     );
   }
 
-  // First process the query string to extract keyword values
-  const processedQuery = processQueryKeywords(query);
-  
+  // Process the query to extract just values
   const parts = [];
   let lastIndex = 0;
   
-  // Match any remaining patterns that weren't processed
+  // Match any patterns: stock:, timeframe:, sector:
   const pattern = /(stock:|timeframe:|sector:)(\w*)/g;
   let match;
   
-  while ((match = pattern.exec(processedQuery)) !== null) {
+  while ((match = pattern.exec(query)) !== null) {
     // Add text before match
     if (match.index > lastIndex) {
       parts.push(
         <span key={`text-${lastIndex}`}>
-          {processedQuery.substring(lastIndex, match.index)}
+          {query.substring(lastIndex, match.index)}
         </span>
       );
     }
@@ -59,23 +58,15 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ query }) => {
   }
   
   // Add any remaining text
-  if (lastIndex < processedQuery.length) {
+  if (lastIndex < query.length) {
     parts.push(
       <span key={`text-${lastIndex}`}>
-        {processedQuery.substring(lastIndex)}
+        {query.substring(lastIndex)}
       </span>
     );
   }
   
   return <>{parts}</>;
 };
-
-// Helper function to process the query string and extract keyword values
-function processQueryKeywords(input: string): string {
-  // This is where we transform the actual text before rendering
-  // For now we're keeping the original format in the underlying text
-  // but returning the formatted version for display
-  return input;
-}
 
 export default HighlightedText;

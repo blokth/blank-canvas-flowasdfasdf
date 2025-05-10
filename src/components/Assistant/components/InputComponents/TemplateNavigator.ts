@@ -9,7 +9,7 @@ export const moveToNextTemplateField = (
   cursorPosition: number,
   textareaRef: React.RefObject<HTMLTextAreaElement>
 ) => {
-  const fieldPattern = /\{\{(stock|timeframe|sector)\}\}/g;
+  const fieldPattern = /(stock|timeframe|sector):/g;
   let match;
   let firstMatch = null;
   let nextMatch = null;
@@ -33,9 +33,9 @@ export const moveToNextTemplateField = (
   
   // Move cursor to the beginning of the next template field
   if (nextMatch && textareaRef.current) {
-    const newPosition = nextMatch.index;
+    const newPosition = nextMatch.index + nextMatch[0].length;
     textareaRef.current.focus();
-    textareaRef.current.setSelectionRange(newPosition, newPosition + nextMatch[0].length);
+    textareaRef.current.setSelectionRange(newPosition, newPosition);
     return newPosition;
   }
   

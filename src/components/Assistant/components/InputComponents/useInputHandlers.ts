@@ -100,8 +100,8 @@ export const useInputHandlers = ({
     
     // When suggestions are shown, Enter key behavior is managed in InputArea component
     if (e.key === 'Enter' && !e.shiftKey) {
-      // Check if we're in a template field
-      if (templateField) {
+      // Check if we're after a field: pattern
+      if (/(stock|timeframe|sector):$/.test(query.substring(0, cursorPosition))) {
         e.preventDefault();
         const newPosition = moveToNextTemplateField(query, cursorPosition, textareaRef);
         setCursorPosition(newPosition);
@@ -171,17 +171,7 @@ export const useInputHandlers = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
-    
-    // Check if a command has been typed
-    const textBeforeCursor = newValue.substring(0, e.target.selectionStart || 0);
-    const commandMatch = /\/(stock|timeframe|sector)$/.exec(textBeforeCursor);
-    
-    if (commandMatch) {
-      // Don't replace the command yet, we'll do it on space key
-      setQuery(newValue);
-    } else {
-      setQuery(newValue);
-    }
+    setQuery(newValue);
     
     // Only update cursor position after a debounce
     if (cursorUpdateTimer) {
@@ -198,26 +188,33 @@ export const useInputHandlers = ({
   };
 
   const handleSuggestionSelect = (value: string) => {
-    // Handle template field selections
-    if (templateField) {
-      // Replace the template field with the selected value
-      const beforeTemplate = query.substring(0, query.indexOf(templateField));
-      const afterTemplate = query.substring(query.indexOf(templateField) + templateField.length);
-      const newQuery = beforeTemplate + value + afterTemplate;
-      setQuery(newQuery);
-      
-      // Set cursor position after the inserted value
-      setTimeout(() => {
-        if (textareaRef.current) {
-          const newPosition = beforeTemplate.length + value.length;
-          textareaRef.current.focus();
-          textareaRef.current.setSelectionRange(newPosition, newPosition);
-          setCursorPosition(newPosition);
-          moveToNextTemplateField(newQuery, newPosition, textareaRef);
-        }
-      }, 0);
-      setShowSuggestions(false);
-      return;
+    // Handle field: style selections
+    if (/(stock|timeframe|sector):$/.test(query.substring(0, cursorPosition))) {
+      // Find the field: pattern before the cursor
+      const match = /(stock|timeframe|sector):$/.exec(query.substring(0, cursorPosition));
+      if (match) {
+        const field = match[0];
+        const fieldPos = query.substring(0, cursorPosition).lastIndexOf(field);
+        
+        // Insert the selected value after the field:
+        const beforeField = query.substring(0, fieldPos + field.length);
+        const afterCursor = query.substring(cursorPosition);
+        const newQuery = beforeField + value + afterCursor;
+        
+        setQuery(newQuery);
+        
+        // Set cursor position after the inserted value
+        setTimeout(() => {
+          if (textareaRef.current) {
+            const newPosition = fieldPos + field.length + value.length;
+            textareaRef.current.focus();
+            textareaRef.current.setSelectionRange(newPosition, newPosition);
+            setCursorPosition(newPosition);
+          }
+        }, 0);
+        setShowSuggestions(false);
+        return;
+      }
     }
     
     if (!suggestionType) {
