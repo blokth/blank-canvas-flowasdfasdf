@@ -5,6 +5,7 @@ import PerformanceChart from '../components/Dashboard/PerformanceChart';
 import StockList from '../components/Stocks/StockList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PersonalFinance from '../components/Dashboard/PersonalFinance';
+import FinanceAssistant from '../components/Assistant/FinanceAssistant';
 
 // Sample data for chart
 const chartData = [
@@ -61,6 +62,9 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Add the Finance Assistant */}
+      <FinanceAssistant />
     </div>
   );
 };
