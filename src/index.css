@@ -5,33 +5,33 @@
 
 @layer base {
   :root {
-    --background: 0 0% 6%;        /* Almost black */
-    --foreground: 0 0% 98%;       /* Almost white */
+    --background: 0 0% 100%;      /* White */
+    --foreground: 0 0% 0%;        /* Black */
 
-    --card: 0 0% 8%;             /* Slightly lighter black */
-    --card-foreground: 0 0% 98%; /* Almost white */
+    --card: 0 0% 98%;             /* Almost white */
+    --card-foreground: 0 0% 0%;   /* Black */
 
-    --popover: 0 0% 5%;          /* Deep black */
-    --popover-foreground: 0 0% 98%; /* Almost white */
+    --popover: 0 0% 100%;         /* White */
+    --popover-foreground: 0 0% 0%; /* Black */
 
-    --primary: 0 0% 98%;         /* Almost white */
-    --primary-foreground: 0 0% 5%; /* Deep black */
+    --primary: 0 0% 0%;           /* Black */
+    --primary-foreground: 0 0% 100%; /* White */
 
-    --secondary: 0 0% 15%;       /* Dark gray */
-    --secondary-foreground: 0 0% 98%; /* Almost white */
+    --secondary: 0 0% 95%;        /* Light gray */
+    --secondary-foreground: 0 0% 0%; /* Black */
 
-    --muted: 0 0% 15%;          /* Dark gray */
-    --muted-foreground: 0 0% 70%; /* Light gray */
+    --muted: 0 0% 90%;            /* Light gray */
+    --muted-foreground: 0 0% 40%; /* Dark gray */
 
-    --accent: 0 0% 20%;         /* Slightly lighter gray */
-    --accent-foreground: 0 0% 98%; /* Almost white */
+    --accent: 0 0% 85%;           /* Lighter gray */
+    --accent-foreground: 0 0% 0%; /* Black */
 
-    --destructive: 0 0% 0%;     /* Pure black */
-    --destructive-foreground: 0 0% 98%; /* Almost white */
+    --destructive: 0 0% 100%;     /* White */
+    --destructive-foreground: 0 0% 0%; /* Black */
 
-    --border: 0 0% 20%;         /* Dark gray border */
-    --input: 0 0% 20%;          /* Dark gray input */
-    --ring: 0 0% 70%;           /* Light gray ring */
+    --border: 0 0% 80%;           /* Light gray border */
+    --input: 0 0% 80%;            /* Light gray input */
+    --ring: 0 0% 40%;             /* Dark gray ring */
   }
 }
 
@@ -55,17 +55,17 @@
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply bg-white/30 rounded-none; /* Removed rounding for rough edges */
+    @apply bg-black/30 rounded-none; /* Changed to black with opacity */
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-white/50;
+    @apply bg-black/50;
   }
 }
 
 @layer components {
   .tr-card {
-    @apply bg-card border border-white/10 rounded-none p-4 shadow-none; /* Changed to square edges */
+    @apply bg-card border border-black/10 rounded-none p-4 shadow-none; /* Changed border color */
   }
   
   .tr-container {
@@ -73,22 +73,22 @@
   }
   
   .tr-bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 flex justify-around items-center h-16 bg-black border-t border-white/10 z-40;
+    @apply fixed bottom-0 left-0 right-0 flex justify-around items-center h-16 bg-white border-t border-black/10 z-40; /* Changed background and border */
   }
   
   .tr-bottom-nav-item {
-    @apply flex-1 flex flex-col items-center justify-center h-full text-muted-foreground hover:text-white transition-colors;
+    @apply flex-1 flex flex-col items-center justify-center h-full text-muted-foreground hover:text-black transition-colors; /* Changed hover color */
   }
   
   .tr-bottom-nav-item.active {
-    @apply text-white;
+    @apply text-black; /* Changed text color */
   }
   
   .fade-mask {
     mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
   }
 
-  /* New rough edge styles */
+  /* Keep rough edge styles */
   .rough-edge {
     clip-path: polygon(
       0 5px, 3px 0, calc(100% - 3px) 0, 100% 4px, 100% calc(100% - 5px), 

@@ -21,16 +21,16 @@ const StockCard: React.FC<StockCardProps> = ({
   changePercent,
 }) => {
   const isPositive = changePercent >= 0;
-  const changeColor = isPositive ? 'text-white' : 'text-black';
-  const changeBg = isPositive ? 'bg-white/10' : 'bg-white/5';
+  const changeColor = isPositive ? 'text-black' : 'text-gray-700';
+  const changeBg = isPositive ? 'bg-black/5' : 'bg-black/10';
   
   return (
     <Link to={`/stock/${id}`}>
-      <div className="border-t border-white/10 py-3 hover:bg-white/5 transition-colors px-2 transform hover:-translate-y-[1px] hover:translate-x-[1px]">
+      <div className="border-t border-black/10 py-3 hover:bg-black/5 transition-colors px-2 transform hover:-translate-y-[1px] hover:translate-x-[1px]">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-medium text-sm">{name}</h3>
-            <p className="text-xs text-gray-400">{symbol}</p>
+            <p className="text-xs text-gray-600">{symbol}</p>
           </div>
           
           <div className="text-right">

@@ -63,28 +63,28 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-        // Updated TR colors to black and white
+        // Updated TR colors to black and white but in light mode
         tr: {
-          dark: '#111111',
-          darker: '#000000',
+          dark: '#FFFFFF',
+          darker: '#F1F1F1',
           purple: {
-            DEFAULT: '#ffffff',
-            light: '#eeeeee',
-            dark: '#aaaaaa'
+            DEFAULT: '#000000',
+            light: '#222222',
+            dark: '#555555'
           },
           gray: {
-            DEFAULT: '#999999',
-            light: '#cccccc',
-            dark: '#444444'
+            DEFAULT: '#777777',
+            light: '#999999',
+            dark: '#AAAAAA'
           },
-          green: '#ffffff',
-          red: '#000000',
+          green: '#000000',
+          red: '#111111',
         }
 			},
 			borderRadius: {
-				lg: '0.25rem',  // Reduced for rougher edges
-				md: '0.125rem', // Reduced for rougher edges
-				sm: '0px'       // No radius for rough edges
+				lg: '0.25rem',  // Keeping reduced radius for rougher edges
+				md: '0.125rem', // Keeping reduced radius for rougher edges
+				sm: '0px'       // Keeping no radius for rough edges
 			},
 			keyframes: {
 				'accordion-down': {
