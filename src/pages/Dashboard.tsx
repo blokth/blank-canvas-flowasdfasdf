@@ -50,7 +50,10 @@ const Dashboard = () => {
   const handleAssistantSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      sendMessage(query);
+      // Store the current query before it gets cleared by the ConversationView component
+      const currentQuery = query; 
+      sendMessage(currentQuery);
+      // The input will be cleared in ConversationView's handleSubmit function
     }
   };
 

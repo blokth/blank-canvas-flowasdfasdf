@@ -60,34 +60,35 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     if (chunks.length > 0) {
       const latestChunk = chunks[chunks.length - 1];
       
-      // If we already have an assistant message being built
-      if (currentAssistantMessage) {
+      // If this is a new response and not a continuation
+      if (!currentAssistantMessage || messages.length === 0 || 
+          (messages.length > 0 && messages[messages.length - 1].role === 'user')) {
+        // Create a new assistant message
         setCurrentAssistantMessage(latestChunk);
+        setMessages(prev => {
+          // Only add a new assistant message if the last message was from the user
+          if (prev.length === 0 || prev[prev.length - 1].role === 'user') {
+            return [...prev, { 
+              role: 'assistant', 
+              content: latestChunk,
+              timestamp: new Date()
+            }];
+          }
+          return prev;
+        });
       } else {
-        // Start a new assistant message
+        // Update existing assistant message
         setCurrentAssistantMessage(latestChunk);
-        
-        // Add to messages only if this is a new assistant response
-        // (i.e., not a continuation of the current one)
-        if (messages.length === 0 || messages[messages.length - 1].role !== 'assistant') {
-          setMessages(prev => [...prev, { 
-            role: 'assistant', 
-            content: latestChunk,
-            timestamp: new Date()
-          }]);
-        }
+        setMessages(prev => {
+          const newMessages = [...prev];
+          if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
+            newMessages[newMessages.length - 1].content = latestChunk;
+          }
+          return newMessages;
+        });
       }
-      
-      // Update the last assistant message with the current content
-      setMessages(prev => {
-        const newMessages = [...prev];
-        if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
-          newMessages[newMessages.length - 1].content = latestChunk;
-        }
-        return newMessages;
-      });
     }
-  }, [chunks, currentAssistantMessage, messages]);
+  }, [chunks, currentAssistantMessage]);
   
   // Handle form submission to add user message
   const handleSubmit = (e: React.FormEvent) => {
@@ -102,11 +103,14 @@ const ConversationView: React.FC<ConversationViewProps> = ({
       timestamp: new Date()
     }]);
     
-    // Reset current assistant message
+    // Reset current assistant message to prevent showing old content
     setCurrentAssistantMessage('');
     
     // Call the provided onSubmit
     onSubmit(e);
+    
+    // Clear the input field immediately after submission
+    setQuery('');
   };
 
   return (
@@ -153,7 +157,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
               </div>
             ))}
             {/* Only show the typing indicator when loading and after at least one message */}
-            {isLoading && messages.length > 0 && !currentAssistantMessage && (
+            {isLoading && messages.length > 0 && (
               <div className="flex items-center space-x-2 px-4 py-3 rounded-lg bg-muted rounded-bl-none max-w-[80%] w-20">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>

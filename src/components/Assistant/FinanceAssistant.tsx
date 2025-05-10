@@ -22,6 +22,9 @@ const FinanceAssistant: React.FC = () => {
     e.preventDefault();
     if (!query.trim()) return;
     
+    // Store current query before clearing
+    const currentQuery = query.trim();
+    
     // Mock response generation
     setIsLoading(true);
     
@@ -29,9 +32,9 @@ const FinanceAssistant: React.FC = () => {
     let mockChunks: string[] = [];
     
     setTimeout(() => {
-      if (query.toLowerCase().includes('portfolio')) {
+      if (currentQuery.toLowerCase().includes('portfolio')) {
         mockChunks = ['Here is', 'Here is your', 'Here is your portfolio', 'Here is your portfolio breakdown'];
-      } else if (query.toLowerCase().includes('invest')) {
+      } else if (currentQuery.toLowerCase().includes('invest')) {
         mockChunks = ['Based on', 'Based on your', 'Based on your risk profile', 'Based on your risk profile, I recommend'];
       } else {
         mockChunks = ['I can', 'I can help', 'I can help you', 'I can help you with your financial questions'];
@@ -51,11 +54,12 @@ const FinanceAssistant: React.FC = () => {
           if (index === mockChunks.length - 1) {
             setResponse(chunk);
             setIsLoading(false);
-            setQuery('');
           }
         }, index * 300);
       });
     }, 500);
+    
+    // Query will be cleared by the ConversationView component
   };
 
   // Cleanup on unmount

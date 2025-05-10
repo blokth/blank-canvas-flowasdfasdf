@@ -36,6 +36,8 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
     e.preventDefault();
     
     if (!query.trim()) return;
+    
+    const currentQuery = query; // Store current query before it gets cleared
 
     if (parentOnSubmit) {
       parentOnSubmit(e);
@@ -45,7 +47,7 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
       // Simulate AI response delay
       setTimeout(() => {
         // Demo responses based on certain keywords
-        if (query.toLowerCase().includes('portfolio')) {
+        if (currentQuery.toLowerCase().includes('portfolio')) {
           setActiveVisualization('portfolio-breakdown');
           setResponse("Here's your portfolio breakdown by sector:");
         } else {
