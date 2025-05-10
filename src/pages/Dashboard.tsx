@@ -56,17 +56,8 @@ const Dashboard = () => {
 
   return (
     <div className="pb-28 max-w-lg mx-auto">
-      {/* Chat Experience (moved to the top) */}
-      <div className="mb-4">
-        <h3 className="text-lg font-medium mb-2">Ask me about your finances</h3>
-        <ConversationView
-          chunks={chunks}
-          isLoading={isLoading}
-          query={query}
-          setQuery={setQuery}
-          onSubmit={handleAssistantSubmit}
-        />
-      </div>
+      {/* Page Title */}
+      <h3 className="text-lg font-medium mb-4">Ask me about your finances</h3>
       
       {/* Portfolio Overview with Tabs */}
       <PortfolioOverview 
@@ -93,6 +84,17 @@ const Dashboard = () => {
         onSubmit={handleAssistantSubmit}
         isLoading={isLoading}
       />
+      
+      {/* Chat Experience (moved below charts) */}
+      <div className="mt-4">
+        <ConversationView
+          chunks={chunks}
+          isLoading={isLoading}
+          query={query}
+          setQuery={setQuery}
+          onSubmit={handleAssistantSubmit}
+        />
+      </div>
     </div>
   );
 };
