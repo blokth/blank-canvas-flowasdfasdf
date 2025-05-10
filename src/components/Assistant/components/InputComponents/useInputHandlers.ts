@@ -1,4 +1,3 @@
-
 import { useState, useEffect, RefObject } from 'react';
 import { moveToNextTemplateField } from './TemplateNavigator';
 import { suggestions } from './useSuggestions';
@@ -135,36 +134,29 @@ export const useInputHandlers = ({
     }
     
     if (!suggestionType) {
-      // Handle command quick templates
+      // Handle command quick templates - directly replace with template fields
       const templates: Record<string, string> = {
-        'stock': 'Show me data for {{stock}}',
-        'sector': 'Show performance of {{sector}}',
-        'timeframe': 'Show data for the past {{timeframe}}'
+        'stock': '{{stock}}',
+        'sector': '{{sector}}',
+        'timeframe': '{{timeframe}}'
       };
       
       if (templates[value.toLowerCase()]) {
         const template = templates[value.toLowerCase()];
         // Insert at cursor position
-        const newQuery = query.substring(0, cursorPosition - (searchTerm.length + 1)) + 
-                        template + 
-                        query.substring(cursorPosition);
+        const beforeSlashCommand = query.substring(0, cursorPosition - (searchTerm.length + 1));
+        const afterSlashCommand = query.substring(cursorPosition);
+        const newQuery = beforeSlashCommand + template + afterSlashCommand;
         setQuery(newQuery);
         
         // Set cursor position to the first template field
         setTimeout(() => {
-          const fieldPattern = /\{\{(stock|timeframe|sector)\}\}/;
-          const match = fieldPattern.exec(newQuery);
-          
-          if (match && textareaRef.current) {
-            const fieldPos = match.index;
+          if (textareaRef.current) {
+            const templateFieldPosition = beforeSlashCommand.length;
+            const templateFieldLength = template.length;
             textareaRef.current.focus();
-            textareaRef.current.setSelectionRange(fieldPos, fieldPos + match[0].length);
-            setCursorPosition(fieldPos);
-          } else if (textareaRef.current) {
-            const newPosition = cursorPosition - (searchTerm.length + 1) + template.length;
-            textareaRef.current.focus();
-            textareaRef.current.setSelectionRange(newPosition, newPosition);
-            setCursorPosition(newPosition);
+            textareaRef.current.setSelectionRange(templateFieldPosition, templateFieldPosition + templateFieldLength);
+            setCursorPosition(templateFieldPosition);
           }
         }, 0);
       }
