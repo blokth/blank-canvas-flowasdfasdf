@@ -25,20 +25,20 @@ const StockCard: React.FC<StockCardProps> = ({
   
   return (
     <Link to={`/stock/${id}`}>
-      <div className="tr-card mb-3 hover:border-tr-purple/30 transition-colors">
+      <div className="border-t border-border/10 py-3 hover:bg-muted/20 transition-colors px-2 rounded-md">
         <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <h3 className="font-medium">{name}</h3>
-            <p className="text-sm text-muted-foreground">{symbol}</p>
+          <div>
+            <h3 className="font-medium text-sm">{name}</h3>
+            <p className="text-xs text-muted-foreground">{symbol}</p>
           </div>
           
           <div className="text-right">
-            <p className="font-medium">${price.toFixed(2)}</p>
-            <div className={`flex items-center justify-end ${changeColor} text-sm`}>
+            <p className="font-medium text-sm">${price.toFixed(2)}</p>
+            <div className={`flex items-center justify-end ${changeColor} text-xs`}>
               {isPositive ? (
-                <TrendingUp size={14} className="mr-1" />
+                <TrendingUp size={12} className="mr-1" />
               ) : (
-                <TrendingUp size={14} className="mr-1 rotate-180" />
+                <TrendingUp size={12} className="mr-1 rotate-180" />
               )}
               <span>
                 {isPositive ? '+' : ''}{changePercent.toFixed(2)}%

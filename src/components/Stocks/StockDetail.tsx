@@ -92,12 +92,12 @@ const StockDetail: React.FC = () => {
   if (!id || !STOCKS[id as keyof typeof STOCKS]) {
     return (
       <div className="flex flex-col items-center justify-center h-[70vh] px-4">
-        <h2 className="text-xl font-bold mb-4">Stock Not Found</h2>
-        <p className="text-muted-foreground mb-6">
+        <h2 className="text-lg font-medium mb-4">Stock Not Found</h2>
+        <p className="text-muted-foreground mb-6 text-sm">
           The stock you're looking for doesn't exist or has been removed.
         </p>
         <Link to="/stocks">
-          <Button>Back to Stocks</Button>
+          <Button variant="outline" size="sm" className="rounded-full">Back to Stocks</Button>
         </Link>
       </div>
     );
@@ -121,63 +121,65 @@ const StockDetail: React.FC = () => {
     <div className="animate-fade-in">
       <div className="flex items-center mb-4">
         <Link to="/stocks" className="mr-3">
-          <ArrowLeft size={20} className="text-muted-foreground" />
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <ArrowLeft size={16} className="text-muted-foreground" />
+          </Button>
         </Link>
-        <h1 className="text-xl font-bold">{stock.name}</h1>
+        <h1 className="text-lg font-medium">{stock.name}</h1>
       </div>
       
       <div className="mb-6">
         <div className="flex items-baseline">
-          <h2 className="text-3xl font-bold mr-3">${stock.price.toFixed(2)}</h2>
+          <h2 className="text-2xl font-medium mr-3">${stock.price.toFixed(2)}</h2>
           <div className={`flex items-center ${changeColor}`}>
             {isPositive ? (
-              <TrendingUp size={16} className="mr-1" />
+              <TrendingUp size={14} className="mr-1" />
             ) : (
-              <TrendingUp size={16} className="mr-1 rotate-180" />
+              <TrendingUp size={14} className="mr-1 rotate-180" />
             )}
-            <span className="font-medium">
+            <span className="text-sm">
               {isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%
             </span>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">{stock.symbol}</p>
+        <p className="text-xs text-muted-foreground">{stock.symbol}</p>
       </div>
       
       <StockChart data={chartData} isPositive={isPositive} />
       
-      <div className="mt-6 tr-card">
-        <h3 className="font-medium mb-4">Stock Information</h3>
+      <div className="mt-6 p-4 border border-border/20 rounded-lg bg-card">
+        <h3 className="text-sm font-medium mb-4">Stock Information</h3>
         
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <p className="text-sm text-muted-foreground">High</p>
+            <p className="text-xs text-muted-foreground">High</p>
             <p className="font-medium">${stock.high}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Low</p>
+            <p className="text-xs text-muted-foreground">Low</p>
             <p className="font-medium">${stock.low}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Volume</p>
+            <p className="text-xs text-muted-foreground">Volume</p>
             <p className="font-medium">{stock.volume}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Market Cap</p>
+            <p className="text-xs text-muted-foreground">Market Cap</p>
             <p className="font-medium">{stock.marketCap}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">P/E Ratio</p>
+            <p className="text-xs text-muted-foreground">P/E Ratio</p>
             <p className="font-medium">{stock.peRatio}</p>
           </div>
         </div>
       </div>
       
-      <div className="fixed bottom-20 inset-x-0 px-4">
+      <div className="fixed bottom-20 inset-x-0 px-4 max-w-md mx-auto">
         <div className="flex gap-3 mb-4">
-          <Button className="flex-1 bg-tr-green hover:bg-tr-green/90">
+          <Button className="flex-1 rounded-full h-10 bg-tr-green hover:bg-tr-green/90 text-sm">
             Buy
           </Button>
-          <Button className="flex-1" variant="outline">
+          <Button className="flex-1 rounded-full h-10 text-sm" variant="outline">
             Sell
           </Button>
         </div>

@@ -4,7 +4,9 @@ import StockDetail from '../components/Stocks/StockDetail';
 
 const StockView = () => {
   return (
-    <StockDetail />
+    <div className="max-w-md mx-auto">
+      <StockDetail />
+    </div>
   );
 };
 

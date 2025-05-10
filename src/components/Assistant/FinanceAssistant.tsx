@@ -56,25 +56,25 @@ const FinanceAssistant: React.FC = () => {
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>
         <Button
-          className="fixed bottom-20 right-4 z-40 rounded-full h-12 w-12 shadow-lg flex items-center justify-center"
-          variant="secondary"
+          className="fixed bottom-20 right-4 z-40 rounded-full h-10 w-10 shadow-md flex items-center justify-center bg-background border border-border/20"
+          variant="outline"
         >
-          <MessageSquare size={20} />
+          <MessageSquare size={18} />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-h-[80vh]">
-        <DrawerHeader className="flex justify-between items-center">
-          <DrawerTitle>Finance Assistant</DrawerTitle>
-          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-            <X size={18} />
+      <DrawerContent className="max-h-[80vh] border-t border-border/20">
+        <DrawerHeader className="flex justify-between items-center border-b border-border/10 pb-2">
+          <DrawerTitle className="text-base font-medium">Finance Assistant</DrawerTitle>
+          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8">
+            <X size={16} />
           </Button>
         </DrawerHeader>
         
         <div className="p-4 flex flex-col h-full max-h-[calc(80vh-4rem)] overflow-y-auto">
           {response && (
-            <Card className="p-4 mb-4 bg-secondary/50">
+            <Card className="p-3 mb-4 bg-secondary/20 border-border/10">
               <p className="mb-3 text-sm">{response}</p>
-              <div className="h-64 bg-background rounded-lg">
+              <div className="h-64 bg-background rounded-md border border-border/10">
                 {renderVisualization()}
               </div>
             </Card>
@@ -89,8 +89,9 @@ const FinanceAssistant: React.FC = () => {
                 setActiveVisualization('portfolio-breakdown');
                 setResponse("Here's your portfolio breakdown by sector:");
               }}
+              className="text-xs h-8 rounded-full border-border/20"
             >
-              <PieChart size={16} className="mr-2" /> Portfolio Breakdown
+              <PieChart size={14} className="mr-1" /> Portfolio Breakdown
             </Button>
             <Button 
               size="sm" 
@@ -100,8 +101,9 @@ const FinanceAssistant: React.FC = () => {
                 setActiveVisualization('performance-trend');
                 setResponse("Here's your portfolio performance over time:");
               }}
+              className="text-xs h-8 rounded-full border-border/20"
             >
-              <LineChart size={16} className="mr-2" /> Performance Trend
+              <LineChart size={14} className="mr-1" /> Performance Trend
             </Button>
             <Button 
               size="sm" 
@@ -111,8 +113,9 @@ const FinanceAssistant: React.FC = () => {
                 setActiveVisualization('stock-comparison');
                 setResponse("Here's how your selected stocks compare:");
               }}
+              className="text-xs h-8 rounded-full border-border/20"
             >
-              <BarChart2 size={16} className="mr-2" /> Compare Stocks
+              <BarChart2 size={14} className="mr-1" /> Compare Stocks
             </Button>
           </div>
           
@@ -122,16 +125,17 @@ const FinanceAssistant: React.FC = () => {
                 placeholder="Ask about your finances or portfolio..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="resize-none"
+                className="resize-none text-sm border-border/20"
                 rows={2}
               />
               <Button 
                 type="submit" 
                 size="icon" 
                 disabled={isLoading || !query.trim()}
-                className="shrink-0 h-12 w-12"
+                className="shrink-0 h-10 w-10 rounded-full"
+                variant="outline"
               >
-                <Send size={18} />
+                <Send size={16} />
               </Button>
             </div>
           </form>

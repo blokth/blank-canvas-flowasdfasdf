@@ -33,28 +33,27 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({
   }).format(Math.abs(changeValue));
 
   return (
-    <Card className="tr-card animate-fade-in">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium text-foreground">Portfolio</h2>
+    <Card className="border-border/20 p-4">
+      <div className="flex items-center justify-between mb-2">
         <span className="text-sm text-muted-foreground">{period}</span>
       </div>
       
       <div className="flex flex-col">
-        <span className="text-3xl font-bold mb-1">{formattedTotalValue}</span>
+        <span className="text-3xl font-medium mb-1">{formattedTotalValue}</span>
         
         <div className="flex items-center space-x-2">
           <div className={`flex items-center ${changeColor}`}>
             {isPositive ? (
-              <TrendingUp size={16} className="mr-1" />
+              <TrendingUp size={14} className="mr-1" />
             ) : (
-              <TrendingUp size={16} className="mr-1 rotate-180" />
+              <TrendingUp size={14} className="mr-1 rotate-180" />
             )}
-            <span className="font-medium">
+            <span>
               {isPositive ? '+' : '-'}{Math.abs(changePercentage).toFixed(2)}%
             </span>
           </div>
           
-          <span className={`${changeColor}`}>
+          <span className={`${changeColor} text-sm`}>
             {isPositive ? '+' : '-'}{formattedChangeValue}
           </span>
         </div>

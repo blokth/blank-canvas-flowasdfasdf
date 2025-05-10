@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import PortfolioSummary from '../components/Dashboard/PortfolioSummary';
 import PerformanceChart from '../components/Dashboard/PerformanceChart';
 import StockList from '../components/Stocks/StockList';
@@ -32,38 +32,39 @@ const Dashboard = () => {
   const isPositive = portfolioChangePercent >= 0;
 
   return (
-    <div className="pb-16 flex flex-col items-center">
-      <h1 className="text-2xl font-bold mb-6">Your Portfolio</h1>
+    <div className="pb-16 max-w-md mx-auto">
+      <h1 className="text-xl font-medium mb-6 text-center">Portfolio Overview</h1>
       
-      <div className="w-full max-w-md">
-        <Tabs defaultValue="portfolio" className="w-full mb-6">
-          <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-            <TabsTrigger value="personal">Personal Finance</TabsTrigger>
-          </TabsList>
+      <Tabs defaultValue="portfolio" className="w-full mb-6">
+        <TabsList className="w-full grid grid-cols-2 h-11 rounded-full p-1 bg-muted/30">
+          <TabsTrigger value="portfolio" className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            Portfolio
+          </TabsTrigger>
+          <TabsTrigger value="personal" className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            Personal Finance
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="portfolio" className="mt-4 space-y-6">
+          <PortfolioSummary 
+            totalValue={portfolioValue}
+            changePercentage={portfolioChangePercent}
+            changeValue={portfolioChange}
+          />
           
-          <TabsContent value="portfolio" className="mt-4">
-            <PortfolioSummary 
-              totalValue={portfolioValue}
-              changePercentage={portfolioChangePercent}
-              changeValue={portfolioChange}
-            />
-            
-            <PerformanceChart data={chartData} isPositive={isPositive} />
-            
-            <div className="mt-8">
-              <h2 className="text-xl font-bold mb-4">Top Performers</h2>
-              <StockList />
-            </div>
-          </TabsContent>
+          <PerformanceChart data={chartData} isPositive={isPositive} />
           
-          <TabsContent value="personal" className="mt-4">
-            <PersonalFinance />
-          </TabsContent>
-        </Tabs>
-      </div>
+          <div>
+            <h2 className="text-base font-medium mb-3">Top Performers</h2>
+            <StockList />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="personal" className="mt-4">
+          <PersonalFinance />
+        </TabsContent>
+      </Tabs>
       
-      {/* Add the Finance Assistant */}
       <FinanceAssistant />
     </div>
   );
