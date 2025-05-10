@@ -95,6 +95,12 @@ export const useInputHandlers = ({
     showSuggestions
   });
 
+  // Use suggestion filtering logic
+  const { filteredSuggestions } = useSuggestionFiltering({
+    suggestionType,
+    searchTerm
+  });
+
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
