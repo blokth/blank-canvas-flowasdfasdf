@@ -26,18 +26,27 @@ const Dashboard = () => {
   const [query, setQuery] = useState('');
   const [activeDataType, setActiveDataType] = useState<'wealth' | 'cash'>('wealth');
   const [showFullscreenChart, setShowFullscreenChart] = useState(false);
+  const [showChunks, setShowChunks] = useState(false);
 
   // MCP connection using the updated hook
   const { 
     response, 
     visualizationType, 
     isLoading, 
+    chunks,
     sendMessage,
     setResponse,
     setVisualizationType
   } = useMCPConnection();
   
   const [activeVisualization, setActiveVisualization] = useState<VisualizationType>(null);
+
+  // Log chunks when they update
+  useEffect(() => {
+    if (chunks && chunks.length > 0) {
+      console.log('Current chunks in state:', chunks);
+    }
+  }, [chunks]);
 
   // Update active visualization when MCP provides one
   useEffect(() => {
@@ -72,6 +81,22 @@ const Dashboard = () => {
 
   return (
     <div className="pb-28 max-w-lg mx-auto">
+      {/* Debugging UI for chunks - toggle with button */}
+      {chunks && chunks.length > 0 && showChunks && (
+        <div className="mt-4 p-4 bg-slate-50 border rounded-md overflow-auto max-h-40">
+          <h3 className="font-medium mb-2">Stream Chunks ({chunks.length}):</h3>
+          <pre className="text-xs whitespace-pre-wrap">{chunks.join('\n')}</pre>
+        </div>
+      )}
+      {chunks && chunks.length > 0 && (
+        <button 
+          onClick={() => setShowChunks(!showChunks)} 
+          className="mt-2 text-xs text-blue-600 hover:text-blue-800"
+        >
+          {showChunks ? 'Hide' : 'Show'} Stream Chunks
+        </button>
+      )}
+      
       {/* Portfolio Overview with Tabs */}
       <PortfolioOverview 
         stockChartData={stockChartData}
@@ -117,6 +142,7 @@ const Dashboard = () => {
               handleAssistantSubmit({ preventDefault: () => {} } as React.FormEvent);
             }}
             isLoading={isLoading}
+            chunks={chunks}
           />
         </div>
       )}

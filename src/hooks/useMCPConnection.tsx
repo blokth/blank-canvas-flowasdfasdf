@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
@@ -18,10 +19,17 @@ const MCP_CONFIG = {
 export const useMCPConnection = () => {
   const [response, setResponse] = useState<string | null>(null);
   const [visualizationType, setVisualizationType] = useState<VisualizationType | null>(null);
+  const [chunks, setChunks] = useState<string[]>([]);
   
   // Process individual chunks of data from stream
   const processChunk = useCallback((chunk: string, partialData: { text: string }) => {
     partialData.text += chunk;
+    
+    // Log each raw chunk received
+    console.log('Raw chunk received:', chunk);
+    
+    // Add chunk to chunks state for display
+    setChunks(prevChunks => [...prevChunks, chunk]);
     
     // Process any complete messages that end with newlines
     if (partialData.text.includes('\n')) {
@@ -61,9 +69,14 @@ export const useMCPConnection = () => {
     mutationFn: async (query: string) => {
       if (!query.trim()) throw new Error('Empty query');
       
+      // Clear chunks array on new message
+      setChunks([]);
+      
       // Use query parameters instead of JSON body for the message
       const url = new URL(`${MCP_CONFIG.baseUrl}${MCP_CONFIG.chatEndpoint}`);
       url.searchParams.append('message', query);
+      
+      console.log('Sending request to:', url.toString());
       
       const response = await fetch(url.toString(), {
         method: 'POST',
@@ -82,6 +95,7 @@ export const useMCPConnection = () => {
     onMutate: () => {
       setResponse(null);
       setVisualizationType(null);
+      setChunks([]);
     },
     onSuccess: async (response) => {
       // For non-streaming responses
@@ -111,12 +125,17 @@ export const useMCPConnection = () => {
       let completeResponse = '';
       
       try {
+        console.log('Starting to process stream...');
         const processStream = async () => {
           while (true) {
             const { value, done } = await reader.read();
-            if (done) break;
+            if (done) {
+              console.log('Stream complete');
+              break;
+            }
             
             const chunk = decoder.decode(value, { stream: true });
+            console.log('Processing stream chunk:', chunk);
             completeResponse += chunk;
             processChunk(chunk, partialData);
           }
@@ -126,6 +145,7 @@ export const useMCPConnection = () => {
             processChunk('\n', partialData);
           }
           
+          console.log('Complete streamed response:', completeResponse);
           return completeResponse;
         };
         
@@ -145,6 +165,7 @@ export const useMCPConnection = () => {
     response,
     visualizationType,
     isLoading,
+    chunks, // Expose chunks array for display
     sendMessage: (query: string) => {
       if (query.trim()) {
         sendMessage(query);
