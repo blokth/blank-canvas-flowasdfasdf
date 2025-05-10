@@ -29,8 +29,11 @@ const ConversationView: React.FC<ConversationViewProps> = ({
 }) => {
   const { toast } = useToast();
   const conversationEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentAssistantMessage, setCurrentAssistantMessage] = useState<string>('');
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
+  const [userHasScrolled, setUserHasScrolled] = useState(false);
   
   // Handle pills click
   const handlePillClick = (templateQuery: string) => {
@@ -42,6 +45,25 @@ const ConversationView: React.FC<ConversationViewProps> = ({
       setTimeout(() => {
         inputElement.focus();
       }, 0);
+    }
+  };
+
+  // Check if user has scrolled away from bottom
+  const handleScroll = () => {
+    if (!scrollAreaRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = scrollAreaRef.current;
+    const isAtBottom = Math.abs((scrollTop + clientHeight) - scrollHeight) < 20;
+    
+    // If user scrolled away from bottom, don't auto-scroll
+    if (!isAtBottom && !userHasScrolled) {
+      setUserHasScrolled(true);
+    }
+    
+    // If user scrolled back to bottom, enable auto-scroll
+    if (isAtBottom && userHasScrolled) {
+      setUserHasScrolled(false);
+      setShouldScrollToBottom(true);
     }
   };
 
@@ -72,6 +94,11 @@ const ConversationView: React.FC<ConversationViewProps> = ({
         }
         return newMessages;
       });
+      
+      // Only scroll to bottom if user hasn't manually scrolled away
+      if (!userHasScrolled) {
+        setShouldScrollToBottom(true);
+      }
     }
   }, [chunks, currentAssistantMessage, messages]);
   
@@ -87,22 +114,33 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     // Reset current assistant message
     setCurrentAssistantMessage('');
     
+    // Always scroll to bottom after user submits a message
+    setShouldScrollToBottom(true);
+    setUserHasScrolled(false);
+    
     // Call the provided onSubmit
     onSubmit(e);
   };
   
-  // Scroll to bottom when messages change
+  // Scroll to bottom only when needed and without forcing a scroll reset
   useEffect(() => {
-    if (conversationEndRef.current) {
-      setTimeout(() => {
-        conversationEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+    if (shouldScrollToBottom && conversationEndRef.current) {
+      conversationEndRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'end',
+        inline: 'nearest'
+      });
+      setShouldScrollToBottom(false);
     }
-  }, [messages, currentAssistantMessage]);
+  }, [messages, shouldScrollToBottom]);
 
   return (
     <div className="flex flex-col h-full border border-border/20 rounded-xl bg-background/80 shadow-sm overflow-hidden">
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea 
+        className="flex-1 p-4"
+        onScroll={handleScroll}
+        ref={scrollAreaRef}
+      >
         {messages.length === 0 ? (
           <div className="flex flex-col h-full justify-center space-y-6">
             <h3 className="text-lg font-medium">
