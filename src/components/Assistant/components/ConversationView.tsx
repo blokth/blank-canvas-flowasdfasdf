@@ -1,5 +1,6 @@
 
 import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
+import ReactMarkdown from 'react-markdown';
 import ActionPills from './ActionPills';
 import AssistantInput from './AssistantInput';
 
@@ -112,7 +113,13 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                       : 'bg-muted w-full'
                   }`}
                 >
-                  {message.content}
+                  {message.type === 'user' ? (
+                    message.content
+                  ) : (
+                    <ReactMarkdown className="prose dark:prose-invert prose-sm max-w-none">
+                      {message.content}
+                    </ReactMarkdown>
+                  )}
                 </div>
               </div>
             ))}
