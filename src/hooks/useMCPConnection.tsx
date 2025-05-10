@@ -11,7 +11,7 @@ type MCPResponse = {
 
 // MCP configuration with default values
 const MCP_CONFIG = {
-  baseUrl: process.env.REACT_APP_MCP_URL || 'http://localhost:8000',
+  baseUrl: import.meta.env.VITE_APP_MCP_URL || 'http://localhost:8000',
   healthEndpoint: '/health',
   chatEndpoint: '/chat',
   checkInterval: 30000, // 30 seconds
