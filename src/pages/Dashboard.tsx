@@ -56,6 +56,18 @@ const Dashboard = () => {
 
   return (
     <div className="pb-28 max-w-lg mx-auto">
+      {/* Chat Experience (moved to the top) */}
+      <div className="mb-4">
+        <h3 className="text-lg font-medium mb-2">Ask me about your finances</h3>
+        <ConversationView
+          chunks={chunks}
+          isLoading={isLoading}
+          query={query}
+          setQuery={setQuery}
+          onSubmit={handleAssistantSubmit}
+        />
+      </div>
+      
       {/* Portfolio Overview with Tabs */}
       <PortfolioOverview 
         stockChartData={stockChartData}
@@ -69,17 +81,6 @@ const Dashboard = () => {
         activeDataType={activeDataType}
         setActiveDataType={setActiveDataType}
       />
-      
-      {/* Chat Experience (with integrated pills and input) */}
-      <div className="mt-4 mb-4">
-        <ConversationView
-          chunks={chunks}
-          isLoading={isLoading}
-          query={query}
-          setQuery={setQuery}
-          onSubmit={handleAssistantSubmit}
-        />
-      </div>
       
       {/* Visualization Display */}
       <DashboardVisualization

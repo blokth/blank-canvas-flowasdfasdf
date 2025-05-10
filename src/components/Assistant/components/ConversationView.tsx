@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import ActionPills from './ActionPills';
@@ -93,9 +92,8 @@ const ConversationView: React.FC<ConversationViewProps> = ({
         className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 min-h-[350px] max-h-[500px]"
       >
         {messages.length === 0 ? (
-          // Show action pills when no messages
+          // Show action pills when no messages - removed heading as it's now in Dashboard
           <div className="flex flex-col h-full justify-center">
-            <h3 className="text-lg font-medium mb-4 text-center">Ask me about your finances</h3>
             <ActionPills onPillClick={handlePillClick} />
           </div>
         ) : (
