@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 import PortfolioOverview from '../components/Dashboard/PortfolioOverview';
@@ -45,7 +44,7 @@ const Dashboard = () => {
         setActiveDataType={setActiveDataType}
       />
       
-      {/* Action Pills */}
+      {/* Action Pills with Selection Templates */}
       <DashboardActions 
         setQuery={setQuery}
         setActiveVisualization={setActiveVisualization}
