@@ -53,22 +53,24 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   const filteredSuggestions = getFilteredSuggestions();
 
   return (
-    <div className="bg-background border border-border/20 rounded-xl shadow-sm p-2">
-      <InputArea
-        query={query}
-        setQuery={setQuery}
-        isLoading={isLoading}
-        handleSubmit={onSubmit}
-        handleKeyDown={handleKeyDown}
-        handleChange={handleChange}
-        showSuggestions={showSuggestions}
-        suggestionType={suggestionType}
-        filteredSuggestions={filteredSuggestions}
-        handleSuggestionSelect={handleSuggestionSelect}
-        textareaRef={textareaRef}
-        templateField={templateField}
-      />
-    </div>
+    <form onSubmit={onSubmit} className="bg-background border border-border/20 rounded-xl shadow-sm">
+      <div className="flex flex-col gap-2 p-2">
+        <InputArea
+          query={query}
+          setQuery={setQuery}
+          isLoading={isLoading}
+          handleSubmit={onSubmit}
+          handleKeyDown={handleKeyDown}
+          handleChange={handleChange}
+          showSuggestions={showSuggestions}
+          suggestionType={suggestionType}
+          filteredSuggestions={filteredSuggestions}
+          handleSuggestionSelect={handleSuggestionSelect}
+          textareaRef={textareaRef}
+          templateField={templateField}
+        />
+      </div>
+    </form>
   );
 };
 
