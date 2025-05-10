@@ -4,7 +4,6 @@ import { Maximize, Minimize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import VisualizationManager, { VisualizationType } from '../Assistant/components/VisualizationManager';
 import VisualizationDisplay from '../Assistant/components/VisualizationDisplay';
-import AssistantDialog from '../Assistant/components/AssistantDialog';
 import AssistantInput from '../Assistant/components/AssistantInput';
 
 interface DashboardVisualizationProps {
@@ -42,24 +41,19 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   const toggleFullscreen = () => {
     const newFullscreenState = !isFullscreen;
     setIsFullscreen(newFullscreenState);
-    
-    // Only set showFullscreenChart to true when entering fullscreen
-    // When exiting fullscreen, make sure it's false but don't trigger the modal
-    if (newFullscreenState) {
-      setShowFullscreenChart(true);
-    } else {
-      setShowFullscreenChart(false);
-    }
+    setShowFullscreenChart(newFullscreenState);
   };
   
   return (
     <div 
-      className={`origin-bottom transition-all duration-500 ease-in-out 
+      className={`origin-bottom transition-all duration-700 ease-in-out 
       ${isFullscreen 
         ? 'fixed inset-0 z-50 bg-background p-4 scale-100 opacity-100' 
         : 'mb-20 scale-95 opacity-100'}`}
       style={{
         transformOrigin: 'bottom center',
+        backfaceVisibility: 'hidden',
+        willChange: 'transform, opacity',
       }}
     >
       <div className="flex justify-between items-center mb-2">
@@ -78,7 +72,7 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
       </div>
       
       {/* Display visualization if available */}
-      <div className={`transition-all duration-500 ${isFullscreen ? 'h-[calc(100%-120px)]' : ''}`}>
+      <div className={`transition-all duration-700 ${isFullscreen ? 'h-[calc(100%-120px)]' : ''}`}>
         <VisualizationDisplay
           response={response}
           visualization={<VisualizationManager activeVisualization={activeVisualization} />}
@@ -99,20 +93,6 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
           />
         </div>
       )}
-      
-      {/* Fullscreen chart dialog - only show when triggered from a click, not when exiting fullscreen */}
-      <AssistantDialog
-        open={showFullscreenChart && !isFullscreen}
-        onOpenChange={(open) => {
-          // When closing the dialog, just set showFullscreenChart to false
-          setShowFullscreenChart(open);
-        }}
-        title={response || ""}
-      >
-        <div className="p-4">
-          <VisualizationManager activeVisualization={activeVisualization} />
-        </div>
-      </AssistantDialog>
     </div>
   );
 };
