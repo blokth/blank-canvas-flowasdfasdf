@@ -1,5 +1,4 @@
-
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 
 interface ConversationViewProps {
   chunks: string[];
@@ -19,7 +18,23 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     }
   }, [chunks]);
 
-  if (chunks.length === 0) {
+  // Process chunks to deduplicate and combine them properly
+  const processedChunks = useMemo(() => {
+    if (chunks.length === 0) return [];
+    
+    // Simple deduplication - keep only unique messages
+    const uniqueChunks = Array.from(new Set(chunks));
+    
+    // If the chunks appear to be part of a continuous message,
+    // combine them into a single message
+    if (uniqueChunks.length === 1) {
+      return uniqueChunks;
+    }
+    
+    return uniqueChunks;
+  }, [chunks]);
+
+  if (processedChunks.length === 0) {
     return null;
   }
 
@@ -28,7 +43,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
       ref={scrollRef}
       className="max-h-[300px] overflow-y-auto bg-background/80 rounded-lg border border-border/5 p-4 mb-4"
     >
-      {chunks.map((chunk, index) => (
+      {processedChunks.map((chunk, index) => (
         <div key={index} className="mb-2 text-sm">
           {chunk}
         </div>

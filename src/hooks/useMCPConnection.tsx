@@ -4,8 +4,11 @@ import { useMutation } from '@tanstack/react-query';
 import { useChunkProcessor } from './useChunkProcessor';
 import { makeStreamRequest, checkMCPHealth } from '../utils/mcpUtils';
 import { processStream } from '../utils/streamProcessor';
+import { useToast } from './use-toast';
 
 export const useMCPConnection = () => {
+  const { toast } = useToast();
+  
   // Use the chunk processor hook
   const {
     response,
@@ -15,6 +18,7 @@ export const useMCPConnection = () => {
     setVisualizationType,
     setChunks,
     processChunk,
+    reset,
   } = useChunkProcessor();
 
   // Send message mutation
@@ -22,9 +26,7 @@ export const useMCPConnection = () => {
     mutationFn: makeStreamRequest,
     onMutate: () => {
       // Reset state before new request
-      setResponse(null);
-      setVisualizationType(null);
-      setChunks([]);
+      reset();
     },
     onSuccess: async (result) => {
       // Handle non-streaming response
@@ -46,12 +48,22 @@ export const useMCPConnection = () => {
         ).catch(error => {
           console.error("Stream processing error:", error);
           setResponse("Error streaming the response.");
+          toast({
+            title: "Error",
+            description: "There was a problem connecting to the server",
+            variant: "destructive",
+          });
         });
       }
     },
     onError: (error) => {
       console.error('Error sending message to MCP:', error);
       setResponse("Failed to connect to the server.");
+      toast({
+        title: "Connection Error",
+        description: "Failed to connect to the server. Please try again later.",
+        variant: "destructive",
+      });
     }
   });
 
