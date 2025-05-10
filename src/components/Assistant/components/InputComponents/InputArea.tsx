@@ -37,30 +37,14 @@ const InputArea: React.FC<InputAreaProps> = ({
 }) => {
   // Track currently selected suggestion
   const [selectedIndex, setSelectedIndex] = React.useState(0);
-  // Track current cursor position for visual cursor display
-  const [visualCursorPosition, setVisualCursorPosition] = React.useState(0);
   
   // Reset selected index when suggestions change
   React.useEffect(() => {
     setSelectedIndex(0);
   }, [filteredSuggestions]);
   
-  // Update visual cursor position whenever real cursor position changes
-  React.useEffect(() => {
-    if (textareaRef.current) {
-      setVisualCursorPosition(textareaRef.current.selectionStart);
-    }
-  }, [textareaRef]);
-  
-  // Enhanced keyboard navigation and cursor tracking
+  // Enhanced keyboard navigation
   const handleKeyDownWithSuggestion = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Update cursor position after key press
-    setTimeout(() => {
-      if (textareaRef.current) {
-        setVisualCursorPosition(textareaRef.current.selectionStart);
-      }
-    }, 0);
-    
     if (showSuggestions && filteredSuggestions.length > 0) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
@@ -84,19 +68,6 @@ const InputArea: React.FC<InputAreaProps> = ({
     handleKeyDown(e);
   };
   
-  // Track cursor position on click events
-  const handleClick = () => {
-    if (textareaRef.current) {
-      setVisualCursorPosition(textareaRef.current.selectionStart);
-    }
-  };
-  
-  // Enhanced onChange to track cursor position
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    handleChange(e);
-    setVisualCursorPosition(e.target.selectionStart);
-  };
-  
   return (
     <div className="relative">
       {/* Suggestion popup ABOVE the input */}
@@ -109,23 +80,20 @@ const InputArea: React.FC<InputAreaProps> = ({
         />
       )}
       
-      <div className="relative border rounded-md focus-within:ring-1 focus-within:ring-ring">
+      <div className="relative">
         {/* Hidden textarea for actual input */}
         <Textarea
           ref={textareaRef}
           placeholder="Ask about your finances or portfolio... (Type / for commands)"
           value={query}
-          onChange={handleInputChange}
-          onClick={handleClick}
+          onChange={handleChange}
           onKeyDown={handleKeyDownWithSuggestion}
-          className="resize-none text-sm border-0 focus-visible:ring-0 shadow-none min-h-10 py-3 pr-10 opacity-100 z-10"
+          className="resize-none text-sm border-0 focus-visible:ring-0 shadow-none min-h-10 py-3 bg-transparent pr-10 absolute inset-0 opacity-0"
           rows={1}
         />
         
-        {/* Visual display layer positioned behind the textarea */}
-        <div className="absolute inset-0 pointer-events-none z-0">
-          <InputDisplay query={query} cursorPosition={visualCursorPosition} />
-        </div>
+        {/* Visible div for highlighting */}
+        <InputDisplay query={query} />
       </div>
       
       <Button 
