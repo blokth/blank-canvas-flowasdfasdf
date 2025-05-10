@@ -18,7 +18,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   isLoading,
 }) => {
   return (
-    <form onSubmit={onSubmit} className="mt-auto">
+    <form onSubmit={onSubmit}>
       <div className="flex items-center gap-2">
         <Textarea
           placeholder="Ask about your finances or portfolio..."

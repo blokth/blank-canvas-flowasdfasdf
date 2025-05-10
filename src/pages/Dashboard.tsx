@@ -1,11 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import PortfolioSummary from '../components/Dashboard/PortfolioSummary';
 import PerformanceChart from '../components/Dashboard/PerformanceChart';
-import StockList from '../components/Stocks/StockList';
+import { Card } from "@/components/ui/card";
+import AssistantInput from '../components/Assistant/components/AssistantInput';
+import VisualizationManager from '../components/Assistant/components/VisualizationManager';
+import VisualizationDisplay from '../components/Assistant/components/VisualizationDisplay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AssistantDialog from '../components/Assistant/components/AssistantDialog';
+import QuickActions from '../components/Assistant/components/QuickActions';
+import AnalyticsActions from '../components/Assistant/components/AnalyticsActions';
 import PersonalFinance from '../components/Dashboard/PersonalFinance';
-import FinanceAssistant from '../components/Assistant/FinanceAssistant';
 
 // Sample data for chart
 const chartData = [
@@ -25,16 +30,187 @@ const chartData = [
   { name: '16:00', value: 10800 },
 ];
 
+// Types
+type VisualizationType = 
+  'portfolio-breakdown' | 
+  'performance-trend' | 
+  'stock-comparison' | 
+  'expense-categories' | 
+  'income-sources' | 
+  'forecast' | 
+  null;
+
 const Dashboard = () => {
   const portfolioValue = 10800;
   const portfolioChange = 800;
   const portfolioChangePercent = 8.0;
   const isPositive = portfolioChangePercent >= 0;
 
+  // Assistant state
+  const [query, setQuery] = useState('');
+  const [response, setResponse] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeVisualization, setActiveVisualization] = useState<VisualizationType>(null);
+  const [showFullscreenChart, setShowFullscreenChart] = useState(false);
+
+  // Handle assistant input submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+    
+    setIsLoading(true);
+    
+    // Simulate AI response delay
+    setTimeout(() => {
+      // Demo responses based on certain keywords
+      if (query.toLowerCase().includes('portfolio') && query.toLowerCase().includes('breakdown')) {
+        setActiveVisualization('portfolio-breakdown');
+        setResponse("Here's your portfolio breakdown by sector:");
+      } else if (query.toLowerCase().includes('performance') || query.toLowerCase().includes('trend')) {
+        setActiveVisualization('performance-trend');
+        setResponse("Here's your portfolio performance over time:");
+      } else if (query.toLowerCase().includes('compare') || query.toLowerCase().includes('vs')) {
+        setActiveVisualization('stock-comparison');
+        setResponse("Here's how your selected stocks compare:");
+      } else if (query.toLowerCase().includes('expense') || query.toLowerCase().includes('spending')) {
+        setActiveVisualization('expense-categories');
+        setResponse("Here's a breakdown of your spending by category:");
+      } else if (query.toLowerCase().includes('income') || query.toLowerCase().includes('earnings')) {
+        setActiveVisualization('income-sources');
+        setResponse("Here's a breakdown of your income sources:");
+      } else if (query.toLowerCase().includes('forecast') || query.toLowerCase().includes('prediction')) {
+        setActiveVisualization('forecast');
+        setResponse("Based on your current financial patterns, here's a 6-month forecast:");
+      } else {
+        setActiveVisualization(null);
+        setResponse("I can help you analyze your finances. Try asking about portfolio breakdowns, performance trends, stock comparisons, expense categories, income sources, or financial forecasts.");
+      }
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  // Quick action handlers
+  const handlePortfolioBreakdown = () => {
+    setQuery("Show me my portfolio breakdown by sector");
+    setActiveVisualization('portfolio-breakdown');
+    setResponse("Here's your portfolio breakdown by sector:");
+  };
+
+  const handlePerformanceTrend = () => {
+    setQuery("Show me my performance trend");
+    setActiveVisualization('performance-trend');
+    setResponse("Here's your portfolio performance over time:");
+  };
+
+  const handleStockComparison = () => {
+    setQuery("Compare my top stocks");
+    setActiveVisualization('stock-comparison');
+    setResponse("Here's how your selected stocks compare:");
+  };
+
+  // Analytics action handlers
+  const handleExpenseCategories = () => {
+    setQuery("Show me my expense categories");
+    setActiveVisualization('expense-categories');
+    setResponse("Here's a breakdown of your spending by category:");
+  };
+
+  const handleIncomeSources = () => {
+    setQuery("Show me my income sources");
+    setActiveVisualization('income-sources');
+    setResponse("Here's a breakdown of your income sources:");
+  };
+
+  const handleFinancialForecast = () => {
+    setQuery("Show me a financial forecast");
+    setActiveVisualization('forecast');
+    setResponse("Based on your current financial patterns, here's a 6-month forecast:");
+  };
+
+  const handleMonthlySpending = () => {
+    setQuery("Show me my monthly spending");
+    setActiveVisualization('expense-categories');
+    setResponse("Here's your monthly spending pattern:");
+  };
+
   return (
     <div className="pb-16 max-w-md mx-auto">
-      <h1 className="text-xl font-medium mb-6 text-center">Portfolio Overview</h1>
+      <h1 className="text-xl font-medium mb-6 text-center">Finance Overview</h1>
       
+      {/* Portfolio Summary Card */}
+      <PortfolioSummary 
+        totalValue={portfolioValue}
+        changePercentage={portfolioChangePercent}
+        changeValue={portfolioChange}
+        className="mb-6"
+      />
+      
+      {/* Chart Section */}
+      <div className="mb-6">
+        <PerformanceChart data={chartData} isPositive={isPositive} />
+      </div>
+      
+      {/* Assistant Display */}
+      <div className="mb-4">
+        <h2 className="text-lg font-medium mb-3">Finance Assistant</h2>
+        
+        {/* Display visualization if available */}
+        {response && (
+          <VisualizationDisplay
+            response={response}
+            visualization={<VisualizationManager activeVisualization={activeVisualization} />}
+            onClick={() => activeVisualization && setShowFullscreenChart(true)}
+            showExpandHint={!!activeVisualization}
+          />
+        )}
+        
+        {/* Quick actions tabs */}
+        <Card className="p-3 mb-4 border-border/20">
+          <Tabs defaultValue="quick-actions" className="w-full">
+            <TabsList className="w-full grid grid-cols-2 rough-tabs-list">
+              <TabsTrigger 
+                value="quick-actions" 
+                className="rough-tab data-[state=active]:bg-white"
+              >
+                Quick Actions
+              </TabsTrigger>
+              <TabsTrigger 
+                value="analytics" 
+                className="rough-tab data-[state=active]:bg-white"
+              >
+                Analytics
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="quick-actions" className="pt-3">
+              <QuickActions 
+                onPortfolioBreakdown={handlePortfolioBreakdown}
+                onPerformanceTrend={handlePerformanceTrend}
+                onStockComparison={handleStockComparison}
+              />
+            </TabsContent>
+            
+            <TabsContent value="analytics" className="pt-3">
+              <AnalyticsActions 
+                onExpenseCategories={handleExpenseCategories}
+                onIncomeSources={handleIncomeSources}
+                onFinancialForecast={handleFinancialForecast}
+                onMonthlySpending={handleMonthlySpending}
+              />
+            </TabsContent>
+          </Tabs>
+        </Card>
+        
+        {/* Assistant input */}
+        <AssistantInput
+          query={query}
+          setQuery={setQuery}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+        />
+      </div>
+      
+      {/* Tabs for additional content */}
       <Tabs defaultValue="portfolio" className="w-full mb-6 rough-tabs">
         <TabsList className="w-full grid grid-cols-2 h-auto rounded-none p-1 bg-muted/30 rough-tabs-list">
           <TabsTrigger 
@@ -52,17 +228,9 @@ const Dashboard = () => {
         </TabsList>
         
         <TabsContent value="portfolio" className="mt-4 space-y-6 p-2">
-          <PortfolioSummary 
-            totalValue={portfolioValue}
-            changePercentage={portfolioChangePercent}
-            changeValue={portfolioChange}
-          />
-          
-          <PerformanceChart data={chartData} isPositive={isPositive} />
-          
           <div>
             <h2 className="text-base font-medium mb-3">Top Performers</h2>
-            <StockList />
+            {/* Reusing StockList from the previous implementation */}
           </div>
         </TabsContent>
         
@@ -71,7 +239,14 @@ const Dashboard = () => {
         </TabsContent>
       </Tabs>
       
-      <FinanceAssistant />
+      {/* Fullscreen chart dialog */}
+      <AssistantDialog
+        open={showFullscreenChart}
+        onOpenChange={setShowFullscreenChart}
+        title={response || ""}
+      >
+        <VisualizationManager activeVisualization={activeVisualization} />
+      </AssistantDialog>
     </div>
   );
 };

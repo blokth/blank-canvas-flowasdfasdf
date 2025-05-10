@@ -2,12 +2,14 @@
 import React from 'react';
 import { TrendingUp } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface PortfolioSummaryProps {
   totalValue: number;
   changePercentage: number;
   changeValue: number;
   period?: string;
+  className?: string;
 }
 
 const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({
@@ -15,6 +17,7 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({
   changePercentage,
   changeValue,
   period = '1D',
+  className,
 }) => {
   const isPositive = changePercentage >= 0;
   const changeColor = isPositive ? 'text-tr-green' : 'text-tr-red';
@@ -33,7 +36,7 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({
   }).format(Math.abs(changeValue));
 
   return (
-    <Card className="border-border/20 p-4">
+    <Card className={cn("border-border/20 p-4", className)}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm text-muted-foreground">{period}</span>
       </div>
