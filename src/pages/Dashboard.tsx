@@ -49,17 +49,20 @@ const Dashboard = () => {
   // Handle assistant submission
   const handleAssistantSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
-      // Store the current query before it gets cleared
-      const currentQuery = query; 
-      
-      // Clear response before sending the message to prevent seeing previous response
-      setResponse(null);
-      
-      // Send message and clear query
+    if (!query.trim() || isLoading) return;
+    
+    // Store the current query before it gets cleared
+    const currentQuery = query.trim(); 
+    
+    // Clear response and query immediately to prevent showing previous content
+    setResponse(null);
+    setQuery('');
+    
+    // Use setTimeout to ensure the UI has updated before sending message
+    setTimeout(() => {
+      // Send message after clearing the state
       sendMessage(currentQuery);
-      setQuery('');
-    }
+    }, 0);
   };
 
   return (

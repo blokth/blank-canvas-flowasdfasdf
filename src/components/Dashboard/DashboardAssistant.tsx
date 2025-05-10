@@ -42,36 +42,40 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
     submissionInProgressRef.current = true;
     
     // Store current query before it gets cleared
-    const currentQuery = query; 
+    const currentQuery = query.trim(); 
 
     // Clear response immediately to prevent seeing the previous response
     setResponse(null);
-
-    if (parentOnSubmit) {
-      // Clear query right after submission, before calling parent's onSubmit
-      if (setExternalQuery) {
-        setExternalQuery('');
-      }
-      parentOnSubmit(e);
+    
+    // Clear query immediately (IMPORTANT: do this BEFORE calling parentOnSubmit)
+    if (setExternalQuery) {
+      setExternalQuery('');
     } else {
-      setInternalIsLoading(true);
-      // Clear internal query immediately
       setInternalQuery('');
-      
-      // Simulate AI response delay
-      setTimeout(() => {
-        // Demo responses based on certain keywords
-        if (currentQuery.toLowerCase().includes('portfolio')) {
-          setActiveVisualization('portfolio-breakdown');
-          setResponse("Here's your portfolio breakdown by sector:");
-        } else {
-          setActiveVisualization(null);
-          setResponse("I can help you analyze your finances. Try asking about portfolio breakdowns.");
-        }
-        setInternalIsLoading(false);
-        submissionInProgressRef.current = false;
-      }, 1000);
     }
+
+    // We'll use a small timeout to ensure the query clearing has been processed
+    setTimeout(() => {
+      if (parentOnSubmit) {
+        parentOnSubmit(e);
+      } else {
+        setInternalIsLoading(true);
+        
+        // Simulate AI response delay
+        setTimeout(() => {
+          // Demo responses based on certain keywords
+          if (currentQuery.toLowerCase().includes('portfolio')) {
+            setActiveVisualization('portfolio-breakdown');
+            setResponse("Here's your portfolio breakdown by sector:");
+          } else {
+            setActiveVisualization(null);
+            setResponse("I can help you analyze your finances. Try asking about portfolio breakdowns.");
+          }
+          setInternalIsLoading(false);
+          submissionInProgressRef.current = false;
+        }, 1000);
+      }
+    }, 0);
     
     // Reset submission flag after a short delay to prevent rapid submissions
     setTimeout(() => {

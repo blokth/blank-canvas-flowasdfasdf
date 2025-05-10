@@ -11,7 +11,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp?: Date;
-  id?: string; // Add unique ID for messages
+  id: string; // Unique ID for messages
 }
 
 interface ConversationViewProps {
@@ -35,6 +35,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastChunkRef = useRef<string>(''); // Track the last chunk to avoid duplicates
   const inSubmissionRef = useRef<boolean>(false); // Track if we're in submission process
+  const submissionTimeRef = useRef<number>(0); // Track when the last submission happened
   
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -62,6 +63,8 @@ const ConversationView: React.FC<ConversationViewProps> = ({
   useEffect(() => {
     if (isLoading) {
       inSubmissionRef.current = true;
+      // Mark the time of submission to prevent race conditions
+      submissionTimeRef.current = Date.now();
       // Don't reset messages, just prepare for new assistant response
       lastChunkRef.current = '';
       setCurrentAssistantMessage('');
@@ -81,6 +84,16 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     if (latestChunk === lastChunkRef.current) return;
     lastChunkRef.current = latestChunk;
     
+    // Get the current time to compare with submission time
+    const currentTime = Date.now();
+    // Only process if it's been at least 100ms since submission or if not in submission
+    const timeElapsed = currentTime - submissionTimeRef.current;
+    
+    if (timeElapsed < 100 && submissionTimeRef.current > 0) {
+      console.log('Skipping chunk processing, too soon after submission:', timeElapsed, 'ms');
+      return;
+    }
+    
     // If this is a new response and not a continuation
     if (!currentAssistantMessage || messages.length === 0 || 
         (messages.length > 0 && messages[messages.length - 1].role === 'user')) {
@@ -89,11 +102,13 @@ const ConversationView: React.FC<ConversationViewProps> = ({
       setMessages(prev => {
         // Only add a new assistant message if the last message was from the user
         if (prev.length === 0 || prev[prev.length - 1].role === 'user') {
+          // Generate a truly unique ID with timestamp and random number
+          const uniqueId = `assistant-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
           return [...prev, { 
             role: 'assistant', 
             content: latestChunk,
             timestamp: new Date(),
-            id: `assistant-${Date.now()}`
+            id: uniqueId
           }];
         }
         return prev;
@@ -119,13 +134,18 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     
     // Mark as in submission to prevent processing chunks temporarily
     inSubmissionRef.current = true;
+    // Record the submission time
+    submissionTimeRef.current = Date.now();
+
+    // Generate a unique ID for the user message
+    const uniqueId = `user-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
     // Add user message to the conversation with unique ID
     setMessages(prev => [...prev, { 
       role: 'user', 
       content: query,
       timestamp: new Date(),
-      id: `user-${Date.now()}`
+      id: uniqueId
     }]);
     
     // Reset current assistant message to prevent showing old content
@@ -134,8 +154,16 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     // Reset chunks tracking
     lastChunkRef.current = '';
     
-    // Call the provided onSubmit (this will also clear the input in parent components)
-    onSubmit(e);
+    // First clear the query input and then call the provided onSubmit
+    const currentQuery = query.trim();
+    setQuery('');
+    
+    // Use setTimeout to ensure React has time to process state updates
+    setTimeout(() => {
+      // Create a new form event to pass to the onSubmit handler
+      const newEvent = { ...e, preventDefault: () => {} };
+      onSubmit(newEvent);
+    }, 0);
   };
 
   return (
@@ -152,7 +180,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
           <div className="space-y-6 pb-6">
             {messages.map((message) => (
               <div 
-                key={message.id || `${message.role}-${message.timestamp?.getTime()}`}
+                key={message.id}
                 className={cn(
                   "flex flex-col space-y-2 animate-fade-in",
                   message.role === 'user' ? "items-end" : "items-start"

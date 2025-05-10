@@ -35,20 +35,27 @@ export const useChunkProcessor = () => {
       
       // Update chunks for streaming display
       setChunks(prev => {
-        // Start fresh if we're in a new conversation
+        // Start fresh if we're in a new conversation or if we explicitly reset
         if (processingRef.current === false) {
           processingRef.current = true;
           return [chunk];
         }
         
         // Otherwise replace the last chunk for continuous updating
-        return [...prev.slice(0, -1), chunk];
+        const newChunks = [...prev];
+        if (newChunks.length > 0) {
+          newChunks[newChunks.length - 1] = chunk;
+        } else {
+          newChunks.push(chunk);
+        }
+        return newChunks;
       });
     }
   }, []);
   
   // Reset all state
   const reset = useCallback(() => {
+    // Immediately clear all state
     setResponse(null);
     setVisualizationType(null);
     setChunks([]);
