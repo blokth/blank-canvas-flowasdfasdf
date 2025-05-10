@@ -65,7 +65,8 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     handleKeyDown,
     handleChange,
     handleSuggestionSelect,
-    getFilteredSuggestions
+    getFilteredSuggestions,
+    handleFieldClick
   } = useInputHandlers({
     query,
     setQuery,
@@ -101,6 +102,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
           handleSuggestionSelect={handleSuggestionSelect}
           textareaRef={textareaRef}
           templateField={templateField}
+          handleFieldClick={handleFieldClick}
         />
       </div>
     </div>

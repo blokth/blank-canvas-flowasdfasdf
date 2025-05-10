@@ -19,6 +19,7 @@ interface InputAreaProps {
   handleSuggestionSelect: (value: string) => void;
   textareaRef: React.RefObject<HTMLTextAreaElement>;
   templateField: string | null;
+  handleFieldClick?: (fieldType: 'stock' | 'timeframe' | 'sector', position: number) => void;
 }
 
 const InputArea: React.FC<InputAreaProps> = ({
@@ -33,7 +34,8 @@ const InputArea: React.FC<InputAreaProps> = ({
   filteredSuggestions,
   handleSuggestionSelect,
   textareaRef,
-  templateField
+  templateField,
+  handleFieldClick
 }) => {
   // Track currently selected suggestion
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -85,25 +87,6 @@ const InputArea: React.FC<InputAreaProps> = ({
     // Fall back to default handling if no suggestions or other key
     handleKeyDown(e);
   }, [showSuggestions, filteredSuggestions, selectedIndex, handleSuggestionSelect, handleKeyDown]);
-  
-  // Handle field click to show suggestions
-  const handleFieldClick = (fieldType: 'stock' | 'timeframe' | 'sector', position: number) => {
-    // Position cursor at the field
-    if (textareaRef.current) {
-      // Calculate the exact position after the field: prefix
-      const fieldLength = fieldType.length + 1; // +1 for colon
-      const cursorPos = position + fieldLength;
-      
-      textareaRef.current.focus();
-      textareaRef.current.setSelectionRange(cursorPos, cursorPos);
-      
-      // Show suggestions for this field type
-      if (fieldType) {
-        // We'll handle this through the useInputHandlers, which watches cursor position
-        // This will trigger showing suggestions for the appropriate field type
-      }
-    }
-  };
   
   return (
     <form onSubmit={handleFormSubmit} className="relative">
