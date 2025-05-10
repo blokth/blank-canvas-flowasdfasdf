@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface SuggestionsHookProps {
   query: string;
@@ -38,49 +39,27 @@ export const useSuggestions = ({
   const [suggestionType, setSuggestionType] = useState<'stock' | 'timeframe' | 'sector' | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [templateField, setTemplateField] = useState<string | null>(null);
-  // Add debounce timer to prevent frequent UI updates
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  // Keep track of the previous query to prevent unnecessary updates
+  
+  // Add refs to track previous values and prevent unnecessary state updates
   const prevQueryRef = useRef<string>('');
   const prevCursorPosRef = useRef<number>(0);
+  const prevSuggestionTypeRef = useRef<'stock' | 'timeframe' | 'sector' | null>(null);
+  const prevSearchTermRef = useRef<string>('');
+  const debounceTimerRef = useRef<number | null>(null);
   
-  // Check for autocompletion trigger with debounce
-  useEffect(() => {
-    // Skip if no changes in inputs that would affect suggestions
-    if (
-      prevQueryRef.current === query && 
-      prevCursorPosRef.current === cursorPosition &&
-      !showSuggestions
-    ) {
+  // Memoized checkForTrigger to prevent recreating the function on each render
+  const checkForTrigger = useCallback(() => {
+    // Exit early if cursor position is not set
+    if (!cursorPosition) return;
+    
+    // Exit early if query and cursor position haven't changed
+    if (prevQueryRef.current === query && prevCursorPosRef.current === cursorPosition) {
       return;
     }
     
     // Update refs
     prevQueryRef.current = query;
     prevCursorPosRef.current = cursorPosition;
-    
-    // Clear any existing timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-    
-    // Set a new debounce timer
-    debounceTimerRef.current = setTimeout(() => {
-      checkForTrigger();
-    }, 100); // 100ms debounce
-    
-    // Cleanup on unmount
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, [query, cursorPosition, showSuggestions]);
-  
-  // The actual check function - extracted to keep code clean
-  const checkForTrigger = () => {
-    // Exit early if cursor position is not set
-    if (!cursorPosition) return;
     
     // Get text before the cursor
     const textBeforeCursor = query.substring(0, cursorPosition);
@@ -91,42 +70,85 @@ export const useSuggestions = ({
     const sectorMatch = /sector:(\w*)$/.exec(textBeforeCursor);
     
     if (stockMatch) {
-      setSuggestionType('stock');
-      setSearchTerm(stockMatch[1] || '');
-      setTemplateField(null);
-      setShowSuggestions(true);
+      const searchValue = stockMatch[1] || '';
+      if (prevSuggestionTypeRef.current !== 'stock' || prevSearchTermRef.current !== searchValue) {
+        setSuggestionType('stock');
+        setSearchTerm(searchValue);
+        setTemplateField(null);
+        setShowSuggestions(true);
+        prevSuggestionTypeRef.current = 'stock';
+        prevSearchTermRef.current = searchValue;
+      }
       return;
     } else if (timeframeMatch) {
-      setSuggestionType('timeframe');
-      setSearchTerm(timeframeMatch[1] || '');
-      setTemplateField(null);
-      setShowSuggestions(true);
+      const searchValue = timeframeMatch[1] || '';
+      if (prevSuggestionTypeRef.current !== 'timeframe' || prevSearchTermRef.current !== searchValue) {
+        setSuggestionType('timeframe');
+        setSearchTerm(searchValue);
+        setTemplateField(null);
+        setShowSuggestions(true);
+        prevSuggestionTypeRef.current = 'timeframe';
+        prevSearchTermRef.current = searchValue;
+      }
       return;
     } else if (sectorMatch) {
-      setSuggestionType('sector');
-      setSearchTerm(sectorMatch[1] || '');
-      setTemplateField(null);
-      setShowSuggestions(true);
+      const searchValue = sectorMatch[1] || '';
+      if (prevSuggestionTypeRef.current !== 'sector' || prevSearchTermRef.current !== searchValue) {
+        setSuggestionType('sector');
+        setSearchTerm(searchValue);
+        setTemplateField(null);
+        setShowSuggestions(true);
+        prevSuggestionTypeRef.current = 'sector';
+        prevSearchTermRef.current = searchValue;
+      }
       return;
     }
     
     // Check for basic slash command
     const slashMatch = /\/(\w*)$/.exec(textBeforeCursor);
     if (slashMatch) {
-      // Show quick templates
-      setShowSuggestions(true);
-      setSuggestionType(null);
-      setSearchTerm(slashMatch[1] || '');
-      setTemplateField(null);
+      const searchValue = slashMatch[1] || '';
+      if (prevSuggestionTypeRef.current !== null || prevSearchTermRef.current !== searchValue) {
+        // Show quick templates
+        setShowSuggestions(true);
+        setSuggestionType(null);
+        setSearchTerm(searchValue);
+        setTemplateField(null);
+        prevSuggestionTypeRef.current = null;
+        prevSearchTermRef.current = searchValue;
+      }
       return;
     }
     
-    // If no matches, hide suggestions
+    // If no matches and suggestions are showing, hide them
     if (showSuggestions) {
       setShowSuggestions(false);
+      prevSuggestionTypeRef.current = null;
+      prevSearchTermRef.current = '';
     }
     setTemplateField(null);
-  };
+  }, [query, cursorPosition, setShowSuggestions, showSuggestions]);
+  
+  // Check for autocompletion trigger with debounce and RAF instead of setTimeout
+  useEffect(() => {
+    // Cancel any existing RAF
+    if (debounceTimerRef.current !== null) {
+      cancelAnimationFrame(debounceTimerRef.current);
+    }
+    
+    // Schedule a new RAF
+    debounceTimerRef.current = requestAnimationFrame(() => {
+      checkForTrigger();
+      debounceTimerRef.current = null;
+    });
+    
+    // Cleanup on unmount
+    return () => {
+      if (debounceTimerRef.current !== null) {
+        cancelAnimationFrame(debounceTimerRef.current);
+      }
+    };
+  }, [query, cursorPosition, checkForTrigger]);
   
   return {
     suggestionType,

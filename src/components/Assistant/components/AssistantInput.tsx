@@ -27,7 +27,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     return query.replace(/(stock:|timeframe:|sector:)(\w+)/g, "$2");
   }, [query]);
   
-  // Submit handler that processes the query
+  // Submit handler that processes the query - memoized to prevent re-creation
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     
@@ -38,7 +38,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     onSubmit(newEvent);
   }, [onSubmit]);
   
-  // Use the extracted suggestions hook
+  // Use the extracted suggestions hook with memoization to prevent unnecessary re-renders
   const { 
     suggestionType, 
     setSuggestionType, 
@@ -52,7 +52,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     setShowSuggestions
   });
 
-  // Use the input handlers hook
+  // Use the input handlers hook - memoizing references to prevent unnecessary re-renders
   const {
     handleKeyDown,
     handleChange,
@@ -62,7 +62,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   } = useInputHandlers({
     query,
     setQuery,
-    onSubmit: handleSubmit, // Use our custom submit handler
+    onSubmit: handleSubmit,
     textareaRef,
     isLoading,
     showSuggestions,
@@ -76,7 +76,8 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     setCursorPosition
   });
 
-  const filteredSuggestions = getFilteredSuggestions();
+  // Memoize filtered suggestions to prevent re-rendering
+  const filteredSuggestions = useMemo(() => getFilteredSuggestions(), [getFilteredSuggestions]);
 
   return (
     <div className="bg-background border border-border/40 rounded-xl shadow-sm hover:border-border/60 transition-colors duration-200 w-full">
