@@ -125,6 +125,29 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
           }
         }, 0);
       }
+    } else if (suggestionType === 'stock') {
+      // For stock suggestions, just use the stock symbol without prefix
+      // Find the position of 'stock:' before the cursor
+      const beforeCursor = query.substring(0, cursorPosition);
+      const stockCommandIndex = beforeCursor.lastIndexOf('stock:');
+      
+      if (stockCommandIndex !== -1) {
+        // Replace everything from 'stock:' to cursor with just the stock symbol
+        const beforeCommand = query.substring(0, stockCommandIndex);
+        const afterCursor = query.substring(cursorPosition);
+        const newQuery = beforeCommand + value + afterCursor;
+        setQuery(newQuery);
+        
+        // Set cursor position after inserted symbol
+        setTimeout(() => {
+          if (textareaRef.current) {
+            const newPosition = beforeCommand.length + value.length;
+            textareaRef.current.focus();
+            textareaRef.current.setSelectionRange(newPosition, newPosition);
+            setCursorPosition(newPosition);
+          }
+        }, 0);
+      }
     } else {
       // Replace the search term with the selected suggestion
       const beforePattern = query.substring(0, cursorPosition - searchTerm.length);
