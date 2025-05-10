@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface HighlightedTextProps {
@@ -14,7 +13,7 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ query }) => {
     );
   }
 
-  // Process the query to extract just values
+  // Process the query to highlight the patterns, but keep the full patterns intact
   const parts = [];
   let lastIndex = 0;
   
@@ -32,27 +31,15 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ query }) => {
       );
     }
     
-    // Add just the keyword value (e.g., TSLA instead of stock:TSLA)
-    if (match[2]) {
-      parts.push(
-        <span 
-          key={`value-${match.index}`} 
-          className="text-primary font-semibold"
-        >
-          {match[2]}
-        </span>
-      );
-    } else {
-      // If no value after colon, still show the prefix (stock:, timeframe:, etc.)
-      parts.push(
-        <span 
-          key={`keyword-${match.index}`} 
-          className="text-primary font-semibold"
-        >
-          {match[1]}
-        </span>
-      );
-    }
+    // Add the full pattern (e.g., stock:TSLA) as highlighted text
+    parts.push(
+      <span 
+        key={`value-${match.index}`} 
+        className="text-primary font-semibold"
+      >
+        {match[0]}
+      </span>
+    );
     
     lastIndex = match.index + match[0].length;
   }
