@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, useCallback, useMemo } from 'react';
+import React, { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import InputArea from './InputComponents/InputArea';
 import { useSuggestions } from './InputComponents/useSuggestions';
 import { useInputHandlers } from './InputComponents/useInputHandlers';
@@ -58,7 +58,8 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     handleChange,
     handleSuggestionSelect,
     getFilteredSuggestions,
-    handleFieldClick
+    handleFieldClick,
+    navigateToFirstField
   } = useInputHandlers({
     query,
     setQuery,
@@ -75,6 +76,24 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     cursorPosition,
     setCursorPosition
   });
+
+  // When a template is pasted or selected, navigate to the first field
+  useEffect(() => {
+    if (query.includes(':') && (query !== prevQueryRef.current)) {
+      // Use a short timeout to allow the DOM to update
+      const timeoutId = setTimeout(() => {
+        navigateToFirstField();
+      }, 50);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [query, navigateToFirstField]);
+  
+  // Ref to track previous query for comparison
+  const prevQueryRef = useRef(query);
+  useEffect(() => {
+    prevQueryRef.current = query;
+  }, [query]);
 
   // Memoize filtered suggestions to prevent re-rendering
   const filteredSuggestions = useMemo(() => getFilteredSuggestions(), [getFilteredSuggestions]);

@@ -1,11 +1,12 @@
 
-import { useState, useEffect, RefObject } from 'react';
+import { useState, useEffect, RefObject, useCallback } from 'react';
 import { useTemplateNavigation } from './hooks/useTemplateNavigation';
 import { useSuggestionSelection } from './hooks/useSuggestionSelection';
 import { useKeyboardHandling } from './hooks/useKeyboardHandling';
 import { useCursorHandling } from './hooks/useCursorHandling';
 import { useSuggestionFiltering } from './hooks/useSuggestionFiltering';
 import { suggestions } from './useSuggestions';
+import { findFirstTemplateField } from './TemplateNavigator';
 
 interface InputHandlersProps {
   query: string;
@@ -41,7 +42,7 @@ export const useInputHandlers = ({
   setCursorPosition
 }: InputHandlersProps) => {
   // Use template navigation logic
-  const { navigateToNextField, navigateToField } = useTemplateNavigation({
+  const { navigateToNextField, navigateToField, navigateToFirstField } = useTemplateNavigation({
     query,
     cursorPosition,
     textareaRef,
@@ -101,6 +102,34 @@ export const useInputHandlers = ({
     searchTerm
   });
 
+  // Navigate to the first field when a template is selected or created
+  useEffect(() => {
+    // Check if the query contains a template pattern and cursor is at start or end
+    const hasTemplatePattern = /(stock|timeframe|sector):/.test(query);
+    const isAtStartOrEnd = cursorPosition === 0 || cursorPosition === query.length;
+    
+    if (hasTemplatePattern && isAtStartOrEnd) {
+      // Find the first template field
+      const firstField = findFirstTemplateField(query);
+      
+      if (firstField) {
+        // Small delay to let the UI update
+        setTimeout(() => {
+          if (textareaRef.current) {
+            const newPosition = firstField.position;
+            textareaRef.current.focus();
+            textareaRef.current.setSelectionRange(newPosition, newPosition);
+            setCursorPosition(newPosition);
+            
+            // Show suggestions for this field type
+            setSuggestionType(firstField.fieldType);
+            setShowSuggestions(true);
+          }
+        }, 10);
+      }
+    }
+  }, [query, setCursorPosition, setSuggestionType, setShowSuggestions, textareaRef]);
+
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
@@ -113,11 +142,17 @@ export const useInputHandlers = ({
     navigateToField(fieldType, position);
   };
   
+  // Get filtered suggestions - memoized to avoid recalculation
+  const getFilteredSuggestions = useCallback(() => {
+    return filteredSuggestions;
+  }, [filteredSuggestions]);
+  
   return {
     handleKeyDown,
     handleChange,
     handleSuggestionSelect,
-    getFilteredSuggestions: () => filteredSuggestions,
-    handleFieldClick
+    getFilteredSuggestions,
+    handleFieldClick,
+    navigateToFirstField
   };
 };

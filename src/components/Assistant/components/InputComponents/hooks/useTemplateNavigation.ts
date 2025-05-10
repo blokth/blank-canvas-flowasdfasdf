@@ -1,5 +1,5 @@
 
-import { useState, RefObject } from 'react';
+import { RefObject } from 'react';
 import { moveToNextTemplateField } from '../TemplateNavigator';
 
 interface TemplateNavigationProps {
@@ -32,6 +32,29 @@ export const useTemplateNavigation = ({
     return newPosition;
   };
 
+  // Navigate to the first field in the template
+  const navigateToFirstField = () => {
+    const fieldPattern = /(stock|timeframe|sector):/g;
+    const match = fieldPattern.exec(query);
+    
+    if (match && textareaRef.current) {
+      const fieldType = match[1] as 'stock' | 'timeframe' | 'sector';
+      const newPosition = match.index + match[0].length;
+      
+      textareaRef.current.focus();
+      textareaRef.current.setSelectionRange(newPosition, newPosition);
+      
+      // Show suggestions for this field type
+      setSuggestionType(fieldType);
+      setShowSuggestions(true);
+      
+      setCursorPosition(newPosition);
+      return newPosition;
+    }
+    
+    return cursorPosition;
+  };
+
   // Position cursor after specific field type
   const navigateToField = (fieldType: 'stock' | 'timeframe' | 'sector', position: number) => {
     if (textareaRef.current) {
@@ -54,6 +77,7 @@ export const useTemplateNavigation = ({
 
   return {
     navigateToNextField,
-    navigateToField
+    navigateToField,
+    navigateToFirstField
   };
 };

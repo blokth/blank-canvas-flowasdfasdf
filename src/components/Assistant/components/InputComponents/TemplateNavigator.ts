@@ -52,3 +52,43 @@ export const moveToNextTemplateField = (
   return cursorPosition;
 };
 
+/**
+ * Find the first template field in the query string
+ */
+export const findFirstTemplateField = (
+  query: string
+) => {
+  const fieldPattern = /(stock|timeframe|sector):/g;
+  const match = fieldPattern.exec(query);
+  
+  if (match) {
+    return {
+      fieldType: match[1] as 'stock' | 'timeframe' | 'sector',
+      position: match.index + match[0].length,
+      index: match.index
+    };
+  }
+  
+  return null;
+};
+
+/**
+ * Get all template fields in order
+ */
+export const getAllTemplateFields = (
+  query: string
+) => {
+  const fieldPattern = /(stock|timeframe|sector):/g;
+  const fields = [];
+  let match;
+  
+  while ((match = fieldPattern.exec(query)) !== null) {
+    fields.push({
+      fieldType: match[1] as 'stock' | 'timeframe' | 'sector',
+      position: match.index + match[0].length,
+      index: match.index
+    });
+  }
+  
+  return fields;
+};
