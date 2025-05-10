@@ -243,19 +243,9 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
         </div>
 
         <div className="relative">
-          <Textarea
-            ref={textareaRef}
-            placeholder="Ask about your finances or portfolio... (Type / for commands)"
-            value={query}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            className="resize-none text-sm border-0 focus-visible:ring-0 shadow-none min-h-10 py-3 bg-transparent pr-10"
-            rows={1}
-          />
-          
-          {/* Suggestion popup */}
+          {/* Suggestion popup ABOVE the input */}
           {showSuggestions && (
-            <div className="absolute left-0 right-0 top-full mt-1 z-50">
+            <div className="absolute left-0 right-0 bottom-full mb-1 z-50">
               <Command className="rounded-lg border shadow-md bg-popover">
                 <CommandList>
                   <CommandGroup heading={suggestionType ? `${suggestionType.charAt(0).toUpperCase() + suggestionType.slice(1)} suggestions` : "Commands"}>
@@ -278,6 +268,16 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
               </Command>
             </div>
           )}
+          
+          <Textarea
+            ref={textareaRef}
+            placeholder="Ask about your finances or portfolio... (Type / for commands)"
+            value={query}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            className="resize-none text-sm border-0 focus-visible:ring-0 shadow-none min-h-10 py-3 bg-transparent pr-10"
+            rows={1}
+          />
           
           <Button 
             type="submit" 
