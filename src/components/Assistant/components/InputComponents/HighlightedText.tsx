@@ -31,24 +31,24 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ query }) => {
       );
     }
     
-    // Add highlighted keyword (stock:, timeframe:, sector:)
-    parts.push(
-      <span 
-        key={`keyword-${match.index}`} 
-        className="text-primary font-semibold"
-      >
-        {match[1]}
-      </span>
-    );
-    
-    // Add the value after the colon if it exists
+    // Add just the keyword value (e.g., TSLA instead of stock:TSLA)
     if (match[2]) {
       parts.push(
         <span 
           key={`value-${match.index}`} 
-          className="text-primary"
+          className="text-primary font-semibold"
         >
           {match[2]}
+        </span>
+      );
+    } else {
+      // If no value after colon, still show the prefix (stock:, timeframe:, etc.)
+      parts.push(
+        <span 
+          key={`keyword-${match.index}`} 
+          className="text-primary font-semibold"
+        >
+          {match[1]}
         </span>
       );
     }
