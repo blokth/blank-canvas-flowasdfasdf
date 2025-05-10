@@ -9,6 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface DataPoint {
   name: string;
@@ -41,25 +42,28 @@ interface PeriodButtonProps {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
+  color?: string;
 }
 
-const PeriodButton: React.FC<PeriodButtonProps> = ({ active, onClick, children }) => (
+const PeriodButton: React.FC<PeriodButtonProps> = ({ active, onClick, children, color = "#8E9196" }) => (
   <button
     onClick={onClick}
-    className={`px-3 py-1 rounded-full text-xs ${
+    className={`px-3 py-1 rounded-full text-xs transition-all ${
       active 
-        ? 'bg-background border border-border/30 shadow-sm' 
-        : 'text-muted-foreground hover:bg-muted/30'
+        ? 'bg-background border border-border/30 shadow-sm text-foreground' 
+        : `text-muted-foreground hover:text-foreground hover:bg-muted/30`
     }`}
+    style={{ borderColor: active ? color : 'transparent' }}
   >
     {children}
   </button>
 );
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-background p-2 border border-border/20 shadow-sm rounded-md">
+        {label && <p className="text-xs text-muted-foreground">{label}</p>}
         <p className="text-foreground font-medium">${payload[0].value.toFixed(2)}</p>
       </div>
     );
@@ -84,10 +88,40 @@ const StockChart: React.FC<StockChartProps> = ({
   
   const activeData = activeDataType === 'wealth' ? data : cashData || data;
   
+  // Different tick counts for different periods for more consistency
+  const getTickConfig = (period: typeof periods[number]) => {
+    switch (period) {
+      case '1D': return { interval: 'preserveEnd', count: 4 };
+      case '1W': return { interval: 'preserveEnd', count: 5 };
+      case '1M': return { interval: 'preserveEnd', count: 4 };
+      case '3M': return { interval: 'preserveEnd', count: 5 };
+      case '1Y': return { interval: 'preserveEnd', count: 4 };
+      case 'All': return { interval: 'preserveEnd', count: 5 };
+    }
+  };
+
+  // Custom tick formatter for each period type
+  const getTickFormatter = (period: typeof periods[number]) => {
+    switch (period) {
+      case '1D':
+        return (value: string) => value; // Show hours
+      case '1W':
+        return (value: string) => value; // Show days
+      case '1M': 
+      case '3M':
+      case '1Y':
+      case 'All':
+        return (value: string) => value; // Show abbreviated months/dates
+    }
+  };
+  
+  const tickConfig = getTickConfig(activePeriod);
+  const tickFormatter = getTickFormatter(activePeriod);
+
   return (
     <Card className="border-border/20 p-3">
       <div className="flex flex-col space-y-4">
-        {/* Just the period selector now */}
+        {/* Period selector */}
         <div className="flex justify-end">
           <div className="flex gap-1 p-1 bg-muted/30 rounded-full">
             {periods.map((period) => (
@@ -95,6 +129,7 @@ const StockChart: React.FC<StockChartProps> = ({
                 key={period}
                 active={activePeriod === period}
                 onClick={() => setActivePeriod(period)}
+                color={chartColor}
               >
                 {period}
               </PeriodButton>
@@ -119,17 +154,22 @@ const StockChart: React.FC<StockChartProps> = ({
                 tickLine={false}
                 axisLine={false}
                 tick={{ fontSize: 10, fill: '#8E9196' }}
-                interval="preserveStartEnd"
-                minTickGap={60}
+                interval={tickConfig.interval as any}
+                minTickGap={30}
                 height={20}
                 padding={{ left: 0, right: 0 }}
-                tickCount={5}
+                tickFormatter={tickFormatter}
+                tickCount={tickConfig.count}
               />
               <YAxis 
                 hide={true}
                 domain={['auto', 'auto']}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip 
+                content={<CustomTooltip />} 
+                animationDuration={200}
+                cursor={{ stroke: '#8E9196', strokeWidth: 1, strokeDasharray: '4 4' }}
+              />
               <Area
                 type="linear"
                 dataKey="value"
@@ -138,6 +178,7 @@ const StockChart: React.FC<StockChartProps> = ({
                 fillOpacity={1}
                 fill={`url(#${gradientId})`}
                 dot={false}
+                activeDot={{ r: 5, fill: chartColor, stroke: '#fff', strokeWidth: 1 }}
                 connectNulls={false}
                 isAnimationActive={false}
               />
