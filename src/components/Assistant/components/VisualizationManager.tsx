@@ -7,13 +7,17 @@ import ExpenseCategoriesChart from '../Visualizations/ExpenseCategoriesChart';
 import IncomeSourcesChart from '../Visualizations/IncomeSourcesChart';
 import ForecastChart from '../Visualizations/ForecastChart';
 
-type VisualizationType = 
+export type VisualizationType = 
   'portfolio-breakdown' | 
   'performance-trend' | 
   'stock-comparison' | 
   'expense-categories' | 
   'income-sources' | 
   'forecast' | 
+  'wealth-overview' |
+  'cash-management' |
+  'investment-allocation' |
+  'savings-goals' |
   null;
 
 interface VisualizationManagerProps {
@@ -33,6 +37,15 @@ const VisualizationManager: React.FC<VisualizationManagerProps> = ({ activeVisua
     case 'income-sources':
       return <IncomeSourcesChart />;
     case 'forecast':
+      return <ForecastChart />;
+    // For the new visualization types, fallback to existing visualizations for now
+    case 'wealth-overview':
+      return <PortfolioBreakdownChart />;
+    case 'cash-management':
+      return <IncomeSourcesChart />;
+    case 'investment-allocation':
+      return <PortfolioBreakdownChart />;
+    case 'savings-goals':
       return <ForecastChart />;
     default:
       return null;

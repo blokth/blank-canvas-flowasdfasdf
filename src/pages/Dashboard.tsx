@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PortfolioSummary from '../components/Dashboard/PortfolioSummary';
 import PerformanceChart from '../components/Dashboard/PerformanceChart';
 import AssistantInput from '../components/Assistant/components/AssistantInput';
-import VisualizationManager from '../components/Assistant/components/VisualizationManager';
+import VisualizationManager, { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 import VisualizationDisplay from '../components/Assistant/components/VisualizationDisplay';
 import AssistantDialog from '../components/Assistant/components/AssistantDialog';
 import ActionPills from '../components/Assistant/components/ActionPills';
@@ -26,19 +26,7 @@ const chartData = [
   { name: '16:00', value: 10800 },
 ];
 
-// Types
-type VisualizationType = 
-  'portfolio-breakdown' | 
-  'performance-trend' | 
-  'stock-comparison' | 
-  'expense-categories' | 
-  'income-sources' | 
-  'forecast' | 
-  'wealth-overview' |
-  'cash-management' |
-  'investment-allocation' |
-  'savings-goals' |
-  null;
+// We're no longer defining VisualizationType here, using the imported one instead
 
 const Dashboard = () => {
   const portfolioValue = 10800;
