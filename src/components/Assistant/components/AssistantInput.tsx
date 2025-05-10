@@ -21,11 +21,11 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
   
-  // Template buttons for quick access
+  // Command buttons for quick access - removed "Compare" and "Forecast"
   const commandButtons = [
-    { label: "{{stock}}", command: "{{stock}}" },
-    { label: "{{timeframe}}", command: "{{timeframe}}" },
-    { label: "{{sector}}", command: "{{sector}}" },
+    { label: "Stock", command: "stock:" },
+    { label: "Timeframe", command: "timeframe:" },
+    { label: "Sector", command: "sector:" },
   ];
   
   // Use the extracted suggestions hook
@@ -103,8 +103,8 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     if (!suggestionType) {
       // Handle command quick templates
       const templates: Record<string, string> = {
-        'stock': 'Show me data for {{stock}}',
-        'sector': 'Show performance of {{sector}}'
+        'stock': 'Show me data for stock:',
+        'sector': 'Show performance of sector:'
       };
       
       if (templates[value.toLowerCase()]) {
@@ -126,33 +126,12 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
         }, 0);
       }
     } else if (suggestionType === 'stock') {
-      // For stock suggestions, check if we're dealing with a template field
+      // For stock suggestions, just use the stock symbol without prefix
+      // Find the position of 'stock:' before the cursor
       const beforeCursor = query.substring(0, cursorPosition);
       const stockCommandIndex = beforeCursor.lastIndexOf('stock:');
-      const stockTemplateIndex = beforeCursor.lastIndexOf('{{stock');
       
-      if (stockTemplateIndex !== -1 && (stockTemplateIndex > stockCommandIndex || stockCommandIndex === -1)) {
-        // Find the closing }} and replace everything between {{ and }} with the value
-        const afterCursor = query.substring(cursorPosition);
-        const closingBraceIndex = afterCursor.indexOf('}}');
-        if (closingBraceIndex !== -1) {
-          const beforeTemplate = query.substring(0, stockTemplateIndex);
-          const afterTemplate = query.substring(cursorPosition + closingBraceIndex + 2);
-          const newQuery = beforeTemplate + value + afterTemplate;
-          setQuery(newQuery);
-          
-          // Set cursor position after inserted value
-          setTimeout(() => {
-            if (textareaRef.current) {
-              const newPosition = beforeTemplate.length + value.length;
-              textareaRef.current.focus();
-              textareaRef.current.setSelectionRange(newPosition, newPosition);
-              setCursorPosition(newPosition);
-            }
-          }, 0);
-        }
-      } else if (stockCommandIndex !== -1) {
-        // Handle regular stock: command
+      if (stockCommandIndex !== -1) {
         // Replace everything from 'stock:' to cursor with just the stock symbol
         const beforeCommand = query.substring(0, stockCommandIndex);
         const afterCursor = query.substring(cursorPosition);
@@ -170,49 +149,21 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
         }, 0);
       }
     } else {
-      // Check if we're dealing with a template field for other types
-      const beforeCursor = query.substring(0, cursorPosition);
-      const commandIndex = beforeCursor.lastIndexOf(`${suggestionType}:`);
-      const templateIndex = beforeCursor.lastIndexOf(`{{${suggestionType}`);
+      // Replace the search term with the selected suggestion
+      const beforePattern = query.substring(0, cursorPosition - searchTerm.length);
+      const afterPattern = query.substring(cursorPosition);
+      const newQuery = beforePattern + value + afterPattern;
+      setQuery(newQuery);
       
-      if (templateIndex !== -1 && (templateIndex > commandIndex || commandIndex === -1)) {
-        // Find the closing }} and replace everything between {{ and }} with the value
-        const afterCursor = query.substring(cursorPosition);
-        const closingBraceIndex = afterCursor.indexOf('}}');
-        if (closingBraceIndex !== -1) {
-          const beforeTemplate = query.substring(0, templateIndex);
-          const afterTemplate = query.substring(cursorPosition + closingBraceIndex + 2);
-          const newQuery = beforeTemplate + value + afterTemplate;
-          setQuery(newQuery);
-          
-          // Set cursor position after inserted value
-          setTimeout(() => {
-            if (textareaRef.current) {
-              const newPosition = beforeTemplate.length + value.length;
-              textareaRef.current.focus();
-              textareaRef.current.setSelectionRange(newPosition, newPosition);
-              setCursorPosition(newPosition);
-            }
-          }, 0);
+      // Set cursor position after the inserted suggestion
+      setTimeout(() => {
+        if (textareaRef.current) {
+          const newPosition = beforePattern.length + value.length;
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(newPosition, newPosition);
+          setCursorPosition(newPosition);
         }
-      } else {
-        // Regular command handling (non-template)
-        // Replace the search term with the selected suggestion
-        const beforePattern = query.substring(0, cursorPosition - searchTerm.length);
-        const afterPattern = query.substring(cursorPosition);
-        const newQuery = beforePattern + value + afterPattern;
-        setQuery(newQuery);
-        
-        // Set cursor position after the inserted suggestion
-        setTimeout(() => {
-          if (textareaRef.current) {
-            const newPosition = beforePattern.length + value.length;
-            textareaRef.current.focus();
-            textareaRef.current.setSelectionRange(newPosition, newPosition);
-            setCursorPosition(newPosition);
-          }
-        }, 0);
-      }
+      }, 0);
     }
     
     setShowSuggestions(false);
