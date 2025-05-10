@@ -5,7 +5,7 @@ import { Outlet } from 'react-router-dom';
 const AppLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-tr-dark">
-      <div className="tr-container py-6">
+      <div className="tr-container py-6 px-4">
         <Outlet />
       </div>
     </div>

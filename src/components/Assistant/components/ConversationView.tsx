@@ -105,7 +105,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
       <ScrollArea className="flex-1 p-4">
         {messages.length === 0 ? (
           <div className="flex flex-col h-full justify-center space-y-6">
-            <h3 className="text-lg font-medium text-center">
+            <h3 className="text-lg font-medium">
               Ask me about your finances
             </h3>
             <ActionPills onPillClick={handlePillClick} />

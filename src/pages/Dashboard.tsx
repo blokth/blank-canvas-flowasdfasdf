@@ -55,7 +55,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="pb-28 max-w-lg mx-auto">
+    <div className="pb-28 w-full">
       {/* Page Title */}
       <h3 className="text-lg font-medium mb-4">Ask me about your finances</h3>
       
