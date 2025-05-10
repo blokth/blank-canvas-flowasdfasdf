@@ -65,21 +65,25 @@ const PeriodButton: React.FC<PeriodButtonProps> = ({ active, onClick, children }
   </button>
 );
 
-const CustomTooltip = ({ active, payload, showBothSeries }: any) => {
+const CustomTooltip = ({ active, payload, showBothSeries, primaryLabel, secondaryLabel }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-background p-2 border border-border/20 shadow-sm rounded-md">
         {showBothSeries ? (
           <>
             {payload[0]?.value !== undefined && (
-              <p className="text-foreground font-medium text-purple-600">{payload[0].name}: ${payload[0].value.toFixed(2)}</p>
+              <p className="text-foreground font-medium text-purple-600">
+                {primaryLabel}: ${payload[0].value.toLocaleString()}
+              </p>
             )}
             {payload[1]?.value !== undefined && (
-              <p className="text-foreground font-medium text-indigo-400">{payload[1].name}: ${payload[1].value.toFixed(2)}</p>
+              <p className="text-foreground font-medium text-indigo-400">
+                {secondaryLabel}: ${payload[1].value.toLocaleString()}
+              </p>
             )}
           </>
         ) : (
-          <p className="text-foreground font-medium">${payload[0].value.toFixed(2)}</p>
+          <p className="text-foreground font-medium">${payload[0].value.toLocaleString()}</p>
         )}
       </div>
     );
@@ -115,6 +119,13 @@ const StockChart: React.FC<StockChartProps> = ({
     };
   }) : data[activePeriod];
   
+  // Format numbers for the Y-axis
+  const formatYAxisTick = (value: number) => {
+    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
+    return `$${value}`;
+  };
+  
   return (
     <Card className="border-border/20 p-3">
       <div className="flex items-center justify-center mb-4">
@@ -135,7 +146,7 @@ const StockChart: React.FC<StockChartProps> = ({
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={combinedData}
-            margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
+            margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
           >
             <defs>
               <linearGradient id={primaryGradientId} x1="0" y1="0" x2="0" y2="1">
@@ -157,11 +168,41 @@ const StockChart: React.FC<StockChartProps> = ({
               interval="preserveStartEnd"
               minTickGap={30}
             />
+            
+            {/* Primary Y-axis for wealth */}
             <YAxis 
-              hide={true}
+              yAxisId="left"
+              orientation="left"
+              tickLine={false}
+              axisLine={false}
+              tick={{ fontSize: 10, fill: primaryColor }}
+              tickFormatter={formatYAxisTick}
+              width={45}
               domain={['dataMin - 5', 'dataMax + 5']}
+              hide={!showBothSeries}
             />
-            <Tooltip content={<CustomTooltip showBothSeries={showBothSeries} />} />
+            
+            {/* Secondary Y-axis for finance */}
+            {showBothSeries && (
+              <YAxis 
+                yAxisId="right"
+                orientation="right"
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 10, fill: secondaryColor }}
+                tickFormatter={formatYAxisTick}
+                width={45}
+                domain={['dataMin - 5', 'dataMax + 5']}
+              />
+            )}
+            
+            <Tooltip content={
+              <CustomTooltip 
+                showBothSeries={showBothSeries} 
+                primaryLabel={primaryLabel}
+                secondaryLabel={secondaryLabel}
+              />
+            } />
             
             {showBothSeries ? (
               <>
@@ -169,17 +210,19 @@ const StockChart: React.FC<StockChartProps> = ({
                   type="monotone"
                   dataKey={primaryLabel}
                   stroke={primaryColor}
-                  strokeWidth={1.5}
+                  strokeWidth={2}
                   fillOpacity={1}
                   fill={`url(#${primaryGradientId})`}
+                  yAxisId="left"
                 />
                 <Area
                   type="monotone"
                   dataKey={secondaryLabel}
                   stroke={secondaryColor}
-                  strokeWidth={1.5}
+                  strokeWidth={2}
                   fillOpacity={1}
                   fill={`url(#${secondaryGradientId})`}
+                  yAxisId="right"
                 />
                 <Legend 
                   verticalAlign="top" 
@@ -194,9 +237,10 @@ const StockChart: React.FC<StockChartProps> = ({
                 type="monotone"
                 dataKey="value"
                 stroke={primaryColor}
-                strokeWidth={1.5}
+                strokeWidth={2}
                 fillOpacity={1}
                 fill={`url(#${primaryGradientId})`}
+                yAxisId="left"
               />
             )}
           </AreaChart>
