@@ -8,6 +8,10 @@ import AssistantDialog from '../components/Assistant/components/AssistantDialog'
 import ActionPills from '../components/Assistant/components/ActionPills';
 import PersonalFinance from '../components/Dashboard/PersonalFinance';
 import StockChart from '../components/common/StockChart';
+import {
+  ToggleGroup,
+  ToggleGroupItem
+} from "@/components/ui/toggle-group";
 
 // Sample data for chart
 const chartData = [
@@ -133,6 +137,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeVisualization, setActiveVisualization] = useState<VisualizationType>(null);
   const [showFullscreenChart, setShowFullscreenChart] = useState(false);
+  const [activeDataType, setActiveDataType] = useState<'wealth' | 'cash'>('wealth');
 
   // Handle assistant input submission
   const handleSubmit = (e: React.FormEvent) => {
@@ -263,11 +268,32 @@ const Dashboard = () => {
           type="wealth"
         />
         
-        {/* StockChart for both wealth and cash data */}
+        {/* View selector moved outside of StockChart */}
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-sm font-medium">View:</span>
+          <ToggleGroup 
+            type="single" 
+            value={activeDataType} 
+            onValueChange={(value) => {
+              if (value) setActiveDataType(value as 'wealth' | 'cash');
+            }}
+            size="sm"
+          >
+            <ToggleGroupItem value="wealth" className="text-xs px-2 py-1 h-7">
+              Wealth
+            </ToggleGroupItem>
+            <ToggleGroupItem value="cash" className="text-xs px-2 py-1 h-7">
+              Cash
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+        
+        {/* StockChart now receives activeDataType as prop */}
         <div className="mb-6">
           <StockChart 
             data={stockChartData} 
             isPositive={isPositive} 
+            activeDataType={activeDataType}
             cashData={personalFinanceChartData}
             isCashPositive={isPersonalFinancePositive}
           />

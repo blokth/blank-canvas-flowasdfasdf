@@ -9,10 +9,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import {
-  ToggleGroup,
-  ToggleGroupItem
-} from "@/components/ui/toggle-group";
 
 interface DataPoint {
   name: string;
@@ -29,6 +25,7 @@ interface StockChartProps {
     'All': DataPoint[];
   };
   isPositive: boolean;
+  activeDataType: 'wealth' | 'cash';
   cashData?: {
     '1D': DataPoint[];
     '1W': DataPoint[];
@@ -73,12 +70,12 @@ const CustomTooltip = ({ active, payload }: any) => {
 const StockChart: React.FC<StockChartProps> = ({ 
   data, 
   isPositive, 
+  activeDataType,
   cashData, 
   isCashPositive = true 
 }) => {
   const periods = ['1D', '1W', '1M', '3M', '1Y', 'All'] as const;
   const [activePeriod, setActivePeriod] = useState<typeof periods[number]>('1D');
-  const [activeDataType, setActiveDataType] = useState<'wealth' | 'cash'>('wealth');
   
   const gradientId = "stockChartGradient";
   const chartColor = activeDataType === 'wealth' 
@@ -90,29 +87,8 @@ const StockChart: React.FC<StockChartProps> = ({
   return (
     <Card className="border-border/20 p-3">
       <div className="flex flex-col space-y-4">
-        {/* Chart type and view selector in the same row, above the chart */}
-        <div className="flex items-center justify-between">
-          {/* Left side with view selector */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">View:</span>
-            <ToggleGroup 
-              type="single" 
-              value={activeDataType} 
-              onValueChange={(value) => {
-                if (value) setActiveDataType(value as 'wealth' | 'cash');
-              }}
-              size="sm"
-            >
-              <ToggleGroupItem value="wealth" className="text-xs px-2 py-1 h-7">
-                Wealth
-              </ToggleGroupItem>
-              <ToggleGroupItem value="cash" className="text-xs px-2 py-1 h-7">
-                Cash
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
-          
-          {/* Right side with period selector */}
+        {/* Just the period selector now */}
+        <div className="flex justify-end">
           <div className="flex gap-1 p-1 bg-muted/30 rounded-full">
             {periods.map((period) => (
               <PeriodButton
