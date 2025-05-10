@@ -5,6 +5,7 @@ import PortfolioOverview from '../components/Dashboard/PortfolioOverview';
 import DashboardVisualization from '../components/Dashboard/DashboardVisualization';
 import { generateChartData, generatePersonalFinanceData } from '../utils/chartDataGenerators';
 import { useMCPConnection } from '../hooks/useMCPConnection';
+import MinimalChat from '../components/Chat/MinimalChat';
 
 const Dashboard = () => {
   // Memoize chart data to prevent regeneration on every render
@@ -82,6 +83,9 @@ const Dashboard = () => {
         onSubmit={handleAssistantSubmit}
         isLoading={isLoading}
       />
+      
+      {/* Chat interface outside of any cards */}
+      <MinimalChat />
     </div>
   );
 };
