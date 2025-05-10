@@ -64,14 +64,12 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
   };
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 max-w-lg mx-auto">
-      <AssistantInput
-        query={query}
-        setQuery={setQuery}
-        onSubmit={handleSubmit}
-        isLoading={isLoading}
-      />
-    </div>
+    <AssistantInput
+      query={query}
+      setQuery={setQuery}
+      onSubmit={handleSubmit}
+      isLoading={isLoading}
+    />
   );
 };
 

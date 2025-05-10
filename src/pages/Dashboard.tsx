@@ -30,7 +30,7 @@ const Dashboard = () => {
   const [activeDataType, setActiveDataType] = useState<'wealth' | 'cash'>('wealth');
 
   return (
-    <div className="pb-16 max-w-lg mx-auto">
+    <div className="pb-28 max-w-lg mx-auto"> {/* Increased bottom padding to make room for assistant */}
       {/* Portfolio Overview with Tabs */}
       <PortfolioOverview 
         stockChartData={stockChartData}
@@ -60,11 +60,13 @@ const Dashboard = () => {
         setShowFullscreenChart={setShowFullscreenChart}
       />
       
-      {/* Assistant Input */}
-      <DashboardAssistant
-        setActiveVisualization={setActiveVisualization}
-        setResponse={setResponse}
-      />
+      {/* Assistant Input - now positioned at the bottom */}
+      <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto">
+        <DashboardAssistant
+          setActiveVisualization={setActiveVisualization}
+          setResponse={setResponse}
+        />
+      </div>
     </div>
   );
 };
