@@ -90,8 +90,9 @@ const StockChart: React.FC<StockChartProps> = ({
   return (
     <Card className="border-border/20 p-3">
       <div className="flex flex-col space-y-2 mb-4">
-        {/* Chart title and view selector in the same row */}
+        {/* Chart controls row with type selector and period selector */}
         <div className="flex items-center justify-between">
+          {/* Type selector - now all in one row */}
           <div className="flex items-center space-x-2">
             <span className="text-sm font-medium">View:</span>
             <ToggleGroup 
