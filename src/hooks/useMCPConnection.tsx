@@ -19,16 +19,16 @@ export const useMCPConnection = () => {
   const [visualizationType, setVisualizationType] = useState<VisualizationType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Function to handle streamed responses from the server
-  const handleStreamedResponse = async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
+  // Function to handle streamed responses from the server without awaiting the reader
+  const handleStreamedResponse = (reader: ReadableStreamDefaultReader<Uint8Array>) => {
     const decoder = new TextDecoder();
     let completeResponse = '';
     let partialResponse = '';
     
-    try {
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
+    // Process chunks without awaiting
+    function processNextChunk() {
+      reader.read().then(({ value, done }) => {
+        if (done) return;
         
         const chunk = decoder.decode(value, { stream: true });
         completeResponse += chunk;
@@ -70,31 +70,18 @@ export const useMCPConnection = () => {
         if (!response && completeResponse.trim()) {
           setResponse(completeResponse.trim());
         }
-      }
-      
-      // Process any remaining partial response
-      if (partialResponse.trim()) {
-        try {
-          const jsonData = JSON.parse(partialResponse);
-          // Update final response state with content
-          if (jsonData.content) {
-            setResponse(jsonData.content);
-          }
-          // Handle visualization type if provided
-          if (jsonData.visualization) {
-            setVisualizationType(jsonData.visualization);
-          }
-        } catch (e) {
-          // Use as plain text if not JSON
-          setResponse(prev => (prev ? `${prev}\n${partialResponse}` : partialResponse));
-        }
-      }
-      
-      return completeResponse;
-    } catch (error) {
-      console.error('Error reading stream:', error);
-      throw error;
+        
+        // Continue processing next chunk
+        processNextChunk();
+      }).catch(error => {
+        console.error('Error reading stream:', error);
+      });
     }
+    
+    // Start processing chunks
+    processNextChunk();
+    
+    return completeResponse;
   };
   
   // Function to send messages to the MCP server
@@ -123,8 +110,7 @@ export const useMCPConnection = () => {
       // Check if the response body is a stream
       if (response.body) {
         const reader = response.body.getReader();
-        const result = await handleStreamedResponse(reader);
-        console.log('Completed streamed response:', result);
+        handleStreamedResponse(reader);
         return true;
       } else {
         // Fallback for non-streaming responses
