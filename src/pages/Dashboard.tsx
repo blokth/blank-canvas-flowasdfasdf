@@ -28,7 +28,6 @@ const Dashboard = () => {
   const [activeVisualization, setActiveVisualization] = useState<VisualizationType>(null);
   const [showFullscreenChart, setShowFullscreenChart] = useState(false);
   const [activeDataType, setActiveDataType] = useState<'wealth' | 'cash'>('wealth');
-  const [isVisualizationFullscreen, setIsVisualizationFullscreen] = useState(false);
 
   // Handle template selection from DashboardActions
   const handleTemplateSelection = (template: string) => {
@@ -44,9 +43,9 @@ const Dashboard = () => {
   };
 
   // Handle assistant submission with fullscreen toggle
-  const handleAssistantSubmit = (fullscreen: boolean = false) => {
-    if (fullscreen) {
-      setIsVisualizationFullscreen(true);
+  const handleAssistantSubmit = () => {
+    if (activeVisualization) {
+      setShowFullscreenChart(true);
     }
   };
 
@@ -79,6 +78,7 @@ const Dashboard = () => {
         activeVisualization={activeVisualization}
         showFullscreenChart={showFullscreenChart}
         setShowFullscreenChart={setShowFullscreenChart}
+        query={query}
       />
       
       {/* Assistant Input - now positioned at the bottom with notion-like selectors */}

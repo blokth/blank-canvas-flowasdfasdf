@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Maximize, Minimize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import VisualizationManager, { VisualizationType } from '../Assistant/components/VisualizationManager';
@@ -11,20 +11,32 @@ interface DashboardVisualizationProps {
   activeVisualization: VisualizationType;
   showFullscreenChart: boolean;
   setShowFullscreenChart: (value: boolean) => void;
+  query?: string;
 }
 
 const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   response,
   activeVisualization,
   showFullscreenChart,
-  setShowFullscreenChart
+  setShowFullscreenChart,
+  query
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  // Effect to handle automatic fullscreen when showFullscreenChart changes
+  useEffect(() => {
+    if (showFullscreenChart) {
+      setIsFullscreen(true);
+    }
+  }, [showFullscreenChart]);
   
   if (!response) return null;
   
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
+    if (!isFullscreen) {
+      setShowFullscreenChart(true);
+    }
   };
   
   return (
@@ -45,22 +57,42 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
       </div>
       
       {/* Display visualization if available */}
-      <VisualizationDisplay
-        response={response}
-        visualization={<VisualizationManager activeVisualization={activeVisualization} />}
-        onClick={() => activeVisualization && setShowFullscreenChart(true)}
-        showExpandHint={!!activeVisualization}
-        minimal={true}
-      />
+      <div className={`${isFullscreen ? 'h-[calc(100%-80px)]' : ''}`}>
+        <VisualizationDisplay
+          response={response}
+          visualization={<VisualizationManager activeVisualization={activeVisualization} />}
+          onClick={() => activeVisualization && setShowFullscreenChart(true)}
+          showExpandHint={!!activeVisualization && !isFullscreen}
+          minimal={true}
+        />
+      </div>
+      
+      {/* Display query at the bottom of fullscreen view */}
+      {isFullscreen && query && (
+        <div className="absolute bottom-4 left-4 right-4 bg-muted/30 p-3 rounded-lg border border-border/30">
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium">Query:</span> {query}
+          </p>
+        </div>
+      )}
       
       {/* Fullscreen chart dialog */}
       <AssistantDialog
-        open={showFullscreenChart}
+        open={showFullscreenChart && !isFullscreen}
         onOpenChange={setShowFullscreenChart}
         title={response || ""}
       >
         <div className="p-4">
           <VisualizationManager activeVisualization={activeVisualization} />
+          
+          {/* Display query at the bottom of dialog */}
+          {query && (
+            <div className="mt-4 bg-muted/30 p-3 rounded-lg border border-border/30">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium">Query:</span> {query}
+              </p>
+            </div>
+          )}
         </div>
       </AssistantDialog>
     </div>
