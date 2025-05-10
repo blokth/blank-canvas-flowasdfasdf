@@ -75,30 +75,32 @@ const InputArea: React.FC<InputAreaProps> = ({
     handleKeyDown(e);
   };
   
-  // Show suggestions on click
-  const handleInputClick = () => {
+  // Show suggestions when clicking on template fields
+  const handleInputClick = (e: React.MouseEvent<HTMLTextAreaElement>) => {
     if (textareaRef.current) {
       // Update cursor position
-      setCursorPosition(textareaRef.current.selectionStart);
-      
-      // Show command suggestions by simulating a slash command
-      const slashCommand = '/';
       const cursorPos = textareaRef.current.selectionStart;
+      setCursorPosition(cursorPos);
       
-      // Only show suggestions if they're not already showing
-      if (!showSuggestions) {
-        const newQuery = query.substring(0, cursorPos) + slashCommand + query.substring(cursorPos);
-        setQuery(newQuery);
+      // Check if click is within a template field
+      const text = query;
+      const templateRegex = /\{\{(stock|timeframe|sector)\}\}/g;
+      let match;
+      
+      while ((match = templateRegex.exec(text)) !== null) {
+        const start = match.index;
+        const end = start + match[0].length;
         
-        // Position cursor after the slash
-        setTimeout(() => {
-          if (textareaRef.current) {
-            const newPosition = cursorPos + 1;
-            textareaRef.current.selectionStart = newPosition;
-            textareaRef.current.selectionEnd = newPosition;
-            setCursorPosition(newPosition);
-          }
-        }, 0);
+        if (cursorPos >= start && cursorPos <= end) {
+          // Clicked on a template field, show suggestions
+          // No need to insert slash, just activate the suggestion for the field type
+          const fieldType = match[1] as 'stock' | 'timeframe' | 'sector';
+          
+          // We don't modify the query here, just trigger suggestions
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(start, end);
+          return;
+        }
       }
     }
   };
@@ -138,7 +140,8 @@ const InputArea: React.FC<InputAreaProps> = ({
       parts.push(
         <span 
           key={`field-${match.index}`} 
-          className="bg-primary/20 text-primary rounded px-1"
+          className="bg-primary/20 text-primary rounded px-1 cursor-pointer"
+          onClick={() => handleTemplateFieldClick(match[0], match.index, match.index + match[0].length)}
         >
           {match[0]}
         </span>
@@ -157,6 +160,41 @@ const InputArea: React.FC<InputAreaProps> = ({
     }
     
     return parts;
+  };
+
+  // Handle clicks on template fields
+  const handleTemplateFieldClick = (field: string, startPos: number, endPos: number) => {
+    if (textareaRef.current) {
+      // Focus the textarea
+      textareaRef.current.focus();
+      
+      // Select the field
+      textareaRef.current.setSelectionRange(startPos, endPos);
+      setCursorPosition(startPos);
+      
+      // Extract field type from {{field}}
+      const fieldType = field.match(/\{\{(stock|timeframe|sector)\}\}/)?.[1] as 'stock' | 'timeframe' | 'sector' | undefined;
+      
+      if (fieldType) {
+        // Add a slash command before the cursor to trigger suggestions
+        const textBeforeCursor = query.substring(0, startPos);
+        const textAfterCursor = query.substring(startPos);
+        const slashCommand = '/';
+        
+        const newQuery = textBeforeCursor + slashCommand + textAfterCursor;
+        setQuery(newQuery);
+        
+        // Reposition cursor after the slash
+        setTimeout(() => {
+          if (textareaRef.current) {
+            const newPosition = startPos + 1;
+            textareaRef.current.selectionStart = newPosition;
+            textareaRef.current.selectionEnd = newPosition;
+            setCursorPosition(newPosition);
+          }
+        }, 0);
+      }
+    }
   };
   
   return (
