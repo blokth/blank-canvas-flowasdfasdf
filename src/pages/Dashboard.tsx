@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import PortfolioSummary from '../components/Dashboard/PortfolioSummary';
 import PerformanceChart from '../components/Dashboard/PerformanceChart';
 import StockList from '../components/Stocks/StockList';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PersonalFinance from '../components/Dashboard/PersonalFinance';
 
 // Sample data for chart
 const chartData = [
@@ -29,20 +31,35 @@ const Dashboard = () => {
   const isPositive = portfolioChangePercent >= 0;
 
   return (
-    <div className="pb-16">
+    <div className="pb-16 flex flex-col items-center">
       <h1 className="text-2xl font-bold mb-6">Your Portfolio</h1>
       
-      <PortfolioSummary 
-        totalValue={portfolioValue}
-        changePercentage={portfolioChangePercent}
-        changeValue={portfolioChange}
-      />
-      
-      <PerformanceChart data={chartData} isPositive={isPositive} />
-      
-      <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">Top Performers</h2>
-        <StockList />
+      <div className="w-full max-w-md">
+        <Tabs defaultValue="portfolio" className="w-full mb-6">
+          <TabsList className="w-full grid grid-cols-2">
+            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+            <TabsTrigger value="personal">Personal Finance</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="portfolio" className="mt-4">
+            <PortfolioSummary 
+              totalValue={portfolioValue}
+              changePercentage={portfolioChangePercent}
+              changeValue={portfolioChange}
+            />
+            
+            <PerformanceChart data={chartData} isPositive={isPositive} />
+            
+            <div className="mt-8">
+              <h2 className="text-xl font-bold mb-4">Top Performers</h2>
+              <StockList />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="personal" className="mt-4">
+            <PersonalFinance />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
