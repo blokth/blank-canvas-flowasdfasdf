@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 import PortfolioOverview from '../components/Dashboard/PortfolioOverview';
 import DashboardVisualization from '../components/Dashboard/DashboardVisualization';
@@ -8,9 +8,9 @@ import { generateChartData, generatePersonalFinanceData } from '../utils/chartDa
 import { useMCPConnection } from '../hooks/useMCPConnection';
 
 const Dashboard = () => {
-  // Generate chart data
-  const stockChartData = generateChartData();
-  const personalFinanceChartData = generatePersonalFinanceData();
+  // Memoize chart data to prevent regeneration on every render
+  const stockChartData = useMemo(() => generateChartData(), []);
+  const personalFinanceChartData = useMemo(() => generatePersonalFinanceData(), []);
 
   // Portfolio values
   const portfolioValue = 10800;

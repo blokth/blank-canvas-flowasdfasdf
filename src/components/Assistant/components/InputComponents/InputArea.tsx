@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
@@ -36,17 +36,17 @@ const InputArea: React.FC<InputAreaProps> = ({
   templateField
 }) => {
   // Track currently selected suggestion
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   // Track if we're in transition state
-  const [isInTransition, setIsInTransition] = React.useState(false);
+  const [isInTransition, setIsInTransition] = useState(false);
   
   // Reset selected index when suggestions change
-  React.useEffect(() => {
+  useEffect(() => {
     setSelectedIndex(0);
   }, [filteredSuggestions]);
   
-  // Form submit handler with animation protection
-  const handleFormSubmit = (e: React.FormEvent) => {
+  // Form submit handler with animation protection - memoize to prevent rerenders
+  const handleFormSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     
     // Prevent rapid repeated submissions 
@@ -59,10 +59,10 @@ const InputArea: React.FC<InputAreaProps> = ({
     setTimeout(() => {
       setIsInTransition(false);
     }, 1100);
-  };
+  }, [handleSubmit, isInTransition]);
   
-  // Enhanced keyboard navigation
-  const handleKeyDownWithSuggestion = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  // Enhanced keyboard navigation - memoize to prevent rerenders
+  const handleKeyDownWithSuggestion = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (showSuggestions && filteredSuggestions.length > 0) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
@@ -84,7 +84,7 @@ const InputArea: React.FC<InputAreaProps> = ({
     
     // Fall back to default handling if no suggestions or other key
     handleKeyDown(e);
-  };
+  }, [showSuggestions, filteredSuggestions, selectedIndex, handleSuggestionSelect, handleKeyDown]);
   
   return (
     <form onSubmit={handleFormSubmit} className="relative">
@@ -127,4 +127,5 @@ const InputArea: React.FC<InputAreaProps> = ({
   );
 };
 
-export default InputArea;
+// Memoize the component to prevent unnecessary rerenders
+export default React.memo(InputArea);

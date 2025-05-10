@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 import ActionPills from './ActionPills';
 import AssistantInput from './AssistantInput';
 
@@ -62,7 +62,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     });
     
     setMessages(newMessages);
-  }, [chunks, query, messages]);
+  }, [chunks, query]);  // Remove messages dependency to prevent infinite loops
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -71,8 +71,8 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     }
   }, [messages, isLoading]);
 
-  // Handle pill click
-  const handlePillClick = (templateQuery: string) => {
+  // Handle pill click - memoize to prevent rerenders
+  const handlePillClick = useCallback((templateQuery: string) => {
     setQuery(templateQuery);
     
     // Focus the input element if possible
@@ -82,7 +82,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
         textareaElement.focus();
       }
     }, 0);
-  };
+  }, [setQuery]);
 
   return (
     <div className="flex flex-col h-full border border-border/20 rounded-xl bg-background/80 shadow-sm">
@@ -145,4 +145,5 @@ const ConversationView: React.FC<ConversationViewProps> = ({
   );
 };
 
-export default ConversationView;
+// Memoize the component to avoid unnecessary rerenders
+export default memo(ConversationView);
