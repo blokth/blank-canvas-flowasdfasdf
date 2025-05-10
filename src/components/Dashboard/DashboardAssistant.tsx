@@ -23,15 +23,29 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
   const query = externalQuery !== undefined ? externalQuery : internalQuery;
   const setQuery = setExternalQuery !== undefined ? setExternalQuery : setInternalQuery;
 
-  // Process query to replace any remaining placeholders
+  // Process query to extract keywords
   const processQuery = (rawQuery: string) => {
-    // Replace any placeholder that wasn't filled
-    let processed = rawQuery
-      .replace(/{{stock}}/g, "AAPL")
-      .replace(/{{timeframe}}/g, "3 months")
-      .replace(/{{sector}}/g, "Technology");
+    // Extract stock, timeframe, and sector keywords
+    const stockMatch = /stock:(\w+)/g.exec(rawQuery);
+    const timeframeMatch = /timeframe:(\w+)/g.exec(rawQuery);
+    const sectorMatch = /sector:(\w+)/g.exec(rawQuery);
     
-    return processed;
+    const extractedStock = stockMatch ? stockMatch[1] : "AAPL";
+    const extractedTimeframe = timeframeMatch ? timeframeMatch[1] : "3m";
+    const extractedSector = sectorMatch ? sectorMatch[1] : "Technology";
+    
+    // Create a processed query for display in the UI
+    const processedQuery = rawQuery
+      .replace(/stock:(\w+)/g, extractedStock)
+      .replace(/timeframe:(\w+)/g, extractedTimeframe)
+      .replace(/sector:(\w+)/g, extractedSector);
+    
+    return {
+      processedQuery,
+      stock: extractedStock,
+      timeframe: extractedTimeframe,
+      sector: extractedSector
+    };
   };
 
   // Handle assistant input submission
@@ -39,47 +53,45 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
     e.preventDefault();
     if (!query.trim()) return;
     
-    // Process any remaining placeholders before submitting
-    const processedQuery = processQuery(query);
+    // Process keywords in the query
+    const { processedQuery, stock, timeframe, sector } = processQuery(query);
     
     setIsLoading(true);
     
-    // Simulate AI response delay
+    // Determine response based on keywords and query content
     setTimeout(() => {
-      // Demo responses based on certain keywords
+      console.log(`Processed query with: Stock=${stock}, Timeframe=${timeframe}, Sector=${sector}`);
+      
+      // Custom responses based on keywords in the query
       if (processedQuery.toLowerCase().includes('portfolio') && processedQuery.toLowerCase().includes('breakdown')) {
         setActiveVisualization('portfolio-breakdown');
-        setResponse("Here's your portfolio breakdown by sector:");
+        setResponse(`Here's your portfolio breakdown by sector (focusing on ${sector}):`);
+      } else if (processedQuery.toLowerCase().includes('compare')) {
+        setActiveVisualization('stock-comparison');
+        setResponse(`Comparing ${stock} with other stocks in your portfolio:`);
       } else if (processedQuery.toLowerCase().includes('performance') || processedQuery.toLowerCase().includes('trend')) {
         setActiveVisualization('performance-trend');
-        setResponse("Here's your portfolio performance over time:");
-      } else if (processedQuery.toLowerCase().includes('compare') || processedQuery.toLowerCase().includes('vs')) {
-        setActiveVisualization('stock-comparison');
-        setResponse("Here's how your selected stocks compare:");
-      } else if (processedQuery.toLowerCase().includes('expense') || processedQuery.toLowerCase().includes('spending')) {
-        setActiveVisualization('expense-categories');
-        setResponse("Here's a breakdown of your spending by category:");
-      } else if (processedQuery.toLowerCase().includes('income') || processedQuery.toLowerCase().includes('earnings')) {
-        setActiveVisualization('income-sources');
-        setResponse("Here's a breakdown of your income sources:");
+        setResponse(`Here's ${stock}'s performance over the past ${timeframe}:`);
       } else if (processedQuery.toLowerCase().includes('forecast') || processedQuery.toLowerCase().includes('prediction')) {
         setActiveVisualization('forecast');
-        setResponse("Based on your current financial patterns, here's a 6-month forecast:");
-      } else if (processedQuery.toLowerCase().includes('wealth') || processedQuery.toLowerCase().includes('overview')) {
-        setActiveVisualization('wealth-overview');
-        setResponse("Here's an overview of your total wealth:");
-      } else if (processedQuery.toLowerCase().includes('cash') || processedQuery.toLowerCase().includes('management')) {
-        setActiveVisualization('cash-management');
-        setResponse("Here's a summary of your cash accounts:");
-      } else if (processedQuery.toLowerCase().includes('investment') || processedQuery.toLowerCase().includes('allocation')) {
-        setActiveVisualization('investment-allocation');
-        setResponse("Here's how your investments are allocated:");
-      } else if (processedQuery.toLowerCase().includes('savings') || processedQuery.toLowerCase().includes('goals')) {
-        setActiveVisualization('savings-goals');
-        setResponse("Here's your progress towards savings goals:");
+        setResponse(`Based on current market trends, here's a ${timeframe} forecast for ${stock}:`);
+      } else if (processedQuery.toLowerCase().includes('expense') || processedQuery.toLowerCase().includes('spending')) {
+        setActiveVisualization('expense-categories');
+        setResponse(`Here's a breakdown of your spending by category for the past ${timeframe}:`);
+      } else if (processedQuery.toLowerCase().includes('income') || processedQuery.toLowerCase().includes('earnings')) {
+        setActiveVisualization('income-sources');
+        setResponse(`Here's a breakdown of your income sources over the past ${timeframe}:`);
+      } else if (stock && !processedQuery.toLowerCase().includes('compare')) {
+        // Default stock view if stock is mentioned
+        setActiveVisualization('performance-trend');
+        setResponse(`Here's the performance data for ${stock} over ${timeframe}:`);
+      } else if (sector && !processedQuery.toLowerCase().includes('portfolio')) {
+        // Sector view
+        setActiveVisualization('portfolio-breakdown');
+        setResponse(`Here's an overview of the ${sector} sector performance:`);
       } else {
         setActiveVisualization(null);
-        setResponse("I can help you analyze your finances. Try asking about portfolio breakdowns, performance trends, stock comparisons, expense categories, income sources, or financial forecasts.");
+        setResponse("I can help you analyze your finances. Try using keywords like 'stock:AAPL', 'timeframe:1m', or 'sector:Technology' in your queries.");
       }
       setIsLoading(false);
     }, 1000);
