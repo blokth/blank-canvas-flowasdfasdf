@@ -68,9 +68,17 @@ export const useMessageHandler = (chunks: string[] = []) => {
     }
   };
 
+  // Process query to replace patterns with just values
+  const processQuery = (query: string): string => {
+    return query.replace(/(stock:|timeframe:|sector:)(\w+)/g, "$2");
+  };
+
   // Handle form submission to add user message
   const addUserMessage = (query: string) => {
     if (!query.trim()) return;
+    
+    // Process the query to replace patterns with just values
+    const processedQuery = processQuery(query);
     
     // Mark as in submission to prevent processing chunks temporarily
     inSubmissionRef.current = true;
@@ -83,7 +91,7 @@ export const useMessageHandler = (chunks: string[] = []) => {
     // Add user message to the conversation with unique ID
     setMessages(prev => [...prev, { 
       role: 'user', 
-      content: query,
+      content: processedQuery,
       timestamp: new Date(),
       id: uniqueId
     }]);

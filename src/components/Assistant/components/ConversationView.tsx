@@ -38,15 +38,20 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     }
   };
 
+  // Process query to replace patterns with just values
+  const processQuery = (q: string): string => {
+    return q.replace(/(stock:|timeframe:|sector:)(\w+)/g, "$2");
+  };
+
   // Watch loading state changes
   useEffect(() => {
     handleLoadingChange(isLoading);
-  }, [isLoading]);
+  }, [isLoading, handleLoadingChange]);
 
   // Process incoming chunks
   useEffect(() => {
     processChunks();
-  }, [chunks]);
+  }, [chunks, processChunks]);
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
@@ -54,11 +59,13 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     
     if (!query.trim() || isLoading) return;
     
-    // Add user message to the conversation
-    addUserMessage(query);
+    // Process the query to replace patterns with just values
+    const processedQuery = processQuery(query);
     
-    // First clear the query input and then call the provided onSubmit
-    const currentQuery = query.trim();
+    // Add user message to the conversation with processed query
+    addUserMessage(processedQuery);
+    
+    // Clear the query input
     setQuery('');
     
     // Use setTimeout to ensure React has time to process state updates

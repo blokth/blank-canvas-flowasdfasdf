@@ -1,5 +1,5 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import InputArea from './InputComponents/InputArea';
 import { useSuggestions } from './InputComponents/useSuggestions';
 import { useInputHandlers } from './InputComponents/useInputHandlers';
@@ -21,6 +21,31 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
   
+  // Process query for display (show only values) while maintaining original for submission
+  const processedQuery = useCallback((q: string) => {
+    // Replace patterns like "stock:TSLA" with just "TSLA" for display and processing
+    return q.replace(/(stock:|timeframe:|sector:)(\w+)/g, "$2");
+  }, []);
+  
+  // Submit handler that processes the query
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    const processedQuery = query.replace(/(stock:|timeframe:|sector:)(\w+)/g, "$2");
+    
+    // Create a new form event to pass to the onSubmit handler
+    const newEvent = { ...e, preventDefault: () => {} };
+    
+    // Use the processed query text for the actual submission
+    const originalQuery = query;
+    setQuery(processedQuery);
+    
+    // Use setTimeout to ensure React has time to process state updates
+    setTimeout(() => {
+      onSubmit(newEvent);
+      // If needed, we can restore the original query format after submission
+    }, 0);
+  }, [query, setQuery, onSubmit]);
+  
   // Use the extracted suggestions hook
   const { suggestionType, searchTerm, templateField } = useSuggestions({
     query,
@@ -38,7 +63,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   } = useInputHandlers({
     query,
     setQuery,
-    onSubmit,
+    onSubmit: handleSubmit, // Use our custom submit handler
     textareaRef,
     isLoading,
     showSuggestions,
@@ -59,7 +84,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
           query={query}
           setQuery={setQuery}
           isLoading={isLoading}
-          handleSubmit={onSubmit}
+          handleSubmit={handleSubmit} // Use our custom submit handler
           handleKeyDown={handleKeyDown}
           handleChange={handleChange}
           showSuggestions={showSuggestions}
