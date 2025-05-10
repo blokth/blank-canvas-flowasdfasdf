@@ -2,9 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 import PortfolioOverview from '../components/Dashboard/PortfolioOverview';
-import DashboardActions from '../components/Dashboard/DashboardActions';
 import DashboardVisualization from '../components/Dashboard/DashboardVisualization';
-import AssistantInput from '../components/Assistant/components/AssistantInput';
 import ConversationView from '../components/Assistant/components/ConversationView';
 import { generateChartData, generatePersonalFinanceData } from '../utils/chartDataGenerators';
 import { useMCPConnection } from '../hooks/useMCPConnection';
@@ -41,13 +39,6 @@ const Dashboard = () => {
   
   const [activeVisualization, setActiveVisualization] = useState<VisualizationType>(null);
 
-  // Log chunks when they update
-  useEffect(() => {
-    if (chunks && chunks.length > 0) {
-      console.log('Current chunks in state:', chunks);
-    }
-  }, [chunks]);
-
   // Update active visualization when MCP provides one
   useEffect(() => {
     if (visualizationType) {
@@ -55,24 +46,12 @@ const Dashboard = () => {
     }
   }, [visualizationType]);
 
-  // Handle template selection from DashboardActions
-  const handleTemplateSelection = (template: string) => {
-    setQuery(template);
-    
-    // Focus the input element
-    const inputElement = document.querySelector('textarea');
-    if (inputElement) {
-      setTimeout(() => {
-        inputElement.focus();
-      }, 0);
-    }
-  };
-
-  // Handle assistant submission without fullscreen toggle
+  // Handle assistant submission
   const handleAssistantSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    sendMessage(query);
-    // Removed the automatic fullscreen behavior
+    if (query.trim()) {
+      sendMessage(query);
+    }
   };
 
   return (
@@ -91,18 +70,14 @@ const Dashboard = () => {
         setActiveDataType={setActiveDataType}
       />
       
-      {/* Action Pills with Selection Templates */}
-      <DashboardActions 
-        setQuery={handleTemplateSelection}
-        setActiveVisualization={setVisualizationType}
-        setResponse={setResponse}
-      />
-      
-      {/* Conversation View (including streaming chunks) */}
-      <div className="mt-4">
+      {/* Chat Experience (with integrated pills and input) */}
+      <div className="mt-4 mb-4">
         <ConversationView
           chunks={chunks}
           isLoading={isLoading}
+          query={query}
+          setQuery={setQuery}
+          onSubmit={handleAssistantSubmit}
         />
       </div>
       
@@ -110,27 +85,13 @@ const Dashboard = () => {
       <DashboardVisualization
         response={response}
         activeVisualization={activeVisualization}
-        showFullscreenChart={false} // Always false to disable fullscreen
-        setShowFullscreenChart={() => {}} // Empty function as we're not using fullscreen
+        showFullscreenChart={false}
+        setShowFullscreenChart={() => {}}
         query={query}
         setQuery={setQuery}
         onSubmit={handleAssistantSubmit}
         isLoading={isLoading}
       />
-      
-      {/* Fixed position input at the bottom */}
-      <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto">
-        <div className="bg-background rounded-xl shadow-sm">
-          <AssistantInput
-            query={query}
-            setQuery={setQuery}
-            onSubmit={() => {
-              handleAssistantSubmit({ preventDefault: () => {} } as React.FormEvent);
-            }}
-            isLoading={isLoading}
-          />
-        </div>
-      </div>
     </div>
   );
 };
