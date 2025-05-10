@@ -58,7 +58,7 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
     
     const timeout = setTimeout(() => {
       setIsTransitioning(false);
-    }, 1100); // slightly longer than animation duration to ensure it completes
+    }, 550); // Changed from 1100ms to 550ms (slightly longer than animation duration to ensure it completes)
     
     return () => clearTimeout(timeout);
   }, [isFullscreen]);
@@ -94,7 +94,7 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
       )}
       
       <div 
-        className={`transition-all duration-1000 ease-in-out will-change-transform will-change-opacity
+        className={`transition-all duration-500 ease-in-out will-change-transform will-change-opacity
         ${isFullscreen 
           ? 'fixed inset-0 z-50 bg-background p-4 scale-100 opacity-100' 
           : 'mb-20 scale-100 opacity-100 transform translate-y-0'}`}
@@ -123,7 +123,7 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
         
         {/* Display visualization if available */}
         <div 
-          className={`transition-all duration-1000 ${isFullscreen ? 'h-[calc(100%-120px)]' : ''}`}
+          className={`transition-all duration-500 ${isFullscreen ? 'h-[calc(100%-120px)]' : ''}`}
           style={{ contain: 'paint layout' }} // Optimize rendering performance
         >
           <VisualizationDisplay

@@ -63,7 +63,7 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
     // Reset transition state after animation would complete
     setTimeout(() => {
       setIsInTransition(false);
-    }, 1100); // slightly longer than animation duration
+    }, 550); // Changed from 1100ms to 550ms (slightly longer than animation duration)
   };
 
   return (
