@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 import PortfolioOverview from '../components/Dashboard/PortfolioOverview';
@@ -7,7 +6,6 @@ import { generateChartData, generatePersonalFinanceData } from '../utils/chartDa
 import { useMCPConnection } from '../hooks/useMCPConnection';
 import StockList from '../components/Stocks/StockList';
 import MinimalChat from '../components/Chat/MinimalChat';
-
 const Dashboard = () => {
   // Memoize chart data to prevent regeneration on every render
   const stockChartData = useMemo(() => generateChartData(), []);
@@ -17,7 +15,6 @@ const Dashboard = () => {
   const portfolioValue = 10800;
   const portfolioChange = 800;
   const portfolioChangePercent = 8.0;
-  
   const personalFinanceValue = 5350;
   const personalFinanceChange = 350;
   const personalFinanceChangePercent = 7.0;
@@ -28,15 +25,14 @@ const Dashboard = () => {
   const [showFullscreenChart, setShowFullscreenChart] = useState(false);
 
   // MCP connection using the updated hook
-  const { 
-    response, 
-    visualizationType, 
-    isLoading, 
+  const {
+    response,
+    visualizationType,
+    isLoading,
     sendMessage,
     setResponse,
     setVisualizationType
   } = useMCPConnection();
-  
   const [activeVisualization, setActiveVisualization] = useState<VisualizationType>(null);
 
   // Update active visualization when MCP provides one
@@ -53,41 +49,19 @@ const Dashboard = () => {
       sendMessage(query);
     }
   };
-
-  return (
-    <div className="pb-28 w-full">
+  return <div className="pb-28 w-full">
       {/* Page Title */}
-      <h3 className="text-lg font-medium mb-4">Financial Overview</h3>
+      
       
       {/* Portfolio Overview with Tabs */}
-      <PortfolioOverview 
-        stockChartData={stockChartData}
-        personalFinanceChartData={personalFinanceChartData}
-        portfolioValue={portfolioValue}
-        portfolioChange={portfolioChange}
-        portfolioChangePercent={portfolioChangePercent}
-        personalFinanceValue={personalFinanceValue}
-        personalFinanceChange={personalFinanceChange}
-        personalFinanceChangePercent={personalFinanceChangePercent}
-        activeDataType={activeDataType}
-        setActiveDataType={setActiveDataType}
-      />
+      <PortfolioOverview stockChartData={stockChartData} personalFinanceChartData={personalFinanceChartData} portfolioValue={portfolioValue} portfolioChange={portfolioChange} portfolioChangePercent={portfolioChangePercent} personalFinanceValue={personalFinanceValue} personalFinanceChange={personalFinanceChange} personalFinanceChangePercent={personalFinanceChangePercent} activeDataType={activeDataType} setActiveDataType={setActiveDataType} />
       
       {/* Visualization Display */}
-      <DashboardVisualization
-        response={response}
-        activeVisualization={activeVisualization}
-        showFullscreenChart={false}
-        setShowFullscreenChart={() => {}}
-        query={query}
-        setQuery={setQuery}
-        onSubmit={handleAssistantSubmit}
-        isLoading={isLoading}
-      />
+      <DashboardVisualization response={response} activeVisualization={activeVisualization} showFullscreenChart={false} setShowFullscreenChart={() => {}} query={query} setQuery={setQuery} onSubmit={handleAssistantSubmit} isLoading={isLoading} />
       
       {/* Stocks List */}
       <div className="mt-6 mb-6">
-        <h3 className="text-lg font-medium mb-4">Your Stocks</h3>
+        
         <StockList />
       </div>
       
@@ -95,8 +69,6 @@ const Dashboard = () => {
       <div className="mt-8 mb-20">
         <MinimalChat />
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;
