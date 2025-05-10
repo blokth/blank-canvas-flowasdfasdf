@@ -89,11 +89,11 @@ const StockChart: React.FC<StockChartProps> = ({
   
   return (
     <Card className="border-border/20 p-3">
-      <div className="flex flex-col space-y-2 mb-4">
-        {/* Chart controls row with type selector and period selector */}
+      <div className="flex flex-col space-y-4">
+        {/* Chart type and view selector in the same row, above the chart */}
         <div className="flex items-center justify-between">
-          {/* Type selector - now all in one row */}
-          <div className="flex items-center space-x-2">
+          {/* Left side with view selector */}
+          <div className="flex items-center gap-2">
             <span className="text-sm font-medium">View:</span>
             <ToggleGroup 
               type="single" 
@@ -111,8 +111,8 @@ const StockChart: React.FC<StockChartProps> = ({
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
-        
-          {/* Period selector buttons */}
+          
+          {/* Right side with period selector */}
           <div className="flex gap-1 p-1 bg-muted/30 rounded-full">
             {periods.map((period) => (
               <PeriodButton
@@ -125,43 +125,43 @@ const StockChart: React.FC<StockChartProps> = ({
             ))}
           </div>
         </div>
-      </div>
-      
-      <div className="h-56">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={activeData[activePeriod]}
-            margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
-          >
-            <defs>
-              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={chartColor} stopOpacity={0.2} />
-                <stop offset="95%" stopColor={chartColor} stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <XAxis 
-              dataKey="name"
-              tickLine={false}
-              axisLine={false}
-              tick={{ fontSize: 10, fill: '#8E9196' }}
-              interval="preserveStartEnd"
-              minTickGap={30}
-            />
-            <YAxis 
-              hide={true}
-              domain={['dataMin - 5', 'dataMax + 5']}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Area
-              type="monotone"
-              dataKey="value"
-              stroke={chartColor}
-              strokeWidth={1.5}
-              fillOpacity={1}
-              fill={`url(#${gradientId})`}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        
+        <div className="h-56">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={activeData[activePeriod]}
+              margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
+            >
+              <defs>
+                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={chartColor} stopOpacity={0.2} />
+                  <stop offset="95%" stopColor={chartColor} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis 
+                dataKey="name"
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 10, fill: '#8E9196' }}
+                interval="preserveStartEnd"
+                minTickGap={30}
+              />
+              <YAxis 
+                hide={true}
+                domain={['dataMin - 5', 'dataMax + 5']}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke={chartColor}
+                strokeWidth={1.5}
+                fillOpacity={1}
+                fill={`url(#${gradientId})`}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </Card>
   );
