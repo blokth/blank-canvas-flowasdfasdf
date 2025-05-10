@@ -12,7 +12,9 @@ interface InputHandlersProps {
   showSuggestions: boolean;
   setShowSuggestions: (show: boolean) => void;
   suggestionType: 'stock' | 'timeframe' | 'sector' | null;
+  setSuggestionType: (type: 'stock' | 'timeframe' | 'sector' | null) => void;
   searchTerm: string;
+  setSearchTerm: (term: string) => void;
   templateField: string | null;
   cursorPosition: number;
   setCursorPosition: (position: number) => void;
@@ -27,7 +29,9 @@ export const useInputHandlers = ({
   showSuggestions,
   setShowSuggestions,
   suggestionType,
+  setSuggestionType,
   searchTerm,
+  setSearchTerm,
   templateField,
   cursorPosition,
   setCursorPosition
@@ -84,6 +88,11 @@ export const useInputHandlers = ({
           if (textareaRef.current) {
             textareaRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
             setCursorPosition(newCursorPosition);
+            
+            // Show suggestions when positioning after colon
+            setSuggestionType(commandType as 'stock' | 'timeframe' | 'sector');
+            setShowSuggestions(true);
+            setSearchTerm('');
           }
         }, 0);
         return;
@@ -93,8 +102,15 @@ export const useInputHandlers = ({
     // Handle tab navigation between template fields
     if (e.key === 'Tab') {
       e.preventDefault();
-      const newPosition = moveToNextTemplateField(query, cursorPosition, textareaRef);
+      const newPosition = moveToNextTemplateField(
+        query, 
+        cursorPosition, 
+        textareaRef, 
+        setShowSuggestions, 
+        setSuggestionType
+      );
       setCursorPosition(newPosition);
+      setSearchTerm('');
       return;
     }
     
@@ -103,7 +119,21 @@ export const useInputHandlers = ({
       // Check if we're after a field: pattern
       if (/(stock|timeframe|sector):$/.test(query.substring(0, cursorPosition))) {
         e.preventDefault();
-        const newPosition = moveToNextTemplateField(query, cursorPosition, textareaRef);
+        const fieldMatch = /(stock|timeframe|sector):$/.exec(query.substring(0, cursorPosition));
+        if (fieldMatch) {
+          const fieldType = fieldMatch[1] as 'stock' | 'timeframe' | 'sector';
+          setSuggestionType(fieldType);
+          setShowSuggestions(true);
+          setSearchTerm('');
+        }
+        
+        const newPosition = moveToNextTemplateField(
+          query, 
+          cursorPosition, 
+          textareaRef, 
+          setShowSuggestions, 
+          setSuggestionType
+        );
         setCursorPosition(newPosition);
         return;
       }
@@ -210,9 +240,25 @@ export const useInputHandlers = ({
             textareaRef.current.focus();
             textareaRef.current.setSelectionRange(newPosition, newPosition);
             setCursorPosition(newPosition);
+            
+            // After inserting, move to next template field and show suggestions for it
+            const nextFieldPosition = moveToNextTemplateField(
+              newQuery, 
+              newPosition, 
+              textareaRef, 
+              setShowSuggestions, 
+              setSuggestionType
+            );
+            
+            if (nextFieldPosition === newPosition) {
+              // If we didn't move (no more fields), hide suggestions
+              setShowSuggestions(false);
+            } else {
+              // If we moved to a new field, reset search term
+              setSearchTerm('');
+            }
           }
         }, 0);
-        setShowSuggestions(false);
         return;
       }
     }
@@ -233,6 +279,11 @@ export const useInputHandlers = ({
           textareaRef.current.focus();
           textareaRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
           setCursorPosition(newCursorPosition);
+          
+          // Show suggestions for this field type
+          setSuggestionType(commandType as 'stock' | 'timeframe' | 'sector');
+          setShowSuggestions(true);
+          setSearchTerm('');
         }
       }, 0);
     } else {
@@ -249,11 +300,26 @@ export const useInputHandlers = ({
           textareaRef.current.focus();
           textareaRef.current.setSelectionRange(newPosition, newPosition);
           setCursorPosition(newPosition);
+          
+          // After inserting, check if we should move to next field
+          const nextFieldPosition = moveToNextTemplateField(
+            newQuery, 
+            newPosition, 
+            textareaRef, 
+            setShowSuggestions, 
+            setSuggestionType
+          );
+          
+          if (nextFieldPosition === newPosition) {
+            // If we didn't move (no more fields), hide suggestions
+            setShowSuggestions(false);
+          } else {
+            // If we moved to a new field, reset search term
+            setSearchTerm('');
+          }
         }
       }, 0);
     }
-    
-    setShowSuggestions(false);
   };
 
   // Get filtered suggestions based on search term
@@ -272,3 +338,4 @@ export const useInputHandlers = ({
     getFilteredSuggestions
   };
 };
+

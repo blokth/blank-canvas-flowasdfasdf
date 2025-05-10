@@ -47,7 +47,13 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   }, [query, setQuery, onSubmit]);
   
   // Use the extracted suggestions hook
-  const { suggestionType, searchTerm, templateField } = useSuggestions({
+  const { 
+    suggestionType, 
+    setSuggestionType, 
+    searchTerm,
+    setSearchTerm, 
+    templateField 
+  } = useSuggestions({
     query,
     cursorPosition,
     showSuggestions,
@@ -69,7 +75,9 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     showSuggestions,
     setShowSuggestions,
     suggestionType,
+    setSuggestionType,
     searchTerm,
+    setSearchTerm,
     templateField,
     cursorPosition,
     setCursorPosition

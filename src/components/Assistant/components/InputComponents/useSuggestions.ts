@@ -9,8 +9,8 @@ interface SuggestionsHookProps {
 
 interface SuggestionsHookResult {
   suggestionType: 'stock' | 'timeframe' | 'sector' | null;
-  searchTerm: string;
   setSuggestionType: (type: 'stock' | 'timeframe' | 'sector' | null) => void;
+  searchTerm: string;
   setSearchTerm: (term: string) => void;
   templateField: string | null;
 }
@@ -130,8 +130,8 @@ export const useSuggestions = ({
   
   return {
     suggestionType,
-    searchTerm,
     setSuggestionType,
+    searchTerm,
     setSearchTerm,
     templateField
   };

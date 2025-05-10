@@ -7,7 +7,9 @@
 export const moveToNextTemplateField = (
   query: string,
   cursorPosition: number,
-  textareaRef: React.RefObject<HTMLTextAreaElement>
+  textareaRef: React.RefObject<HTMLTextAreaElement>,
+  setShowSuggestions?: (show: boolean) => void,
+  setSuggestionType?: (type: 'stock' | 'timeframe' | 'sector' | null) => void
 ) => {
   const fieldPattern = /(stock|timeframe|sector):/g;
   let match;
@@ -33,11 +35,20 @@ export const moveToNextTemplateField = (
   
   // Move cursor to the beginning of the next template field
   if (nextMatch && textareaRef.current) {
+    const fieldType = nextMatch[1] as 'stock' | 'timeframe' | 'sector';
     const newPosition = nextMatch.index + nextMatch[0].length;
     textareaRef.current.focus();
     textareaRef.current.setSelectionRange(newPosition, newPosition);
+    
+    // Show suggestions for this field type if the callbacks are provided
+    if (setShowSuggestions && setSuggestionType) {
+      setSuggestionType(fieldType);
+      setShowSuggestions(true);
+    }
+    
     return newPosition;
   }
   
   return cursorPosition;
 };
+
