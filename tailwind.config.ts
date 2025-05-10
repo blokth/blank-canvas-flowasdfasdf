@@ -63,28 +63,28 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-        // Custom TR colors
+        // Updated TR colors to black and white
         tr: {
-          dark: '#1A1F2C',
-          darker: '#151820',
+          dark: '#111111',
+          darker: '#000000',
           purple: {
-            DEFAULT: '#9b87f5',
-            light: '#b3a4f7',
-            dark: '#7E69AB'
+            DEFAULT: '#ffffff',
+            light: '#eeeeee',
+            dark: '#aaaaaa'
           },
           gray: {
-            DEFAULT: '#8E9196',
-            light: '#C8C8C9',
-            dark: '#403E43'
+            DEFAULT: '#999999',
+            light: '#cccccc',
+            dark: '#444444'
           },
-          green: '#4CAF50',
-          red: '#F44336',
+          green: '#ffffff',
+          red: '#000000',
         }
 			},
 			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				lg: '0.25rem',  // Reduced for rougher edges
+				md: '0.125rem', // Reduced for rougher edges
+				sm: '0px'       // No radius for rough edges
 			},
 			keyframes: {
 				'accordion-down': {
