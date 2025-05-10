@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import ActionPills from './ActionPills';
@@ -16,6 +17,7 @@ type MessageType = 'user' | 'assistant';
 interface Message {
   type: MessageType;
   content: string;
+  isStreaming?: boolean;
 }
 
 const ConversationView: React.FC<ConversationViewProps> = ({
@@ -27,42 +29,63 @@ const ConversationView: React.FC<ConversationViewProps> = ({
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  // Track current streaming message to accumulate chunks
+  const [streamingMessage, setStreamingMessage] = useState<string>('');
 
-  // Process chunks into messages
+  // Process chunks into messages with streaming support
   useEffect(() => {
     if (chunks.length === 0) return;
     
-    // Get unique chunks
-    const uniqueChunks = Array.from(new Set(chunks));
-    
-    // Check if we have a new user message to add
-    const lastMessage = messages[messages.length - 1];
-    const hasUserMessageForCurrentResponse = lastMessage && 
-      lastMessage.type === 'user' && 
-      messages.some(m => m.type === 'assistant' && uniqueChunks.includes(m.content));
-    
-    // Create a new message list
+    // Add user query if it doesn't exist yet
     let newMessages = [...messages];
-    
-    // Add user query if it doesn't exist yet and is different from previous
-    if (query && (!hasUserMessageForCurrentResponse)) {
-      const lastUserMessage = messages.filter(m => m.type === 'user').pop();
+    const hasUserQueryForCurrentResponse = newMessages.some(
+      m => m.type === 'user' && m.content === query
+    );
+
+    if (query && !hasUserQueryForCurrentResponse) {
+      newMessages = [...newMessages, { type: 'user', content: query }];
+    }
+
+    // Accumulate streaming chunks into one message or update it
+    const currentMessageContent = chunks.join('');
+    if (currentMessageContent !== streamingMessage) {
+      setStreamingMessage(currentMessageContent);
       
-      // Only add if different from last user message
-      if (!lastUserMessage || lastUserMessage.content !== query) {
-        newMessages.push({ type: 'user', content: query });
+      // Find if we already have an assistant message that's streaming
+      const streamingMessageIndex = newMessages.findIndex(
+        m => m.type === 'assistant' && m.isStreaming
+      );
+      
+      if (streamingMessageIndex >= 0) {
+        // Update existing streaming message
+        newMessages[streamingMessageIndex] = {
+          ...newMessages[streamingMessageIndex],
+          content: currentMessageContent
+        };
+      } else {
+        // Add new streaming message
+        newMessages = [
+          ...newMessages,
+          { 
+            type: 'assistant', 
+            content: currentMessageContent, 
+            isStreaming: true 
+          }
+        ];
       }
+      
+      setMessages(newMessages);
     }
     
-    // Add assistant responses that aren't already in the messages
-    uniqueChunks.forEach(chunk => {
-      if (!newMessages.some(m => m.type === 'assistant' && m.content === chunk)) {
-        newMessages.push({ type: 'assistant', content: chunk });
-      }
-    });
-    
-    setMessages(newMessages);
-  }, [chunks, query]);  // Remove messages dependency to prevent infinite loops
+    // Mark message as non-streaming when loading completes
+    if (!isLoading && streamingMessage) {
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.isStreaming ? { ...msg, isStreaming: false } : msg
+        )
+      );
+    }
+  }, [chunks, query, isLoading, streamingMessage]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -124,7 +147,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
               </div>
             ))}
             
-            {isLoading && (
+            {isLoading && !streamingMessage && (
               <div className="w-full">
                 <div className="p-3 rounded-lg bg-muted">
                   <div className="flex gap-1">
