@@ -40,9 +40,15 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   if (!response) return null;
   
   const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-    if (!isFullscreen) {
+    const newFullscreenState = !isFullscreen;
+    setIsFullscreen(newFullscreenState);
+    
+    // Only set showFullscreenChart to true when entering fullscreen
+    // When exiting fullscreen, make sure it's false but don't trigger the modal
+    if (newFullscreenState) {
       setShowFullscreenChart(true);
+    } else {
+      setShowFullscreenChart(false);
     }
   };
   
@@ -94,10 +100,13 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
         </div>
       )}
       
-      {/* Fullscreen chart dialog - no longer needed as we use direct fullscreen mode */}
+      {/* Fullscreen chart dialog - only show when triggered from a click, not when exiting fullscreen */}
       <AssistantDialog
         open={showFullscreenChart && !isFullscreen}
-        onOpenChange={setShowFullscreenChart}
+        onOpenChange={(open) => {
+          // When closing the dialog, just set showFullscreenChart to false
+          setShowFullscreenChart(open);
+        }}
         title={response || ""}
       >
         <div className="p-4">
