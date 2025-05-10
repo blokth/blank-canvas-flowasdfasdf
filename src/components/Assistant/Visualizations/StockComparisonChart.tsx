@@ -1,20 +1,120 @@
 
 import React from 'react';
+import { 
+  AreaChart, 
+  Area, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer 
+} from 'recharts';
+
+const data = [
+  { name: 'Jan', stocks: 4000, finances: 2400 },
+  { name: 'Feb', stocks: 3000, finances: 2210 },
+  { name: 'Mar', stocks: 5000, finances: 2290 },
+  { name: 'Apr', stocks: 4500, finances: 2000 },
+  { name: 'May', stocks: 6000, finances: 2500 },
+  { name: 'Jun', stocks: 5500, finances: 2800 },
+];
+
+const stocksData = [
+  { name: 'AAPL', value: 80 },
+  { name: 'MSFT', value: 60 },
+  { name: 'GOOGL', value: 90 },
+  { name: 'AMZN', value: 50 },
+];
 
 const StockComparisonChart: React.FC = () => {
   return (
-    <div className="h-full flex items-center justify-center">
-      <svg width="100%" height="160" viewBox="0 0 300 100">
-        <rect x="30" y="20" width="40" height="80" fill="#9b87f5" />
-        <rect x="90" y="40" width="40" height="60" fill="#7E69AB" />
-        <rect x="150" y="10" width="40" height="90" fill="#6E59A5" />
-        <rect x="210" y="50" width="40" height="50" fill="#D6BCFA" />
-        
-        <text x="50" y="110" fontSize="8" fill="#8E9196" textAnchor="middle">AAPL</text>
-        <text x="110" y="110" fontSize="8" fill="#8E9196" textAnchor="middle">MSFT</text>
-        <text x="170" y="110" fontSize="8" fill="#8E9196" textAnchor="middle">GOOGL</text>
-        <text x="230" y="110" fontSize="8" fill="#8E9196" textAnchor="middle">AMZN</text>
-      </svg>
+    <div className="h-full w-full flex flex-col">
+      {/* Line chart comparing stocks vs personal finances */}
+      <div className="mb-6 h-1/2">
+        <h3 className="text-sm font-medium mb-2 text-foreground/70">Performance Over Time</h3>
+        <ResponsiveContainer width="100%" height="90%">
+          <AreaChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+            <defs>
+              <linearGradient id="colorStocks" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#9b87f5" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#9b87f5" stopOpacity={0.1}/>
+              </linearGradient>
+              <linearGradient id="colorFinances" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#7E69AB" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#7E69AB" stopOpacity={0.1}/>
+              </linearGradient>
+            </defs>
+            <XAxis 
+              dataKey="name" 
+              tick={{ fontSize: 10, fill: '#8E9196' }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis hide />
+            <Tooltip 
+              contentStyle={{ 
+                borderRadius: '8px', 
+                border: '1px solid rgba(0, 0, 0, 0.05)', 
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                fontSize: '12px'
+              }} 
+            />
+            <Area 
+              type="monotone" 
+              dataKey="stocks" 
+              stroke="#9b87f5" 
+              fillOpacity={1} 
+              fill="url(#colorStocks)" 
+              name="Stocks"
+            />
+            <Area 
+              type="monotone" 
+              dataKey="finances" 
+              stroke="#7E69AB" 
+              fillOpacity={1} 
+              fill="url(#colorFinances)" 
+              name="Personal Finances"
+            />
+            <Legend 
+              verticalAlign="top" 
+              height={36} 
+              iconType="circle" 
+              iconSize={8}
+              wrapperStyle={{
+                fontSize: '11px',
+                paddingTop: '8px'
+              }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Bar chart for stock values */}
+      <div className="h-1/2">
+        <h3 className="text-sm font-medium mb-2 text-foreground/70">Stock Performance</h3>
+        <ResponsiveContainer width="100%" height="90%">
+          <BarChart data={stocksData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+            <XAxis 
+              dataKey="name" 
+              tick={{ fontSize: 10, fill: '#8E9196' }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis hide />
+            <Tooltip 
+              contentStyle={{ 
+                borderRadius: '8px', 
+                border: '1px solid rgba(0, 0, 0, 0.05)', 
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                fontSize: '12px'
+              }} 
+            />
+            <Bar dataKey="value" fill="#9b87f5" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };
