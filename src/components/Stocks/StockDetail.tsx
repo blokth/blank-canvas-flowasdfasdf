@@ -1,9 +1,13 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, TrendingUp } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import StockChart from '../common/StockChart';
 import { Button } from '@/components/ui/button';
+import {
+  ToggleGroup,
+  ToggleGroupItem
+} from "@/components/ui/toggle-group";
 
 // Sample data for charts
 const generateChartData = (baseValue: number, volatility: number, points: number) => {
@@ -88,6 +92,7 @@ const STOCKS = {
 
 const StockDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const [activeDataType, setActiveDataType] = useState<'wealth' | 'cash'>('wealth');
   
   if (!id || !STOCKS[id as keyof typeof STOCKS]) {
     return (
@@ -117,6 +122,18 @@ const StockDetail: React.FC = () => {
     'All': generateChartData(stock.price / 2, 50, 1500),
   };
   
+  // Generate sample cash data (similar structure but slightly different values)
+  const cashData = {
+    '1D': generateChartData(stock.price / 2 - stock.change / 2, 0.3, 24),
+    '1W': generateChartData(stock.price / 2 - stock.change * 2, 1, 7),
+    '1M': generateChartData(stock.price / 2 - stock.change * 10, 3, 30),
+    '3M': generateChartData(stock.price / 2 - stock.change * 30, 5, 90),
+    '1Y': generateChartData(stock.price / 2 - stock.change * 100, 10, 365),
+    'All': generateChartData(stock.price / 4, 25, 1500),
+  };
+  
+  const isCashPositive = true; // For demo purposes
+  
   return (
     <div className="animate-fade-in">
       <div className="flex items-center mb-4">
@@ -126,6 +143,26 @@ const StockDetail: React.FC = () => {
           </Button>
         </Link>
         <h1 className="text-lg font-medium">{stock.name}</h1>
+      </div>
+      
+      {/* View selector moved to top */}
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-sm font-medium">View:</span>
+        <ToggleGroup 
+          type="single" 
+          value={activeDataType} 
+          onValueChange={(value) => {
+            if (value) setActiveDataType(value as 'wealth' | 'cash');
+          }}
+          size="sm"
+        >
+          <ToggleGroupItem value="wealth" className="text-xs px-2 py-1 h-7">
+            Wealth
+          </ToggleGroupItem>
+          <ToggleGroupItem value="cash" className="text-xs px-2 py-1 h-7">
+            Cash
+          </ToggleGroupItem>
+        </ToggleGroup>
       </div>
       
       <div className="mb-6">
@@ -148,7 +185,9 @@ const StockDetail: React.FC = () => {
       <StockChart 
         data={chartData} 
         isPositive={isPositive} 
-        activeDataType="wealth" 
+        activeDataType={activeDataType}
+        cashData={cashData}
+        isCashPositive={isCashPositive}
       />
       
       <div className="mt-6 p-4 border border-border/20 rounded-lg bg-card">
