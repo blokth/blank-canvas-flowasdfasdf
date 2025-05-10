@@ -1,10 +1,9 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import SuggestionPopup from './SuggestionPopup';
-import InputDisplay from './InputDisplay';
 
 interface InputAreaProps {
   query: string;
@@ -36,11 +35,11 @@ const InputArea: React.FC<InputAreaProps> = ({
   templateField
 }) => {
   // Track currently selected suggestion
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
-  const [cursorPosition, setCursorPosition] = React.useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [cursorPosition, setCursorPosition] = useState(0);
   
   // Reset selected index when suggestions change
-  React.useEffect(() => {
+  useEffect(() => {
     setSelectedIndex(0);
   }, [filteredSuggestions]);
   
@@ -109,6 +108,56 @@ const InputArea: React.FC<InputAreaProps> = ({
     handleChange(e);
     setCursorPosition(e.target.selectionStart);
   };
+
+  // Highlight text and template fields
+  const highlightText = (text: string) => {
+    if (!text) {
+      return (
+        <span className="text-muted-foreground">
+          Ask about your finances or portfolio... (Type / for commands)
+        </span>
+      );
+    }
+
+    const parts = [];
+    const pattern = /(\{\{(stock|timeframe|sector)\}\})/g;
+    let lastIndex = 0;
+    let match;
+    
+    while ((match = pattern.exec(text)) !== null) {
+      // Add text before match
+      if (match.index > lastIndex) {
+        parts.push(
+          <span key={`text-${lastIndex}`}>
+            {text.substring(lastIndex, match.index)}
+          </span>
+        );
+      }
+      
+      // Add highlighted template field
+      parts.push(
+        <span 
+          key={`field-${match.index}`} 
+          className="bg-primary/20 text-primary rounded px-1"
+        >
+          {match[0]}
+        </span>
+      );
+      
+      lastIndex = match.index + match[0].length;
+    }
+    
+    // Add any remaining text
+    if (lastIndex < text.length) {
+      parts.push(
+        <span key={`text-${lastIndex}`}>
+          {text.substring(lastIndex)}
+        </span>
+      );
+    }
+    
+    return parts;
+  };
   
   return (
     <div className="relative">
@@ -122,32 +171,48 @@ const InputArea: React.FC<InputAreaProps> = ({
         />
       )}
       
-      <div className="relative border border-input rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-        {/* Hidden textarea for actual input - make it truly invisible but still interactive */}
-        <Textarea
-          ref={textareaRef}
-          placeholder="Ask about your finances or portfolio... (Type / for commands)"
-          value={query}
-          onChange={handleChangeWithCursor}
-          onKeyDown={handleKeyDownWithSuggestion}
-          onClick={handleInputClick}
-          className="resize-none text-sm min-h-10 py-3 bg-transparent pr-10 z-10 absolute inset-0 opacity-0 caret-transparent"
-          rows={1}
-        />
-        
-        {/* Visible div for highlighting */}
-        <InputDisplay query={query} cursorPosition={cursorPosition} />
-      </div>
-      
-      <Button 
-        type="submit" 
-        size="icon" 
-        disabled={isLoading || !query.trim()}
-        className="absolute right-1 bottom-1 shrink-0 h-8 w-8 rounded-full"
-        variant="ghost"
-      >
-        <Send size={16} className={isLoading ? 'opacity-50' : ''} />
-      </Button>
+      <form onSubmit={handleSubmit} className="relative">
+        <div className="relative border border-input rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+          {/* Hidden but interactive textarea for capturing input */}
+          <Textarea
+            ref={textareaRef}
+            placeholder="Ask about your finances or portfolio... (Type / for commands)"
+            value={query}
+            onChange={handleChangeWithCursor}
+            onKeyDown={handleKeyDownWithSuggestion}
+            onClick={handleInputClick}
+            className="resize-none text-sm min-h-10 py-3 px-3 bg-transparent pr-10 z-10 absolute inset-0 opacity-0 caret-transparent"
+            rows={1}
+          />
+          
+          {/* Visual display of text with highlighting */}
+          <div className="resize-none text-sm min-h-10 py-3 px-3 pr-10 whitespace-pre-wrap pointer-events-none">
+            {highlightText(query)}
+            {/* Render cursor */}
+            {cursorPosition !== undefined && (
+              <span
+                className="absolute h-5 w-0.5 bg-primary animate-blink"
+                style={{
+                  left: `calc(${cursorPosition}ch + 0.75rem)`, // Adjust for padding
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'inline-block',
+                }}
+              />
+            )}
+          </div>
+          
+          <Button 
+            type="submit" 
+            size="icon" 
+            disabled={isLoading || !query.trim()}
+            className="absolute right-1 bottom-1 shrink-0 h-8 w-8 rounded-full"
+            variant="ghost"
+          >
+            <Send size={16} className={isLoading ? 'opacity-50' : ''} />
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };
