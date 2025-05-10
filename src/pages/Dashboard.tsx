@@ -117,8 +117,6 @@ const personalFinanceChartData = {
 // We're no longer defining VisualizationType here, using the imported one instead
 
 const Dashboard = () => {
-  const [currentView, setCurrentView] = useState<'wealth' | 'cash'>('wealth');
-  
   const portfolioValue = 10800;
   const portfolioChange = 800;
   const portfolioChangePercent = 8.0;
@@ -184,11 +182,6 @@ const Dashboard = () => {
       setIsLoading(false);
     }, 1000);
   };
-
-  // Select which chart data to display based on the current view
-  const chartDataToDisplay = currentView === 'wealth' ? stockChartData : personalFinanceChartData;
-  const isChartPositive = currentView === 'wealth' ? isPositive : isPersonalFinancePositive;
-  const chartTitle = currentView === 'wealth' ? "Total Wealth" : "Cash Balance";
 
   // Action handlers for existing pills
   const handlePortfolioBreakdown = () => {
@@ -261,34 +254,34 @@ const Dashboard = () => {
   return (
     <div className="pb-16 max-w-lg mx-auto">
       <div className="bg-background/50 rounded-xl p-6 my-4 shadow-sm">
-        {/* Summary for active view */}
-        {currentView === 'wealth' ? (
-          <PortfolioSummary 
-            totalValue={portfolioValue}
-            changePercentage={portfolioChangePercent}
-            changeValue={portfolioChange}
-            className="mb-4"
-            minimal={true}
-            type="wealth"
-          />
-        ) : (
-          <PortfolioSummary 
-            totalValue={personalFinanceValue}
-            changePercentage={personalFinanceChangePercent}
-            changeValue={personalFinanceChange}
-            className="mb-4"
-            minimal={true}
-            type="cash"
-          />
-        )}
+        {/* Wealth Summary */}
+        <PortfolioSummary 
+          totalValue={portfolioValue}
+          changePercentage={portfolioChangePercent}
+          changeValue={portfolioChange}
+          className="mb-4"
+          minimal={true}
+          type="wealth"
+        />
         
-        {/* Chart with dropdown */}
+        {/* Wealth Chart */}
         <div className="mb-6">
-          <StockChart 
-            data={chartDataToDisplay} 
-            isPositive={isChartPositive}
-            title={chartTitle}
-          />
+          <StockChart data={stockChartData} isPositive={isPositive} />
+        </div>
+
+        {/* Personal Finance Summary */}
+        <PortfolioSummary 
+          totalValue={personalFinanceValue}
+          changePercentage={personalFinanceChangePercent}
+          changeValue={personalFinanceChange}
+          className="mb-4 mt-6"
+          minimal={true}
+          type="cash"
+        />
+        
+        {/* Personal Finance Chart */}
+        <div className="mb-6">
+          <StockChart data={personalFinanceChartData} isPositive={isPersonalFinancePositive} />
         </div>
       </div>
       

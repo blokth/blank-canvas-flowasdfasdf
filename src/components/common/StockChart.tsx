@@ -9,13 +9,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 interface DataPoint {
   name: string;
@@ -32,7 +25,6 @@ interface StockChartProps {
     'All': DataPoint[];
   };
   isPositive: boolean;
-  title?: string;
 }
 
 interface PeriodButtonProps {
@@ -65,28 +57,16 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-const StockChart: React.FC<StockChartProps> = ({ data, isPositive, title = "Total Wealth" }) => {
+const StockChart: React.FC<StockChartProps> = ({ data, isPositive }) => {
   const periods = ['1D', '1W', '1M', '3M', '1Y', 'All'] as const;
   const [activePeriod, setActivePeriod] = useState<typeof periods[number]>('1D');
-  const [displayType, setDisplayType] = useState<string>("wealth");
   
   const gradientId = "stockChartGradient";
   const chartColor = isPositive ? "#4CAF50" : "#F44336";
   
   return (
     <Card className="border-border/20 p-3">
-      <div className="flex items-center justify-between mb-4">
-        <div className="w-36">
-          <Select value={displayType} onValueChange={setDisplayType}>
-            <SelectTrigger className="h-8 text-sm">
-              <SelectValue placeholder="Total Wealth" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="wealth">Total Wealth</SelectItem>
-              <SelectItem value="cash">Cash Balance</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="flex items-center justify-center mb-4">
         <div className="flex gap-1 p-1 bg-muted/30 rounded-full">
           {periods.map((period) => (
             <PeriodButton
