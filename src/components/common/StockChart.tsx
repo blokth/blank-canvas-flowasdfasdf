@@ -8,11 +8,18 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from 'recharts';
 
 interface DataPoint {
   name: string;
   value: number;
+}
+
+interface MultiDataPoint {
+  name: string;
+  wealth?: number;
+  finance?: number;
 }
 
 interface StockChartProps {
@@ -25,6 +32,18 @@ interface StockChartProps {
     'All': DataPoint[];
   };
   isPositive: boolean;
+  secondaryData?: {
+    '1D': DataPoint[];
+    '1W': DataPoint[];
+    '1M': DataPoint[];
+    '3M': DataPoint[];
+    '1Y': DataPoint[];
+    'All': DataPoint[];
+  };
+  isSecondaryPositive?: boolean;
+  showBothSeries?: boolean;
+  primaryLabel?: string;
+  secondaryLabel?: string;
 }
 
 interface PeriodButtonProps {
@@ -46,23 +65,55 @@ const PeriodButton: React.FC<PeriodButtonProps> = ({ active, onClick, children }
   </button>
 );
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload, showBothSeries }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-background p-2 border border-border/20 shadow-sm rounded-md">
-        <p className="text-foreground font-medium">${payload[0].value.toFixed(2)}</p>
+        {showBothSeries ? (
+          <>
+            {payload[0]?.value !== undefined && (
+              <p className="text-foreground font-medium text-purple-600">{payload[0].name}: ${payload[0].value.toFixed(2)}</p>
+            )}
+            {payload[1]?.value !== undefined && (
+              <p className="text-foreground font-medium text-indigo-400">{payload[1].name}: ${payload[1].value.toFixed(2)}</p>
+            )}
+          </>
+        ) : (
+          <p className="text-foreground font-medium">${payload[0].value.toFixed(2)}</p>
+        )}
       </div>
     );
   }
   return null;
 };
 
-const StockChart: React.FC<StockChartProps> = ({ data, isPositive }) => {
+const StockChart: React.FC<StockChartProps> = ({ 
+  data, 
+  isPositive, 
+  secondaryData, 
+  isSecondaryPositive = true,
+  showBothSeries = false,
+  primaryLabel = "Wealth",
+  secondaryLabel = "Personal Finance"
+}) => {
   const periods = ['1D', '1W', '1M', '3M', '1Y', 'All'] as const;
   const [activePeriod, setActivePeriod] = useState<typeof periods[number]>('1D');
   
-  const gradientId = "stockChartGradient";
-  const chartColor = isPositive ? "#4CAF50" : "#F44336";
+  const primaryGradientId = "primaryChartGradient";
+  const secondaryGradientId = "secondaryChartGradient";
+  
+  const primaryColor = isPositive ? "#4CAF50" : "#F44336";
+  const secondaryColor = isSecondaryPositive ? "#7E69AB" : "#F44336";
+
+  // Combine data if showing both series
+  const combinedData = showBothSeries && secondaryData ? data[activePeriod].map((item, index) => {
+    const secondaryItem = secondaryData[activePeriod][index];
+    return {
+      name: item.name,
+      [primaryLabel]: item.value,
+      [secondaryLabel]: secondaryItem ? secondaryItem.value : 0
+    };
+  }) : data[activePeriod];
   
   return (
     <Card className="border-border/20 p-3">
@@ -83,14 +134,20 @@ const StockChart: React.FC<StockChartProps> = ({ data, isPositive }) => {
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={data[activePeriod]}
+            data={combinedData}
             margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
           >
             <defs>
-              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={chartColor} stopOpacity={0.2} />
-                <stop offset="95%" stopColor={chartColor} stopOpacity={0} />
+              <linearGradient id={primaryGradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={primaryColor} stopOpacity={0.2} />
+                <stop offset="95%" stopColor={primaryColor} stopOpacity={0} />
               </linearGradient>
+              {showBothSeries && (
+                <linearGradient id={secondaryGradientId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={secondaryColor} stopOpacity={0.2} />
+                  <stop offset="95%" stopColor={secondaryColor} stopOpacity={0} />
+                </linearGradient>
+              )}
             </defs>
             <XAxis 
               dataKey="name"
@@ -104,15 +161,44 @@ const StockChart: React.FC<StockChartProps> = ({ data, isPositive }) => {
               hide={true}
               domain={['dataMin - 5', 'dataMax + 5']}
             />
-            <Tooltip content={<CustomTooltip />} />
-            <Area
-              type="monotone"
-              dataKey="value"
-              stroke={chartColor}
-              strokeWidth={1.5}
-              fillOpacity={1}
-              fill={`url(#${gradientId})`}
-            />
+            <Tooltip content={<CustomTooltip showBothSeries={showBothSeries} />} />
+            
+            {showBothSeries ? (
+              <>
+                <Area
+                  type="monotone"
+                  dataKey={primaryLabel}
+                  stroke={primaryColor}
+                  strokeWidth={1.5}
+                  fillOpacity={1}
+                  fill={`url(#${primaryGradientId})`}
+                />
+                <Area
+                  type="monotone"
+                  dataKey={secondaryLabel}
+                  stroke={secondaryColor}
+                  strokeWidth={1.5}
+                  fillOpacity={1}
+                  fill={`url(#${secondaryGradientId})`}
+                />
+                <Legend 
+                  verticalAlign="top" 
+                  height={36} 
+                  iconType="circle" 
+                  iconSize={8}
+                  wrapperStyle={{ fontSize: '11px' }}
+                />
+              </>
+            ) : (
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke={primaryColor}
+                strokeWidth={1.5}
+                fillOpacity={1}
+                fill={`url(#${primaryGradientId})`}
+              />
+            )}
           </AreaChart>
         </ResponsiveContainer>
       </div>

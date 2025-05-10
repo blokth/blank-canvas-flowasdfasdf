@@ -254,34 +254,39 @@ const Dashboard = () => {
   return (
     <div className="pb-16 max-w-lg mx-auto">
       <div className="bg-background/50 rounded-xl p-6 my-4 shadow-sm">
-        {/* Wealth Summary */}
-        <PortfolioSummary 
-          totalValue={portfolioValue}
-          changePercentage={portfolioChangePercent}
-          changeValue={portfolioChange}
-          className="mb-4"
-          minimal={true}
-          type="wealth"
-        />
-        
-        {/* Wealth Chart */}
-        <div className="mb-6">
-          <StockChart data={stockChartData} isPositive={isPositive} />
+        <div className="flex flex-col md:flex-row md:justify-between gap-4 mb-4">
+          {/* Wealth Summary */}
+          <PortfolioSummary 
+            totalValue={portfolioValue}
+            changePercentage={portfolioChangePercent}
+            changeValue={portfolioChange}
+            className="mb-2"
+            minimal={true}
+            type="wealth"
+          />
+          
+          {/* Personal Finance Summary */}
+          <PortfolioSummary 
+            totalValue={personalFinanceValue}
+            changePercentage={personalFinanceChangePercent}
+            changeValue={personalFinanceChange}
+            className="mb-2"
+            minimal={true}
+            type="cash"
+          />
         </div>
-
-        {/* Personal Finance Summary */}
-        <PortfolioSummary 
-          totalValue={personalFinanceValue}
-          changePercentage={personalFinanceChangePercent}
-          changeValue={personalFinanceChange}
-          className="mb-4 mt-6"
-          minimal={true}
-          type="cash"
-        />
         
-        {/* Personal Finance Chart */}
+        {/* Combined Chart */}
         <div className="mb-6">
-          <StockChart data={personalFinanceChartData} isPositive={isPersonalFinancePositive} />
+          <StockChart 
+            data={stockChartData} 
+            secondaryData={personalFinanceChartData}
+            isPositive={isPositive} 
+            isSecondaryPositive={isPersonalFinancePositive}
+            showBothSeries={true}
+            primaryLabel="Wealth"
+            secondaryLabel="Finance"
+          />
         </div>
       </div>
       
