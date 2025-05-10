@@ -47,9 +47,12 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (query.trim() && !isLoading) {
-        onSubmit(e as unknown as React.FormEvent);
+      // If suggestions are showing, Tab handling is done in InputArea component
+      if (!showSuggestions) {
+        e.preventDefault();
+        if (query.trim() && !isLoading) {
+          onSubmit(e as unknown as React.FormEvent);
+        }
       }
       return;
     }

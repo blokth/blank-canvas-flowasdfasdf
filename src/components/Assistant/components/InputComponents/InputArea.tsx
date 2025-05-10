@@ -32,6 +32,35 @@ const InputArea: React.FC<InputAreaProps> = ({
   handleSuggestionSelect,
   textareaRef
 }) => {
+  // Track currently selected suggestion
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  
+  // Reset selected index when suggestions change
+  React.useEffect(() => {
+    setSelectedIndex(0);
+  }, [filteredSuggestions]);
+  
+  // Enhanced keyboard navigation
+  const handleKeyDownWithSuggestion = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (showSuggestions && filteredSuggestions.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIndex(prev => (prev + 1) % filteredSuggestions.length);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex(prev => (prev - 1 + filteredSuggestions.length) % filteredSuggestions.length);
+      } else if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        // Apply the currently selected suggestion
+        handleSuggestionSelect(filteredSuggestions[selectedIndex]);
+        return;
+      }
+    }
+    
+    // Fall back to default handling if no suggestions or other key
+    handleKeyDown(e);
+  };
+  
   return (
     <div className="relative">
       {/* Suggestion popup ABOVE the input */}
@@ -40,6 +69,7 @@ const InputArea: React.FC<InputAreaProps> = ({
           suggestionType={suggestionType}
           filteredSuggestions={filteredSuggestions}
           onSuggestionSelect={handleSuggestionSelect}
+          selectedIndex={selectedIndex}
         />
       )}
       
@@ -48,7 +78,7 @@ const InputArea: React.FC<InputAreaProps> = ({
         placeholder="Ask about your finances or portfolio... (Type / for commands)"
         value={query}
         onChange={handleChange}
-        onKeyDown={handleKeyDown}
+        onKeyDown={handleKeyDownWithSuggestion}
         className="resize-none text-sm border-0 focus-visible:ring-0 shadow-none min-h-10 py-3 bg-transparent pr-10"
         rows={1}
       />
