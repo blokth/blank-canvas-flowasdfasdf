@@ -68,15 +68,11 @@ const Dashboard = () => {
     }
   };
 
-  // Handle assistant submission with fullscreen toggle
+  // Handle assistant submission without fullscreen toggle
   const handleAssistantSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const success = sendMessage(query);
-      
-    // Show fullscreen on successful response
-    if (success && response) {
-      setShowFullscreenChart(true);
-    }
+    sendMessage(query);
+    // Removed the automatic fullscreen behavior
   };
 
   return (
@@ -102,22 +98,20 @@ const Dashboard = () => {
         setResponse={setResponse}
       />
       
-      {/* Conversation View (including streaming chunks) now appears here after action pills */}
-      {!showFullscreenChart && (
-        <div className="mt-4">
-          <ConversationView
-            chunks={chunks}
-            isLoading={isLoading}
-          />
-        </div>
-      )}
+      {/* Conversation View (including streaming chunks) */}
+      <div className="mt-4">
+        <ConversationView
+          chunks={chunks}
+          isLoading={isLoading}
+        />
+      </div>
       
       {/* Visualization Display */}
       <DashboardVisualization
         response={response}
         activeVisualization={activeVisualization}
-        showFullscreenChart={showFullscreenChart}
-        setShowFullscreenChart={setShowFullscreenChart}
+        showFullscreenChart={false} // Always false to disable fullscreen
+        setShowFullscreenChart={() => {}} // Empty function as we're not using fullscreen
         query={query}
         setQuery={setQuery}
         onSubmit={handleAssistantSubmit}
@@ -125,20 +119,18 @@ const Dashboard = () => {
       />
       
       {/* Fixed position input at the bottom */}
-      {!showFullscreenChart && (
-        <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto">
-          <div className="bg-background rounded-xl shadow-sm">
-            <AssistantInput
-              query={query}
-              setQuery={setQuery}
-              onSubmit={() => {
-                handleAssistantSubmit({ preventDefault: () => {} } as React.FormEvent);
-              }}
-              isLoading={isLoading}
-            />
-          </div>
+      <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto">
+        <div className="bg-background rounded-xl shadow-sm">
+          <AssistantInput
+            query={query}
+            setQuery={setQuery}
+            onSubmit={() => {
+              handleAssistantSubmit({ preventDefault: () => {} } as React.FormEvent);
+            }}
+            isLoading={isLoading}
+          />
         </div>
-      )}
+      </div>
     </div>
   );
 };
