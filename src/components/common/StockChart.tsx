@@ -128,12 +128,13 @@ const StockChart: React.FC<StockChartProps> = ({
               />
               <Tooltip content={<CustomTooltip />} />
               <Area
-                type="monotone"
+                type="linear" // Changed from "monotone" to "linear" for sharper angles
                 dataKey="value"
                 stroke={chartColor}
                 strokeWidth={1.5}
                 fillOpacity={1}
                 fill={`url(#${gradientId})`}
+                connectNulls={false} // Ensures the line breaks at null/undefined points
               />
             </AreaChart>
           </ResponsiveContainer>

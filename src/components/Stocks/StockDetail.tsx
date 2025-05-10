@@ -9,13 +9,28 @@ import {
   ToggleGroupItem
 } from "@/components/ui/toggle-group";
 
-// Sample data for charts
+// Updated function to generate more realistic market data with sharper price movements
 const generateChartData = (baseValue: number, volatility: number, points: number) => {
   const data = [];
   let currentValue = baseValue;
   
   for (let i = 0; i < points; i++) {
-    const change = (Math.random() - 0.5) * volatility;
+    // More pronounced changes with less smoothing
+    const randomFactor = Math.random();
+    let change;
+    
+    // Create occasional larger spikes and drops
+    if (randomFactor > 0.85) {
+      // Large movement (15% chance)
+      change = (Math.random() * 2 - 1) * volatility * 2.5;
+    } else if (randomFactor > 0.6) {
+      // Medium movement (25% chance) 
+      change = (Math.random() * 2 - 1) * volatility * 1.5;
+    } else {
+      // Regular movement (60% chance)
+      change = (Math.random() * 2 - 1) * volatility;
+    }
+    
     currentValue = Math.max(currentValue + change, 1); // Ensure value stays above 1
     data.push({
       name: i.toString(),
