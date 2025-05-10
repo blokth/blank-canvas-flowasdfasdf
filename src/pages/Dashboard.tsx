@@ -9,9 +9,11 @@ import ActionPills from '../components/Assistant/components/ActionPills';
 import PersonalFinance from '../components/Dashboard/PersonalFinance';
 import StockChart from '../components/common/StockChart';
 import {
-  ToggleGroup,
-  ToggleGroupItem
-} from "@/components/ui/toggle-group";
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from "@/components/ui/tabs";
 
 // Sample data for chart
 const chartData = [
@@ -257,42 +259,34 @@ const Dashboard = () => {
 
   return (
     <div className="pb-16 max-w-lg mx-auto">
+      {/* Top Tabs for Wealth/Cash Toggle */}
+      <Tabs 
+        value={activeDataType} 
+        onValueChange={(value) => setActiveDataType(value as 'wealth' | 'cash')}
+        className="mb-4"
+      >
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="wealth">Wealth</TabsTrigger>
+          <TabsTrigger value="cash">Cash</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       <div className="bg-background/50 rounded-xl p-6 my-4 shadow-sm">
         {/* Financial dashboard with StockChart */}
         <PortfolioSummary 
-          totalValue={portfolioValue}
-          changePercentage={portfolioChangePercent}
-          changeValue={portfolioChange}
+          totalValue={activeDataType === 'wealth' ? portfolioValue : personalFinanceValue}
+          changePercentage={activeDataType === 'wealth' ? portfolioChangePercent : personalFinanceChangePercent}
+          changeValue={activeDataType === 'wealth' ? portfolioChange : personalFinanceChange}
           className="mb-4"
           minimal={true}
-          type="wealth"
+          type={activeDataType}
         />
-        
-        {/* View selector moved outside of StockChart */}
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-sm font-medium">View:</span>
-          <ToggleGroup 
-            type="single" 
-            value={activeDataType} 
-            onValueChange={(value) => {
-              if (value) setActiveDataType(value as 'wealth' | 'cash');
-            }}
-            size="sm"
-          >
-            <ToggleGroupItem value="wealth" className="text-xs px-2 py-1 h-7">
-              Wealth
-            </ToggleGroupItem>
-            <ToggleGroupItem value="cash" className="text-xs px-2 py-1 h-7">
-              Cash
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
         
         {/* StockChart now receives activeDataType as prop */}
         <div className="mb-6">
           <StockChart 
             data={stockChartData} 
-            isPositive={isPositive} 
+            isPositive={activeDataType === 'wealth' ? isPositive : isPersonalFinancePositive} 
             activeDataType={activeDataType}
             cashData={personalFinanceChartData}
             isCashPositive={isPersonalFinancePositive}
