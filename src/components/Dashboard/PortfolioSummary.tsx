@@ -10,6 +10,7 @@ interface PortfolioSummaryProps {
   changeValue: number;
   period?: string;
   className?: string;
+  minimal?: boolean;
 }
 
 const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({
@@ -18,6 +19,7 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({
   changeValue,
   period = '1D',
   className,
+  minimal = false,
 }) => {
   const isPositive = changePercentage >= 0;
   const changeColor = isPositive ? 'text-tr-green' : 'text-tr-red';
@@ -35,6 +37,27 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({
     maximumFractionDigits: 2,
   }).format(Math.abs(changeValue));
 
+  if (minimal) {
+    return (
+      <div className={cn("flex flex-col", className)}>
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs text-muted-foreground">{period}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-2xl font-medium">{formattedTotalValue}</span>
+          <div className={`flex items-center ${changeColor} text-sm`}>
+            {isPositive ? (
+              <TrendingUp size={14} className="mr-1" />
+            ) : (
+              <TrendingUp size={14} className="mr-1 rotate-180" />
+            )}
+            {isPositive ? '+' : '-'}{Math.abs(changePercentage).toFixed(2)}%
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <Card className={cn("border-border/20 p-4", className)}>
       <div className="flex items-center justify-between mb-2">

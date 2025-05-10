@@ -32,6 +32,9 @@
     --border: 0 0% 80%;           /* Light gray border */
     --input: 0 0% 80%;            /* Light gray input */
     --ring: 0 0% 40%;             /* Dark gray ring */
+    
+    --tr-green: #4CAF50;          /* Positive value color */
+    --tr-red: #F44336;            /* Negative value color */
   }
 }
 
@@ -92,5 +95,24 @@
   .rough-tab[data-state="active"] {
     @apply bg-white border-b-white shadow-sm;
     transform: skew(-1deg);
+  }
+  
+  /* Add ChatGPT-like styles */
+  .text-tr-green {
+    @apply text-[color:var(--tr-green)];
+  }
+  
+  .text-tr-red {
+    @apply text-[color:var(--tr-red)];
+  }
+  
+  /* Scrollbar styling */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
   }
 }

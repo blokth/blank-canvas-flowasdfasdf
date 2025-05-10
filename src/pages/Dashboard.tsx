@@ -2,14 +2,11 @@
 import React, { useState } from 'react';
 import PortfolioSummary from '../components/Dashboard/PortfolioSummary';
 import PerformanceChart from '../components/Dashboard/PerformanceChart';
-import { Card } from "@/components/ui/card";
 import AssistantInput from '../components/Assistant/components/AssistantInput';
 import VisualizationManager from '../components/Assistant/components/VisualizationManager';
 import VisualizationDisplay from '../components/Assistant/components/VisualizationDisplay';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AssistantDialog from '../components/Assistant/components/AssistantDialog';
-import QuickActions from '../components/Assistant/components/QuickActions';
-import AnalyticsActions from '../components/Assistant/components/AnalyticsActions';
+import ActionPills from '../components/Assistant/components/ActionPills';
 import PersonalFinance from '../components/Dashboard/PersonalFinance';
 
 // Sample data for chart
@@ -89,7 +86,7 @@ const Dashboard = () => {
     }, 1000);
   };
 
-  // Quick action handlers
+  // Action handlers
   const handlePortfolioBreakdown = () => {
     setQuery("Show me my portfolio breakdown by sector");
     setActiveVisualization('portfolio-breakdown');
@@ -108,7 +105,6 @@ const Dashboard = () => {
     setResponse("Here's how your selected stocks compare:");
   };
 
-  // Analytics action handlers
   const handleExpenseCategories = () => {
     setQuery("Show me my expense categories");
     setActiveVisualization('expense-categories');
@@ -134,74 +130,49 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="pb-16 max-w-md mx-auto">
-      <h1 className="text-xl font-medium mb-6 text-center">Finance Overview</h1>
-      
-      {/* Portfolio Summary Card */}
-      <PortfolioSummary 
-        totalValue={portfolioValue}
-        changePercentage={portfolioChangePercent}
-        changeValue={portfolioChange}
-        className="mb-6"
-      />
-      
-      {/* Chart Section */}
-      <div className="mb-6">
-        <PerformanceChart data={chartData} isPositive={isPositive} />
+    <div className="pb-16 max-w-lg mx-auto">
+      <div className="bg-background/50 rounded-xl p-6 my-4 shadow-sm">
+        {/* Minimal Portfolio Summary */}
+        <PortfolioSummary 
+          totalValue={portfolioValue}
+          changePercentage={portfolioChangePercent}
+          changeValue={portfolioChange}
+          className="mb-4"
+          minimal={true}
+        />
+        
+        {/* Minimal Chart */}
+        <div className="mb-6">
+          <PerformanceChart data={chartData} isPositive={isPositive} minimal={true} />
+        </div>
       </div>
       
-      {/* Assistant Display */}
-      <div className="mb-4">
-        <h2 className="text-lg font-medium mb-3">Finance Assistant</h2>
-        
-        {/* Display visualization if available */}
-        {response && (
-          <VisualizationDisplay
-            response={response}
-            visualization={<VisualizationManager activeVisualization={activeVisualization} />}
-            onClick={() => activeVisualization && setShowFullscreenChart(true)}
-            showExpandHint={!!activeVisualization}
-          />
-        )}
-        
-        {/* Quick actions tabs */}
-        <Card className="p-3 mb-4 border-border/20">
-          <Tabs defaultValue="quick-actions" className="w-full">
-            <TabsList className="w-full grid grid-cols-2 rough-tabs-list">
-              <TabsTrigger 
-                value="quick-actions" 
-                className="rough-tab data-[state=active]:bg-white"
-              >
-                Quick Actions
-              </TabsTrigger>
-              <TabsTrigger 
-                value="analytics" 
-                className="rough-tab data-[state=active]:bg-white"
-              >
-                Analytics
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="quick-actions" className="pt-3">
-              <QuickActions 
-                onPortfolioBreakdown={handlePortfolioBreakdown}
-                onPerformanceTrend={handlePerformanceTrend}
-                onStockComparison={handleStockComparison}
-              />
-            </TabsContent>
-            
-            <TabsContent value="analytics" className="pt-3">
-              <AnalyticsActions 
-                onExpenseCategories={handleExpenseCategories}
-                onIncomeSources={handleIncomeSources}
-                onFinancialForecast={handleFinancialForecast}
-                onMonthlySpending={handleMonthlySpending}
-              />
-            </TabsContent>
-          </Tabs>
-        </Card>
-        
-        {/* Assistant input */}
+      {/* All Actions as Pills */}
+      <div className="my-4 overflow-x-auto pb-2">
+        <ActionPills 
+          onPortfolioBreakdown={handlePortfolioBreakdown}
+          onPerformanceTrend={handlePerformanceTrend}
+          onStockComparison={handleStockComparison} 
+          onExpenseCategories={handleExpenseCategories}
+          onIncomeSources={handleIncomeSources}
+          onFinancialForecast={handleFinancialForecast}
+          onMonthlySpending={handleMonthlySpending}
+        />
+      </div>
+      
+      {/* Display visualization if available */}
+      {response && (
+        <VisualizationDisplay
+          response={response}
+          visualization={<VisualizationManager activeVisualization={activeVisualization} />}
+          onClick={() => activeVisualization && setShowFullscreenChart(true)}
+          showExpandHint={!!activeVisualization}
+          minimal={true}
+        />
+      )}
+      
+      {/* ChatGPT-like input */}
+      <div className="fixed bottom-20 left-4 right-4 max-w-lg mx-auto">
         <AssistantInput
           query={query}
           setQuery={setQuery}
@@ -209,35 +180,6 @@ const Dashboard = () => {
           isLoading={isLoading}
         />
       </div>
-      
-      {/* Tabs for additional content */}
-      <Tabs defaultValue="portfolio" className="w-full mb-6 rough-tabs">
-        <TabsList className="w-full grid grid-cols-2 h-auto rounded-none p-1 bg-muted/30 rough-tabs-list">
-          <TabsTrigger 
-            value="portfolio" 
-            className="rough-tab data-[state=active]:bg-white data-[state=active]:shadow-sm"
-          >
-            Portfolio
-          </TabsTrigger>
-          <TabsTrigger 
-            value="personal" 
-            className="rough-tab data-[state=active]:bg-white data-[state=active]:shadow-sm"
-          >
-            Personal Finance
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="portfolio" className="mt-4 space-y-6 p-2">
-          <div>
-            <h2 className="text-base font-medium mb-3">Top Performers</h2>
-            {/* Reusing StockList from the previous implementation */}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="personal" className="mt-4 p-2">
-          <PersonalFinance />
-        </TabsContent>
-      </Tabs>
       
       {/* Fullscreen chart dialog */}
       <AssistantDialog
