@@ -47,7 +47,7 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   };
   
   return (
-    <div className={`transition-all duration-300 ${isFullscreen ? 'fixed inset-0 z-50 bg-background p-4' : 'mb-20'}`}>
+    <div className={`transition-all duration-500 ease-in-out ${isFullscreen ? 'fixed inset-0 z-50 bg-background p-4 animate-fade-in' : 'mb-20'}`}>
       <div className="flex justify-between items-center mb-2">
         <div></div> {/* Empty div for flex alignment */}
         {response && (
@@ -64,7 +64,7 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
       </div>
       
       {/* Display visualization if available */}
-      <div className={`${isFullscreen ? 'h-[calc(100%-120px)]' : ''}`}>
+      <div className={`transition-all duration-500 ${isFullscreen ? 'h-[calc(100%-120px)]' : ''}`}>
         <VisualizationDisplay
           response={response}
           visualization={<VisualizationManager activeVisualization={activeVisualization} />}
@@ -83,15 +83,6 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
             onSubmit={onSubmit}
             isLoading={isLoading}
           />
-          
-          {/* Show the last query above the input area */}
-          {query && response && (
-            <div className="mb-4 bg-muted/30 p-3 rounded-lg border border-border/30">
-              <p className="text-sm text-muted-foreground">
-                <span className="font-medium">Previous query:</span> {query}
-              </p>
-            </div>
-          )}
         </div>
       )}
       
@@ -103,15 +94,6 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
       >
         <div className="p-4">
           <VisualizationManager activeVisualization={activeVisualization} />
-          
-          {/* Display query at the bottom of dialog */}
-          {query && (
-            <div className="mt-4 bg-muted/30 p-3 rounded-lg border border-border/30">
-              <p className="text-sm text-muted-foreground">
-                <span className="font-medium">Query:</span> {query}
-              </p>
-            </div>
-          )}
         </div>
       </AssistantDialog>
     </div>
