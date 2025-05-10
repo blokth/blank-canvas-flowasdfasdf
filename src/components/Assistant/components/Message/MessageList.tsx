@@ -1,6 +1,9 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import Message, { MessageProps } from './Message';
+import { Button } from '@/components/ui/button';
+import { ChevronUp, ChevronDown } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface MessageListProps {
   messages: MessageProps[];
@@ -9,6 +12,7 @@ interface MessageListProps {
 
 const MessageList: React.FC<MessageListProps> = ({ messages, isLoading }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [showHistory, setShowHistory] = useState(false);
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -19,29 +23,79 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading }) => {
     scrollToBottom();
   }, [messages]);
 
+  // Only show recent messages if showHistory is false
+  const recentMessagesCount = 4; // Show last 2 exchanges (4 messages)
+  const visibleMessages = showHistory 
+    ? messages 
+    : messages.slice(Math.max(0, messages.length - recentMessagesCount));
+
+  const hasHistory = messages.length > recentMessagesCount;
+
   return (
-    <div className="space-y-6 pb-6">
-      {messages.map((message) => (
-        <Message
-          key={message.id}
-          role={message.role}
-          content={message.content}
-          id={message.id}
-        />
-      ))}
-      
-      {/* Typing indicator shown when loading */}
-      {isLoading && messages.length > 0 && (
-        <div className="flex items-center space-x-2 px-4 py-3 rounded-lg bg-white rounded-bl-none max-w-[80%] w-20">
-          <div className="flex space-x-1">
-            <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+    <div className="flex flex-col h-full">
+      {/* History toggle button - only show if there are older messages */}
+      {hasHistory && (
+        <Collapsible
+          open={showHistory}
+          onOpenChange={setShowHistory}
+          className="mb-2"
+        >
+          <div className="flex justify-center">
+            <CollapsibleTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1"
+              >
+                {showHistory ? (
+                  <>Hide History <ChevronUp size={14} /></>
+                ) : (
+                  <>Show History <ChevronDown size={14} /></>
+                )}
+              </Button>
+            </CollapsibleTrigger>
           </div>
-        </div>
+          
+          {/* Historical messages */}
+          <CollapsibleContent>
+            <div className="space-y-6 py-3 opacity-80">
+              {messages.slice(0, Math.max(0, messages.length - recentMessagesCount)).map((message) => (
+                <Message
+                  key={message.id}
+                  role={message.role}
+                  content={message.content}
+                  id={message.id}
+                />
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       )}
       
-      <div ref={messagesEndRef} />
+      {/* Always visible messages (recent ones) */}
+      <div className="space-y-6 overflow-y-auto pb-6">
+        {visibleMessages.map((message) => (
+          <Message
+            key={message.id}
+            role={message.role}
+            content={message.content}
+            id={message.id}
+          />
+        ))}
+        
+        {/* Typing indicator shown when loading */}
+        {isLoading && messages.length > 0 && (
+          <div className="flex items-center space-x-2 px-4 py-3 rounded-lg bg-white rounded-bl-none max-w-[80%] w-20">
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+          </div>
+        )}
+        
+        <div ref={messagesEndRef} />
+      </div>
     </div>
   );
 };
