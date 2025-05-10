@@ -1,4 +1,3 @@
-
 import { useState, useEffect, RefObject } from 'react';
 import { moveToNextTemplateField } from './TemplateNavigator';
 import { suggestions } from './useSuggestions';
@@ -241,21 +240,27 @@ export const useInputHandlers = ({
             textareaRef.current.setSelectionRange(newPosition, newPosition);
             setCursorPosition(newPosition);
             
-            // After inserting, move to next template field and show suggestions for it
-            const nextFieldPosition = moveToNextTemplateField(
-              newQuery, 
-              newPosition, 
-              textareaRef, 
-              setShowSuggestions, 
-              setSuggestionType
-            );
-            
-            if (nextFieldPosition === newPosition) {
-              // If we didn't move (no more fields), hide suggestions
+            // After inserting, check if we should move to next template field or just hide suggestions
+            if (afterCursor.trim() === '') {
+              // If there's no text after the cursor, simply hide suggestions
               setShowSuggestions(false);
             } else {
-              // If we moved to a new field, reset search term
-              setSearchTerm('');
+              // If there is text after, try to move to the next template field
+              const nextFieldPosition = moveToNextTemplateField(
+                newQuery, 
+                newPosition, 
+                textareaRef, 
+                setShowSuggestions, 
+                setSuggestionType
+              );
+              
+              if (nextFieldPosition === newPosition) {
+                // If we didn't move (no more fields), hide suggestions
+                setShowSuggestions(false);
+              } else {
+                // If we moved to a new field, reset search term
+                setSearchTerm('');
+              }
             }
           }
         }, 0);
@@ -301,21 +306,27 @@ export const useInputHandlers = ({
           textareaRef.current.setSelectionRange(newPosition, newPosition);
           setCursorPosition(newPosition);
           
-          // After inserting, check if we should move to next field
-          const nextFieldPosition = moveToNextTemplateField(
-            newQuery, 
-            newPosition, 
-            textareaRef, 
-            setShowSuggestions, 
-            setSuggestionType
-          );
-          
-          if (nextFieldPosition === newPosition) {
-            // If we didn't move (no more fields), hide suggestions
+          // After inserting, check if we should move to next field or just hide suggestions
+          if (afterPattern.trim() === '') {
+            // If there's no text after the cursor, simply hide suggestions
             setShowSuggestions(false);
           } else {
-            // If we moved to a new field, reset search term
-            setSearchTerm('');
+            // Check for any template fields to navigate to
+            const nextFieldPosition = moveToNextTemplateField(
+              newQuery, 
+              newPosition, 
+              textareaRef, 
+              setShowSuggestions, 
+              setSuggestionType
+            );
+            
+            if (nextFieldPosition === newPosition) {
+              // If we didn't move (no more fields), hide suggestions
+              setShowSuggestions(false);
+            } else {
+              // If we moved to a new field, reset search term
+              setSearchTerm('');
+            }
           }
         }
       }, 0);
@@ -338,4 +349,3 @@ export const useInputHandlers = ({
     getFilteredSuggestions
   };
 };
-
