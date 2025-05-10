@@ -10,12 +10,9 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  ToggleGroup,
+  ToggleGroupItem
+} from "@/components/ui/toggle-group";
 
 interface DataPoint {
   name: string;
@@ -93,18 +90,24 @@ const StockChart: React.FC<StockChartProps> = ({
   return (
     <Card className="border-border/20 p-3">
       <div className="flex items-center justify-between mb-4">
-        <Select 
-          value={activeDataType} 
-          onValueChange={(value) => setActiveDataType(value as 'wealth' | 'cash')}
-        >
-          <SelectTrigger className="w-[140px] h-8 text-xs">
-            <SelectValue placeholder="Select view" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="wealth">Total Wealth</SelectItem>
-            <SelectItem value="cash">Cash Balance</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center space-x-2">
+          <span className="text-xs font-medium">View:</span>
+          <ToggleGroup 
+            type="single" 
+            value={activeDataType} 
+            onValueChange={(value) => {
+              if (value) setActiveDataType(value as 'wealth' | 'cash');
+            }}
+            size="sm"
+          >
+            <ToggleGroupItem value="wealth" className="text-xs px-2 py-1 h-7">
+              Wealth
+            </ToggleGroupItem>
+            <ToggleGroupItem value="cash" className="text-xs px-2 py-1 h-7">
+              Cash
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
         
         <div className="flex gap-1 p-1 bg-muted/30 rounded-full">
           {periods.map((period) => (
