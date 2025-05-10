@@ -30,9 +30,8 @@ export const useChunkProcessor = () => {
         setVisualizationType(jsonData.visualization);
       }
     } catch (e) {
-      // If not JSON, use the line as plain text
-      console.log('Received text data (not JSON):', chunk);
-      // We don't update response here since it's just a chunk
+      // If not JSON, treat as plain text - just add to chunks
+      // We've already added this to chunks above
     }
   }, []);
   

@@ -38,7 +38,14 @@ export const useMCPConnection = () => {
       // Handle streaming response (StreamResponse type)
       if ('reader' in result && 'decoder' in result) {
         try {
-          await processStream(result.reader, result.decoder, processChunk);
+          await processStream(
+            result.reader, 
+            result.decoder, 
+            (chunk) => {
+              // Process each chunk as it arrives
+              processChunk(chunk);
+            }
+          );
         } catch (error) {
           setResponse("Error streaming the response.");
         }

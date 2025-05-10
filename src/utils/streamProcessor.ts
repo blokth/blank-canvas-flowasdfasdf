@@ -28,17 +28,17 @@ export const processStream = async (
         break;
       }
       
+      // Process the chunk as it arrives
       const text = decoder.decode(value, { stream: true });
       console.log('Received chunk:', text);
-      buffer += text;
       
-      // Process complete lines in the buffer
+      // Immediately update with the new chunk
+      processChunk(text);
+      
+      // Also handle line breaks for complete messages
+      buffer += text;
       const lines = buffer.split('\n');
       buffer = lines.pop() || ''; // Keep the last incomplete line in the buffer
-      
-      for (const line of lines.filter(Boolean)) {
-        processChunk(line);
-      }
     }
   } catch (error) {
     console.error('Error reading stream:', error);
