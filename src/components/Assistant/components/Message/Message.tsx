@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import mermaid from 'mermaid';
@@ -21,25 +21,38 @@ export interface MessageProps {
 // Component to render Mermaid diagrams
 const MermaidRenderer = ({ code }: { code: string }) => {
   const mermaidRef = useRef<HTMLDivElement>(null);
-  const mermaidId = `mermaid-${Math.random().toString(36).substring(2, 11)}`;
+  
+  // Generate a stable mermaid ID using useMemo
+  const mermaidId = useMemo(() => 
+    `mermaid-${Math.random().toString(36).substring(2, 11)}`, 
+    []
+  );
 
-  useEffect(() => {
-    if (mermaidRef.current) {
-      try {
-        mermaidRef.current.innerHTML = '';
-        mermaid.render(mermaidId, code).then(({ svg }) => {
+  // Use useMemo to prevent re-rendering the diagram unnecessarily
+  const renderMermaid = useMemo(() => {
+    return () => {
+      if (mermaidRef.current) {
+        try {
+          mermaidRef.current.innerHTML = '';
+          mermaid.render(mermaidId, code).then(({ svg }) => {
+            if (mermaidRef.current) {
+              mermaidRef.current.innerHTML = svg;
+            }
+          });
+        } catch (error) {
+          console.error('Mermaid rendering failed', error);
           if (mermaidRef.current) {
-            mermaidRef.current.innerHTML = svg;
+            mermaidRef.current.innerHTML = `<pre className="text-red-500">Diagram rendering failed: ${error}</pre>`;
           }
-        });
-      } catch (error) {
-        console.error('Mermaid rendering failed', error);
-        if (mermaidRef.current) {
-          mermaidRef.current.innerHTML = `<pre className="text-red-500">Diagram rendering failed: ${error}</pre>`;
         }
       }
-    }
+    };
   }, [code, mermaidId]);
+
+  // Call the memoized render function when needed
+  useEffect(() => {
+    renderMermaid();
+  }, [renderMermaid]);
 
   return <div ref={mermaidRef} className="my-4 overflow-auto" />;
 };
