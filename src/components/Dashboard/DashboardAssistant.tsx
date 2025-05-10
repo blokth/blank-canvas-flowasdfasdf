@@ -26,7 +26,6 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
 }) => {
   const [internalQuery, setInternalQuery] = useState('');
   const [internalIsLoading, setInternalIsLoading] = useState(false);
-  const [isInTransition, setIsInTransition] = useState(false);
   
   // Use either external or internal state
   const query = externalQuery !== undefined ? externalQuery : internalQuery;
@@ -37,10 +36,7 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!query.trim() || isInTransition) return;
-    
-    // Set transition state to prevent multiple submissions during animation
-    setIsInTransition(true);
+    if (!query.trim()) return;
 
     if (parentOnSubmit) {
       parentOnSubmit();
@@ -49,7 +45,7 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
       
       // Simulate AI response delay
       setTimeout(() => {
-        // Demo responses based on certain keywords (simplified from the original)
+        // Demo responses based on certain keywords
         if (query.toLowerCase().includes('portfolio')) {
           setActiveVisualization('portfolio-breakdown');
           setResponse("Here's your portfolio breakdown by sector:");
@@ -60,25 +56,15 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
         setInternalIsLoading(false);
       }, 1000);
     }
-    
-    // Reset transition state after animation would complete
-    setTimeout(() => {
-      setIsInTransition(false);
-    }, 550); // Changed from 1100ms to 550ms (slightly longer than animation duration)
   };
 
   return (
     <div className="relative">
+      {/* Only the input component */}
       <AssistantInput
         query={query}
         setQuery={setQuery}
         onSubmit={handleSubmit}
-        isLoading={isLoading}
-      />
-      
-      {/* Conversation View to display streaming chunks */}
-      <ConversationView
-        chunks={chunks}
         isLoading={isLoading}
       />
     </div>

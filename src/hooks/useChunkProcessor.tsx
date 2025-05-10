@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 
 export const useChunkProcessor = () => {
@@ -7,30 +7,12 @@ export const useChunkProcessor = () => {
   const [visualizationType, setVisualizationType] = useState<VisualizationType | null>(null);
   const [chunks, setChunks] = useState<string[]>([]);
   
-  // Keep track of processed chunk IDs to avoid duplicates
-  const processedChunksRef = useRef<Set<string>>(new Set());
-  
-  // Process chunks from FastAPI StreamingResponse - optimized for immediate processing
+  // Simplified process chunk function that just updates the response
   const processChunk = useCallback((chunk: string) => {
     // Skip empty chunks
     if (!chunk.trim()) return;
     
     console.log('Processing chunk:', chunk);
-    
-    // Generate a simple hash/id for the chunk to detect duplicates
-    const chunkId = chunk.trim();
-    
-    // Skip if we've already processed this exact chunk
-    if (processedChunksRef.current.has(chunkId)) {
-      console.log('Skipping duplicate chunk');
-      return;
-    }
-    
-    // Mark this chunk as processed
-    processedChunksRef.current.add(chunkId);
-    
-    // Add the raw chunk to our chunks collection immediately with a functional update
-    setChunks(prevChunks => [...prevChunks, chunk]);
     
     try {
       // Try to parse as JSON for structured data
@@ -47,19 +29,16 @@ export const useChunkProcessor = () => {
         setVisualizationType(jsonData.visualization);
       }
     } catch (e) {
-      // For plain text streams, just accumulate the content immediately
-      setResponse(prevResponse => 
-        prevResponse ? prevResponse + chunk : chunk
-      );
+      // For plain text, just set it directly
+      setResponse(chunk);
     }
   }, []);
   
-  // Reset all state and processed chunks tracking
+  // Reset all state
   const reset = useCallback(() => {
     setResponse(null);
     setVisualizationType(null);
     setChunks([]);
-    processedChunksRef.current.clear();
   }, []);
   
   return {
