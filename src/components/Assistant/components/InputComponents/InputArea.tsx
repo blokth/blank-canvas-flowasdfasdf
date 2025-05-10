@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -37,6 +36,7 @@ const InputArea: React.FC<InputAreaProps> = ({
 }) => {
   // Track currently selected suggestion
   const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [cursorPosition, setCursorPosition] = React.useState(0);
   
   // Reset selected index when suggestions change
   React.useEffect(() => {
@@ -64,8 +64,49 @@ const InputArea: React.FC<InputAreaProps> = ({
       }
     }
     
+    // Update cursor position after key handling
+    setTimeout(() => {
+      if (textareaRef.current) {
+        setCursorPosition(textareaRef.current.selectionStart);
+      }
+    }, 0);
+    
     // Fall back to default handling if no suggestions or other key
     handleKeyDown(e);
+  };
+  
+  // Show suggestions on click
+  const handleInputClick = () => {
+    if (textareaRef.current) {
+      // Update cursor position
+      setCursorPosition(textareaRef.current.selectionStart);
+      
+      // Show command suggestions by simulating a slash command
+      const slashCommand = '/';
+      const cursorPos = textareaRef.current.selectionStart;
+      
+      // Only show suggestions if they're not already showing
+      if (!showSuggestions) {
+        const newQuery = query.substring(0, cursorPos) + slashCommand + query.substring(cursorPos);
+        setQuery(newQuery);
+        
+        // Position cursor after the slash
+        setTimeout(() => {
+          if (textareaRef.current) {
+            const newPosition = cursorPos + 1;
+            textareaRef.current.selectionStart = newPosition;
+            textareaRef.current.selectionEnd = newPosition;
+            setCursorPosition(newPosition);
+          }
+        }, 0);
+      }
+    }
+  };
+  
+  // Track cursor position during typing
+  const handleChangeWithCursor = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    handleChange(e);
+    setCursorPosition(e.target.selectionStart);
   };
   
   return (
@@ -80,20 +121,21 @@ const InputArea: React.FC<InputAreaProps> = ({
         />
       )}
       
-      <div className="relative">
+      <div className="relative border border-input rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
         {/* Hidden textarea for actual input */}
         <Textarea
           ref={textareaRef}
           placeholder="Ask about your finances or portfolio... (Type / for commands)"
           value={query}
-          onChange={handleChange}
+          onChange={handleChangeWithCursor}
           onKeyDown={handleKeyDownWithSuggestion}
-          className="resize-none text-sm border-0 focus-visible:ring-0 shadow-none min-h-10 py-3 bg-transparent pr-10 absolute inset-0 opacity-0"
+          onClick={handleInputClick}
+          className="resize-none text-sm min-h-10 py-3 bg-transparent pr-10 z-10 opacity-100 caret-transparent"
           rows={1}
         />
         
         {/* Visible div for highlighting */}
-        <InputDisplay query={query} />
+        <InputDisplay query={query} cursorPosition={cursorPosition} />
       </div>
       
       <Button 
