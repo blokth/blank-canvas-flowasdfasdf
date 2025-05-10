@@ -5,6 +5,8 @@ import PortfolioOverview from '../components/Dashboard/PortfolioOverview';
 import DashboardVisualization from '../components/Dashboard/DashboardVisualization';
 import { generateChartData, generatePersonalFinanceData } from '../utils/chartDataGenerators';
 import { useMCPConnection } from '../hooks/useMCPConnection';
+import StockList from '../components/Stocks/StockList';
+import MinimalChat from '../components/Chat/MinimalChat';
 
 const Dashboard = () => {
   // Memoize chart data to prevent regeneration on every render
@@ -82,6 +84,17 @@ const Dashboard = () => {
         onSubmit={handleAssistantSubmit}
         isLoading={isLoading}
       />
+      
+      {/* Stocks List */}
+      <div className="mt-6 mb-6">
+        <h3 className="text-lg font-medium mb-4">Your Stocks</h3>
+        <StockList />
+      </div>
+      
+      {/* Chat Interface */}
+      <div className="mt-8 mb-20">
+        <MinimalChat />
+      </div>
     </div>
   );
 };
