@@ -145,7 +145,11 @@ const StockDetail: React.FC = () => {
         <p className="text-xs text-muted-foreground">{stock.symbol}</p>
       </div>
       
-      <StockChart data={chartData} isPositive={isPositive} />
+      <StockChart 
+        data={chartData} 
+        isPositive={isPositive} 
+        activeDataType="wealth" 
+      />
       
       <div className="mt-6 p-4 border border-border/20 rounded-lg bg-card">
         <h3 className="text-sm font-medium mb-4">Stock Information</h3>
