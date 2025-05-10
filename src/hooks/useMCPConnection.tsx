@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
@@ -11,7 +10,8 @@ type MCPResponse = {
 
 // MCP configuration with default values
 const MCP_CONFIG = {
-  baseUrl: import.meta.env.VITE_APP_MCP_URL || 'http://localhost:8000',
+  // Use the Vite proxy to avoid CORS issues
+  baseUrl: import.meta.env.VITE_APP_MCP_URL || '/mcp',
   healthEndpoint: '/health',
   chatEndpoint: '/chat',
   checkInterval: 30000, // 30 seconds
@@ -30,13 +30,12 @@ export const useMCPConnection = () => {
       try {
         console.log(`Checking MCP connection at ${MCP_CONFIG.baseUrl}${MCP_CONFIG.healthEndpoint}`);
         
-        // Make the request with mode: 'cors' explicitly set
+        // Now we don't need to specify CORS mode since we're using the proxy
         const response = await fetch(`${MCP_CONFIG.baseUrl}${MCP_CONFIG.healthEndpoint}`, { 
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
-          mode: 'cors', // Explicitly request CORS
         });
         
         console.log('MCP health check response:', response);
@@ -58,22 +57,13 @@ export const useMCPConnection = () => {
         console.error('Failed to check MCP server status:', error);
         setIsConnected(false);
         
-        // Handle CORS errors specifically
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        const isCorsError = errorMessage.includes('CORS') || 
-                           (error instanceof TypeError && errorMessage.includes('Network'));
         
-        setConnectionError(
-          isCorsError 
-            ? "CORS error: The MCP server needs to enable cross-origin requests" 
-            : `Connection error: ${errorMessage}`
-        );
+        setConnectionError(`Connection error: ${errorMessage}`);
         
         toast({
           title: "MCP Connection Error",
-          description: isCorsError 
-            ? "CORS policy blocked connection to MCP server" 
-            : "Could not connect to MCP server",
+          description: "Could not connect to MCP server",
           variant: "destructive"
         });
       }
@@ -100,7 +90,6 @@ export const useMCPConnection = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ message: query }),
-        mode: 'cors', // Explicitly request CORS
       });
       
       if (!response.ok) {
@@ -124,16 +113,9 @@ export const useMCPConnection = () => {
     } catch (error) {
       console.error('Error sending message to MCP server:', error);
       
-      // Check if this is a CORS error
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      const isCorsError = errorMessage.includes('CORS') || 
-                         (error instanceof TypeError && errorMessage.includes('Network'));
-      
       toast({
         title: "MCP Server Error",
-        description: isCorsError 
-          ? "CORS policy blocked connection to MCP server" 
-          : "Failed to get a response from the MCP server",
+        description: "Failed to get a response from the MCP server",
         variant: "destructive"
       });
       
