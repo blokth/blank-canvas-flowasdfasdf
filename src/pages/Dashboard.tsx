@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import PortfolioSummary from '../components/Dashboard/PortfolioSummary';
 import PerformanceChart from '../components/Dashboard/PerformanceChart';
@@ -7,6 +8,7 @@ import VisualizationDisplay from '../components/Assistant/components/Visualizati
 import AssistantDialog from '../components/Assistant/components/AssistantDialog';
 import ActionPills from '../components/Assistant/components/ActionPills';
 import PersonalFinance from '../components/Dashboard/PersonalFinance';
+import StockChart from '../components/common/StockChart';
 
 // Sample data for chart
 const chartData = [
@@ -26,6 +28,92 @@ const chartData = [
   { name: '16:00', value: 10800 },
 ];
 
+// Sample data for StockChart
+const stockChartData = {
+  '1D': [
+    { name: '9:30', value: 10000 },
+    { name: '10:30', value: 10150 },
+    { name: '11:30', value: 10250 },
+    { name: '12:30', value: 10350 },
+    { name: '13:30', value: 10450 },
+    { name: '14:30', value: 10650 },
+    { name: '15:30', value: 10750 },
+    { name: '16:00', value: 10800 },
+  ],
+  '1W': [
+    { name: 'Mon', value: 10000 },
+    { name: 'Tue', value: 10300 },
+    { name: 'Wed', value: 10200 },
+    { name: 'Thu', value: 10600 },
+    { name: 'Fri', value: 10800 },
+  ],
+  '1M': [
+    { name: 'Week 1', value: 9800 },
+    { name: 'Week 2', value: 10200 },
+    { name: 'Week 3', value: 10400 },
+    { name: 'Week 4', value: 10800 },
+  ],
+  '3M': [
+    { name: 'Jan', value: 9500 },
+    { name: 'Feb', value: 10000 },
+    { name: 'Mar', value: 10800 },
+  ],
+  '1Y': [
+    { name: 'Q1', value: 9000 },
+    { name: 'Q2', value: 9800 },
+    { name: 'Q3', value: 10300 },
+    { name: 'Q4', value: 10800 },
+  ],
+  'All': [
+    { name: '2023', value: 8500 },
+    { name: '2024', value: 9500 },
+    { name: '2025', value: 10800 },
+  ],
+};
+
+// Sample data for personal finances chart
+const personalFinanceChartData = {
+  '1D': [
+    { name: '9:30', value: 5000 },
+    { name: '10:30', value: 5050 },
+    { name: '11:30', value: 5100 },
+    { name: '12:30', value: 5150 },
+    { name: '13:30', value: 5200 },
+    { name: '14:30', value: 5250 },
+    { name: '15:30', value: 5300 },
+    { name: '16:00', value: 5350 },
+  ],
+  '1W': [
+    { name: 'Mon', value: 5000 },
+    { name: 'Tue', value: 5100 },
+    { name: 'Wed', value: 5200 },
+    { name: 'Thu', value: 5250 },
+    { name: 'Fri', value: 5350 },
+  ],
+  '1M': [
+    { name: 'Week 1', value: 4900 },
+    { name: 'Week 2', value: 5050 },
+    { name: 'Week 3', value: 5200 },
+    { name: 'Week 4', value: 5350 },
+  ],
+  '3M': [
+    { name: 'Jan', value: 4800 },
+    { name: 'Feb', value: 5100 },
+    { name: 'Mar', value: 5350 },
+  ],
+  '1Y': [
+    { name: 'Q1', value: 4500 },
+    { name: 'Q2', value: 4800 },
+    { name: 'Q3', value: 5100 },
+    { name: 'Q4', value: 5350 },
+  ],
+  'All': [
+    { name: '2023', value: 4200 },
+    { name: '2024', value: 4800 },
+    { name: '2025', value: 5350 },
+  ],
+};
+
 // We're no longer defining VisualizationType here, using the imported one instead
 
 const Dashboard = () => {
@@ -33,6 +121,12 @@ const Dashboard = () => {
   const portfolioChange = 800;
   const portfolioChangePercent = 8.0;
   const isPositive = portfolioChangePercent >= 0;
+
+  // Personal finance values
+  const personalFinanceValue = 5350;
+  const personalFinanceChange = 350;
+  const personalFinanceChangePercent = 7.0;
+  const isPersonalFinancePositive = personalFinanceChangePercent >= 0;
 
   // Assistant state
   const [query, setQuery] = useState('');
@@ -160,18 +254,34 @@ const Dashboard = () => {
   return (
     <div className="pb-16 max-w-lg mx-auto">
       <div className="bg-background/50 rounded-xl p-6 my-4 shadow-sm">
-        {/* Minimal Portfolio Summary */}
+        {/* Wealth Summary */}
         <PortfolioSummary 
           totalValue={portfolioValue}
           changePercentage={portfolioChangePercent}
           changeValue={portfolioChange}
           className="mb-4"
           minimal={true}
+          type="wealth"
         />
         
-        {/* Minimal Chart */}
+        {/* Wealth Chart */}
         <div className="mb-6">
-          <PerformanceChart data={chartData} isPositive={isPositive} minimal={true} />
+          <StockChart data={stockChartData} isPositive={isPositive} />
+        </div>
+
+        {/* Personal Finance Summary */}
+        <PortfolioSummary 
+          totalValue={personalFinanceValue}
+          changePercentage={personalFinanceChangePercent}
+          changeValue={personalFinanceChange}
+          className="mb-4 mt-6"
+          minimal={true}
+          type="cash"
+        />
+        
+        {/* Personal Finance Chart */}
+        <div className="mb-6">
+          <StockChart data={personalFinanceChartData} isPositive={isPersonalFinancePositive} />
         </div>
       </div>
       
