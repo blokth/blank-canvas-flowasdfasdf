@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { VisualizationType } from '../Assistant/components/VisualizationManager';
 import VisualizationDisplay from '../Assistant/components/VisualizationDisplay';
 import AssistantInput from '../Assistant/components/AssistantInput';
-import { VisualizationManager } from '../Assistant/components/VisualizationManager';
+import VisualizationManager from '../Assistant/components/VisualizationManager';
 
 interface DashboardVisualizationProps {
   response: string | null;
