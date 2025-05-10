@@ -5,6 +5,7 @@ export const useChunkProcessor = () => {
   const [response, setResponse] = useState<string | null>(null);
   const [visualizationType, setVisualizationType] = useState<VisualizationType | null>(null);
   const [chunks, setChunks] = useState<string[]>([]);
+  const processingRef = useRef<boolean>(false);
   
   // Process chunk function that updates chunks array
   const processChunk = useCallback((chunk: string) => {
@@ -34,12 +35,14 @@ export const useChunkProcessor = () => {
       
       // Update chunks for streaming display
       setChunks(prev => {
-        // If this is a continuation of a response, replace the last chunk
-        if (prev.length > 0) {
-          return [...prev.slice(0, -1), chunk];
+        // Start fresh if we're in a new conversation
+        if (processingRef.current === false) {
+          processingRef.current = true;
+          return [chunk];
         }
-        // Otherwise add as new chunk
-        return [...prev, chunk];
+        
+        // Otherwise replace the last chunk for continuous updating
+        return [...prev.slice(0, -1), chunk];
       });
     }
   }, []);
@@ -49,6 +52,7 @@ export const useChunkProcessor = () => {
     setResponse(null);
     setVisualizationType(null);
     setChunks([]);
+    processingRef.current = false;
   }, []);
   
   return {

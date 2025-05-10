@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { VisualizationType } from '../Assistant/components/VisualizationManager';
 import ConversationView from '../Assistant/components/ConversationView';
 
@@ -25,6 +25,7 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
 }) => {
   const [internalQuery, setInternalQuery] = useState('');
   const [internalIsLoading, setInternalIsLoading] = useState(false);
+  const submissionInProgressRef = useRef(false);
   
   // Use either external or internal state
   const query = externalQuery !== undefined ? externalQuery : internalQuery;
@@ -35,22 +36,27 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!query.trim()) return;
+    if (!query.trim() || submissionInProgressRef.current) return;
     
-    const currentQuery = query; // Store current query before it gets cleared
+    // Set submission flag to prevent multiple submissions
+    submissionInProgressRef.current = true;
+    
+    // Store current query before it gets cleared
+    const currentQuery = query; 
 
     // Clear response immediately to prevent seeing the previous response
     setResponse(null);
 
     if (parentOnSubmit) {
-      parentOnSubmit(e);
-      // Clear query right after submission
+      // Clear query right after submission, before calling parent's onSubmit
       if (setExternalQuery) {
         setExternalQuery('');
       }
+      parentOnSubmit(e);
     } else {
       setInternalIsLoading(true);
-      setInternalQuery(''); // Clear internal query immediately
+      // Clear internal query immediately
+      setInternalQuery('');
       
       // Simulate AI response delay
       setTimeout(() => {
@@ -63,8 +69,14 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
           setResponse("I can help you analyze your finances. Try asking about portfolio breakdowns.");
         }
         setInternalIsLoading(false);
+        submissionInProgressRef.current = false;
       }, 1000);
     }
+    
+    // Reset submission flag after a short delay to prevent rapid submissions
+    setTimeout(() => {
+      submissionInProgressRef.current = false;
+    }, 500);
   };
 
   return (

@@ -11,6 +11,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp?: Date;
+  id?: string; // Add unique ID for messages
 }
 
 interface ConversationViewProps {
@@ -32,6 +33,8 @@ const ConversationView: React.FC<ConversationViewProps> = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentAssistantMessage, setCurrentAssistantMessage] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastChunkRef = useRef<string>(''); // Track the last chunk to avoid duplicates
+  const inSubmissionRef = useRef<boolean>(false); // Track if we're in submission process
   
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -55,62 +58,84 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     }
   };
 
+  // Reset assistant state when loading starts
+  useEffect(() => {
+    if (isLoading) {
+      inSubmissionRef.current = true;
+      // Don't reset messages, just prepare for new assistant response
+      lastChunkRef.current = '';
+      setCurrentAssistantMessage('');
+    } else {
+      // After loading is complete, allow processing new chunks
+      inSubmissionRef.current = false;
+    }
+  }, [isLoading]);
+
   // Process incoming chunks and update messages
   useEffect(() => {
-    if (chunks.length > 0) {
-      const latestChunk = chunks[chunks.length - 1];
-      
-      // If this is a new response and not a continuation
-      if (!currentAssistantMessage || messages.length === 0 || 
-          (messages.length > 0 && messages[messages.length - 1].role === 'user')) {
-        // Create a new assistant message
-        setCurrentAssistantMessage(latestChunk);
-        setMessages(prev => {
-          // Only add a new assistant message if the last message was from the user
-          if (prev.length === 0 || prev[prev.length - 1].role === 'user') {
-            return [...prev, { 
-              role: 'assistant', 
-              content: latestChunk,
-              timestamp: new Date()
-            }];
-          }
-          return prev;
-        });
-      } else {
-        // Update existing assistant message
-        setCurrentAssistantMessage(latestChunk);
-        setMessages(prev => {
-          const newMessages = [...prev];
-          if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
-            newMessages[newMessages.length - 1].content = latestChunk;
-          }
-          return newMessages;
-        });
-      }
+    if (chunks.length === 0) return;
+    
+    const latestChunk = chunks[chunks.length - 1];
+    
+    // Skip if this is the same chunk we've already processed
+    if (latestChunk === lastChunkRef.current) return;
+    lastChunkRef.current = latestChunk;
+    
+    // If this is a new response and not a continuation
+    if (!currentAssistantMessage || messages.length === 0 || 
+        (messages.length > 0 && messages[messages.length - 1].role === 'user')) {
+      // Create a new assistant message with unique ID
+      setCurrentAssistantMessage(latestChunk);
+      setMessages(prev => {
+        // Only add a new assistant message if the last message was from the user
+        if (prev.length === 0 || prev[prev.length - 1].role === 'user') {
+          return [...prev, { 
+            role: 'assistant', 
+            content: latestChunk,
+            timestamp: new Date(),
+            id: `assistant-${Date.now()}`
+          }];
+        }
+        return prev;
+      });
+    } else {
+      // Update existing assistant message
+      setCurrentAssistantMessage(latestChunk);
+      setMessages(prev => {
+        const newMessages = [...prev];
+        if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
+          newMessages[newMessages.length - 1].content = latestChunk;
+        }
+        return newMessages;
+      });
     }
-  }, [chunks, currentAssistantMessage]);
+  }, [chunks, messages, currentAssistantMessage]);
   
   // Handle form submission to add user message
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!query.trim()) return;
+    if (!query.trim() || isLoading) return;
     
-    // Add user message to the conversation
+    // Mark as in submission to prevent processing chunks temporarily
+    inSubmissionRef.current = true;
+
+    // Add user message to the conversation with unique ID
     setMessages(prev => [...prev, { 
       role: 'user', 
       content: query,
-      timestamp: new Date()
+      timestamp: new Date(),
+      id: `user-${Date.now()}`
     }]);
     
     // Reset current assistant message to prevent showing old content
     setCurrentAssistantMessage('');
     
-    // Call the provided onSubmit
-    onSubmit(e);
+    // Reset chunks tracking
+    lastChunkRef.current = '';
     
-    // Clear the input field immediately after submission
-    setQuery('');
+    // Call the provided onSubmit (this will also clear the input in parent components)
+    onSubmit(e);
   };
 
   return (
@@ -125,9 +150,9 @@ const ConversationView: React.FC<ConversationViewProps> = ({
           </div>
         ) : (
           <div className="space-y-6 pb-6">
-            {messages.map((message, index) => (
+            {messages.map((message) => (
               <div 
-                key={index}
+                key={message.id || `${message.role}-${message.timestamp?.getTime()}`}
                 className={cn(
                   "flex flex-col space-y-2 animate-fade-in",
                   message.role === 'user' ? "items-end" : "items-start"
