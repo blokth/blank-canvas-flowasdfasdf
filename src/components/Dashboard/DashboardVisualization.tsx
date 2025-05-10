@@ -47,7 +47,15 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   };
   
   return (
-    <div className={`transition-all duration-500 ease-in-out ${isFullscreen ? 'fixed inset-0 z-50 bg-background p-4 animate-fade-in' : 'mb-20'}`}>
+    <div 
+      className={`origin-bottom transition-all duration-500 ease-in-out 
+      ${isFullscreen 
+        ? 'fixed inset-0 z-50 bg-background p-4 scale-100 opacity-100' 
+        : 'mb-20 scale-95 opacity-100'}`}
+      style={{
+        transformOrigin: 'bottom center',
+      }}
+    >
       <div className="flex justify-between items-center mb-2">
         <div></div> {/* Empty div for flex alignment */}
         {response && (
