@@ -260,19 +260,31 @@ const Dashboard = () => {
 
   return (
     <div className="pb-16 max-w-lg mx-auto">
-      {/* Tabs for Wealth/Cash Toggle with integrated portfolio summary */}
-      <Tabs 
-        value={activeDataType} 
-        onValueChange={(value) => setActiveDataType(value as 'wealth' | 'cash')}
-        className="mb-4"
-      >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="wealth">Wealth</TabsTrigger>
-          <TabsTrigger value="cash">Cash</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="wealth" className="mt-2">
-          <div className="bg-background/50 rounded-xl p-6 shadow-sm">
+      {/* Integrated Portfolio Overview with Tabs */}
+      <div className="bg-background/50 rounded-xl shadow-sm overflow-hidden">
+        <Tabs 
+          value={activeDataType} 
+          onValueChange={(value) => setActiveDataType(value as 'wealth' | 'cash')}
+          className="flex flex-col"
+        >
+          <div className="border-b border-border/10">
+            <TabsList className="w-full rounded-none bg-transparent h-12 px-4">
+              <TabsTrigger 
+                value="wealth" 
+                className="flex-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+              >
+                Wealth
+              </TabsTrigger>
+              <TabsTrigger 
+                value="cash" 
+                className="flex-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+              >
+                Cash
+              </TabsTrigger>
+            </TabsList>
+          </div>
+          
+          <TabsContent value="wealth" className="p-6" noTopMargin>
             <PortfolioSummary 
               totalValue={portfolioValue}
               changePercentage={portfolioChangePercent}
@@ -282,7 +294,7 @@ const Dashboard = () => {
               type="wealth"
             />
             
-            <div className="mb-6">
+            <div className="mb-2">
               <StockChart 
                 data={stockChartData} 
                 isPositive={isPositive} 
@@ -291,11 +303,9 @@ const Dashboard = () => {
                 isCashPositive={isPersonalFinancePositive}
               />
             </div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="cash" className="mt-2">
-          <div className="bg-background/50 rounded-xl p-6 shadow-sm">
+          </TabsContent>
+          
+          <TabsContent value="cash" className="p-6" noTopMargin>
             <PortfolioSummary 
               totalValue={personalFinanceValue}
               changePercentage={personalFinanceChangePercent}
@@ -305,7 +315,7 @@ const Dashboard = () => {
               type="cash"
             />
             
-            <div className="mb-6">
+            <div className="mb-2">
               <StockChart 
                 data={stockChartData} 
                 isPositive={isPersonalFinancePositive} 
@@ -314,9 +324,9 @@ const Dashboard = () => {
                 isCashPositive={isPersonalFinancePositive}
               />
             </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+        </Tabs>
+      </div>
       
       {/* All Actions as Pills */}
       <div className="my-4 overflow-x-auto pb-2">
