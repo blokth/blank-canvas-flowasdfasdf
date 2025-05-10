@@ -28,6 +28,7 @@ const Dashboard = () => {
   const [activeVisualization, setActiveVisualization] = useState<VisualizationType>(null);
   const [showFullscreenChart, setShowFullscreenChart] = useState(false);
   const [activeDataType, setActiveDataType] = useState<'wealth' | 'cash'>('wealth');
+  const [isVisualizationFullscreen, setIsVisualizationFullscreen] = useState(false);
 
   // Handle template selection from DashboardActions
   const handleTemplateSelection = (template: string) => {
@@ -39,6 +40,13 @@ const Dashboard = () => {
       setTimeout(() => {
         inputElement.focus();
       }, 0);
+    }
+  };
+
+  // Handle assistant submission with fullscreen toggle
+  const handleAssistantSubmit = (fullscreen: boolean = false) => {
+    if (fullscreen) {
+      setIsVisualizationFullscreen(true);
     }
   };
 
@@ -80,6 +88,7 @@ const Dashboard = () => {
           setResponse={setResponse}
           query={query}
           setQuery={setQuery}
+          onSubmit={handleAssistantSubmit}
         />
       </div>
     </div>

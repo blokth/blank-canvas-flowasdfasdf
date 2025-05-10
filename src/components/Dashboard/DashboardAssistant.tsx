@@ -8,13 +8,15 @@ interface DashboardAssistantProps {
   setResponse: (response: string | null) => void;
   query?: string;
   setQuery?: (query: string) => void;
+  onSubmit?: (fullscreen?: boolean) => void; // Added optional callback for fullscreen toggle
 }
 
 const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
   setActiveVisualization,
   setResponse,
   query: externalQuery,
-  setQuery: setExternalQuery
+  setQuery: setExternalQuery,
+  onSubmit: parentOnSubmit
 }) => {
   const [internalQuery, setInternalQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -94,6 +96,11 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
         setResponse("I can help you analyze your finances. Try using keywords like 'stock:AAPL', 'timeframe:1m', or 'sector:Technology' in your queries.");
       }
       setIsLoading(false);
+      
+      // Notify parent component to toggle fullscreen if needed
+      if (parentOnSubmit) {
+        parentOnSubmit(true);
+      }
     }, 1000);
   };
 
