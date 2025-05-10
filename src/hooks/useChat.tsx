@@ -31,6 +31,7 @@ export const useChat = () => {
       const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json', // Added correct Content-Type header
           'Accept': 'text/event-stream',
         },
         body: JSON.stringify({ message: input }),
