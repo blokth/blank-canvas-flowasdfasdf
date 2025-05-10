@@ -37,14 +37,30 @@ const InputArea: React.FC<InputAreaProps> = ({
 }) => {
   // Track currently selected suggestion
   const [selectedIndex, setSelectedIndex] = React.useState(0);
+  // Track current cursor position for visual cursor display
+  const [visualCursorPosition, setVisualCursorPosition] = React.useState(0);
   
   // Reset selected index when suggestions change
   React.useEffect(() => {
     setSelectedIndex(0);
   }, [filteredSuggestions]);
   
-  // Enhanced keyboard navigation
+  // Update visual cursor position whenever real cursor position changes
+  React.useEffect(() => {
+    if (textareaRef.current) {
+      setVisualCursorPosition(textareaRef.current.selectionStart);
+    }
+  }, [textareaRef]);
+  
+  // Enhanced keyboard navigation and cursor tracking
   const handleKeyDownWithSuggestion = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Update cursor position after key press
+    setTimeout(() => {
+      if (textareaRef.current) {
+        setVisualCursorPosition(textareaRef.current.selectionStart);
+      }
+    }, 0);
+    
     if (showSuggestions && filteredSuggestions.length > 0) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
@@ -68,6 +84,19 @@ const InputArea: React.FC<InputAreaProps> = ({
     handleKeyDown(e);
   };
   
+  // Track cursor position on click events
+  const handleClick = () => {
+    if (textareaRef.current) {
+      setVisualCursorPosition(textareaRef.current.selectionStart);
+    }
+  };
+  
+  // Enhanced onChange to track cursor position
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    handleChange(e);
+    setVisualCursorPosition(e.target.selectionStart);
+  };
+  
   return (
     <div className="relative">
       {/* Suggestion popup ABOVE the input */}
@@ -86,14 +115,15 @@ const InputArea: React.FC<InputAreaProps> = ({
           ref={textareaRef}
           placeholder="Ask about your finances or portfolio... (Type / for commands)"
           value={query}
-          onChange={handleChange}
+          onChange={handleInputChange}
+          onClick={handleClick}
           onKeyDown={handleKeyDownWithSuggestion}
           className="resize-none text-sm border-0 focus-visible:ring-0 shadow-none min-h-10 py-3 bg-transparent pr-10 absolute inset-0 opacity-0"
           rows={1}
         />
         
         {/* Visible div for highlighting */}
-        <InputDisplay query={query} />
+        <InputDisplay query={query} cursorPosition={visualCursorPosition} />
       </div>
       
       <Button 
