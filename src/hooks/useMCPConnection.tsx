@@ -1,10 +1,9 @@
 
-import { useState, useCallback } from 'react';
+import { useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useChunkProcessor } from './useChunkProcessor';
 import { makeStreamRequest, checkMCPHealth } from '../utils/mcpUtils';
 import { processStream } from '../utils/streamProcessor';
-import { useEffect } from 'react';
 
 export const useMCPConnection = () => {
   // Use the chunk processor hook
@@ -41,7 +40,6 @@ export const useMCPConnection = () => {
         try {
           await processStream(result.reader, result.decoder, processChunk);
         } catch (error) {
-          console.error('Error processing stream:', error);
           setResponse("Error streaming the response.");
         }
       }

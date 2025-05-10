@@ -13,9 +13,6 @@ import AssistantInput from './components/AssistantInput';
 import QuickActions from './components/QuickActions';
 import AnalyticsActions from './components/AnalyticsActions';
 
-// Import MCP connection hook
-import { useMCPConnection } from '../../hooks/useMCPConnection';
-
 // Types
 type VisualizationType = 
   'portfolio-breakdown' | 
@@ -28,66 +25,90 @@ type VisualizationType =
 
 const FinanceAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [response, setResponse] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeVisualization, setActiveVisualization] = useState<VisualizationType>(null);
   const [showFullscreenChart, setShowFullscreenChart] = useState(false);
-
-  // MCP connection using the hook
-  const { 
-    response, 
-    visualizationType, 
-    isLoading,
-    chunks, 
-    sendMessage,
-    setResponse,
-    setVisualizationType
-  } = useMCPConnection();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    sendMessage(query);
+    if (!query.trim()) return;
+    
+    setIsLoading(true);
+    
+    // Simulate AI response delay
+    setTimeout(() => {
+      // Demo responses based on certain keywords
+      if (query.toLowerCase().includes('portfolio') && query.toLowerCase().includes('breakdown')) {
+        setActiveVisualization('portfolio-breakdown');
+        setResponse("Here's your portfolio breakdown by sector:");
+      } else if (query.toLowerCase().includes('performance') || query.toLowerCase().includes('trend')) {
+        setActiveVisualization('performance-trend');
+        setResponse("Here's your portfolio performance over time:");
+      } else if (query.toLowerCase().includes('compare') || query.toLowerCase().includes('vs')) {
+        setActiveVisualization('stock-comparison');
+        setResponse("Here's how your selected stocks compare:");
+      } else if (query.toLowerCase().includes('expense') || query.toLowerCase().includes('spending')) {
+        setActiveVisualization('expense-categories');
+        setResponse("Here's a breakdown of your spending by category:");
+      } else if (query.toLowerCase().includes('income') || query.toLowerCase().includes('earnings')) {
+        setActiveVisualization('income-sources');
+        setResponse("Here's a breakdown of your income sources:");
+      } else if (query.toLowerCase().includes('forecast') || query.toLowerCase().includes('prediction')) {
+        setActiveVisualization('forecast');
+        setResponse("Based on your current financial patterns, here's a 6-month forecast:");
+      } else {
+        setActiveVisualization(null);
+        setResponse("I can help you analyze your finances. Try asking about portfolio breakdowns, performance trends, stock comparisons, expense categories, income sources, or financial forecasts.");
+      }
+      setIsLoading(false);
+    }, 1000);
   };
 
-  // Use query state from the hook
-  const [query, setQuery] = useState('');
-  
   // Quick action handlers
   const handlePortfolioBreakdown = () => {
     setQuery("Show me my portfolio breakdown by sector");
-    sendMessage("Show me my portfolio breakdown by sector");
+    setActiveVisualization('portfolio-breakdown');
+    setResponse("Here's your portfolio breakdown by sector:");
   };
 
   const handlePerformanceTrend = () => {
     setQuery("Show me my performance trend");
-    sendMessage("Show me my performance trend");
+    setActiveVisualization('performance-trend');
+    setResponse("Here's your portfolio performance over time:");
   };
 
   const handleStockComparison = () => {
     setQuery("Compare my top stocks");
-    sendMessage("Compare my top stocks");
+    setActiveVisualization('stock-comparison');
+    setResponse("Here's how your selected stocks compare:");
   };
 
   // Analytics action handlers
   const handleExpenseCategories = () => {
     setQuery("Show me my expense categories");
-    sendMessage("Show me my expense categories");
+    setActiveVisualization('expense-categories');
+    setResponse("Here's a breakdown of your spending by category:");
   };
 
   const handleIncomeSources = () => {
     setQuery("Show me my income sources");
-    sendMessage("Show me my income sources");
+    setActiveVisualization('income-sources');
+    setResponse("Here's a breakdown of your income sources:");
   };
 
   const handleFinancialForecast = () => {
     setQuery("Show me a financial forecast");
-    sendMessage("Show me a financial forecast");
+    setActiveVisualization('forecast');
+    setResponse("Based on your current financial patterns, here's a 6-month forecast:");
   };
 
   const handleMonthlySpending = () => {
     setQuery("Show me my monthly spending");
-    sendMessage("Show me my monthly spending");
+    setActiveVisualization('expense-categories');
+    setResponse("Here's your monthly spending pattern:");
   };
-
-  // Determine if we're actively streaming
-  const isStreaming = chunks.length > 0;
 
   return (
     <>
@@ -112,9 +133,9 @@ const FinanceAssistant: React.FC = () => {
             {response && (
               <VisualizationDisplay
                 response={response}
-                visualization={<VisualizationManager activeVisualization={visualizationType} />}
-                onClick={() => visualizationType && setShowFullscreenChart(true)}
-                showExpandHint={!!visualizationType}
+                visualization={<VisualizationManager activeVisualization={activeVisualization} />}
+                onClick={() => activeVisualization && setShowFullscreenChart(true)}
+                showExpandHint={!!activeVisualization}
               />
             )}
             
@@ -157,8 +178,6 @@ const FinanceAssistant: React.FC = () => {
               setQuery={setQuery}
               onSubmit={handleSubmit}
               isLoading={isLoading}
-              streamingChunks={chunks}
-              isStreaming={isStreaming}
             />
           </div>
         </DrawerContent>
@@ -170,7 +189,7 @@ const FinanceAssistant: React.FC = () => {
         onOpenChange={setShowFullscreenChart}
         title={response || ""}
       >
-        <VisualizationManager activeVisualization={visualizationType} />
+        <VisualizationManager activeVisualization={activeVisualization} />
       </AssistantDialog>
     </>
   );
