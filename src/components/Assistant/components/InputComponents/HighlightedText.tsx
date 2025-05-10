@@ -15,8 +15,10 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ query }) => {
   }
 
   const parts = [];
-  const pattern = /(\{\{(stock|timeframe|sector)\}\})/g;
   let lastIndex = 0;
+  
+  // Highlight stock:, timeframe:, sector: patterns
+  const pattern = /(stock:|timeframe:|sector:)(\w*)/g;
   let match;
   
   while ((match = pattern.exec(query)) !== null) {
@@ -29,15 +31,27 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ query }) => {
       );
     }
     
-    // Add highlighted template field
+    // Add highlighted keyword (stock:, timeframe:, sector:)
     parts.push(
       <span 
-        key={`field-${match.index}`} 
-        className="bg-primary/15 text-primary rounded px-1 py-0.5"
+        key={`keyword-${match.index}`} 
+        className="text-primary font-semibold"
       >
-        {match[0]}
+        {match[1]}
       </span>
     );
+    
+    // Add the value after the colon if it exists
+    if (match[2]) {
+      parts.push(
+        <span 
+          key={`value-${match.index}`} 
+          className="text-primary"
+        >
+          {match[2]}
+        </span>
+      );
+    }
     
     lastIndex = match.index + match[0].length;
   }

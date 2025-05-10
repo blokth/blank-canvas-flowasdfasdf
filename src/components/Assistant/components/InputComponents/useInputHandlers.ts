@@ -1,3 +1,4 @@
+
 import { useState, useEffect, RefObject } from 'react';
 import { moveToNextTemplateField } from './TemplateNavigator';
 import { suggestions } from './useSuggestions';
@@ -62,6 +63,33 @@ export const useInputHandlers = ({
   }, [query, setCursorPosition, textareaRef, cursorUpdateTimer]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Handle command conversion on space key
+    if (e.key === ' ') {
+      const textBeforeCursor = query.substring(0, cursorPosition);
+      const commandMatch = /\/(stock|timeframe|sector)$/.exec(textBeforeCursor);
+      
+      if (commandMatch) {
+        e.preventDefault();
+        const commandType = commandMatch[1];
+        const beforeCommand = query.substring(0, cursorPosition - (commandType.length + 1)); // +1 for the '/'
+        const afterCommand = query.substring(cursorPosition);
+        
+        // Replace command with pattern format
+        const newQuery = beforeCommand + commandType + ':' + afterCommand;
+        setQuery(newQuery);
+        
+        // Set cursor position right after the colon
+        setTimeout(() => {
+          const newCursorPosition = beforeCommand.length + commandType.length + 1; // +1 for the ':'
+          if (textareaRef.current) {
+            textareaRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
+            setCursorPosition(newCursorPosition);
+          }
+        }, 0);
+        return;
+      }
+    }
+    
     // Handle tab navigation between template fields
     if (e.key === 'Tab') {
       e.preventDefault();
@@ -142,7 +170,18 @@ export const useInputHandlers = ({
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setQuery(e.target.value);
+    const newValue = e.target.value;
+    
+    // Check if a command has been typed
+    const textBeforeCursor = newValue.substring(0, e.target.selectionStart || 0);
+    const commandMatch = /\/(stock|timeframe|sector)$/.exec(textBeforeCursor);
+    
+    if (commandMatch) {
+      // Don't replace the command yet, we'll do it on space key
+      setQuery(newValue);
+    } else {
+      setQuery(newValue);
+    }
     
     // Only update cursor position after a debounce
     if (cursorUpdateTimer) {
@@ -182,32 +221,23 @@ export const useInputHandlers = ({
     }
     
     if (!suggestionType) {
-      // Handle command quick templates - directly replace with template fields
-      const templates: Record<string, string> = {
-        'stock': '{{stock}}',
-        'sector': '{{sector}}',
-        'timeframe': '{{timeframe}}'
-      };
+      // Handle command quick templates - replace the slash command with the pattern
+      const commandType = value.toLowerCase();
+      const beforeSlashCommand = query.substring(0, cursorPosition - (searchTerm.length + 1)); // +1 for the '/'
+      const afterSlashCommand = query.substring(cursorPosition);
+      const newQuery = beforeSlashCommand + commandType + ':' + afterSlashCommand;
       
-      if (templates[value.toLowerCase()]) {
-        const template = templates[value.toLowerCase()];
-        // Insert at cursor position
-        const beforeSlashCommand = query.substring(0, cursorPosition - (searchTerm.length + 1));
-        const afterSlashCommand = query.substring(cursorPosition);
-        const newQuery = beforeSlashCommand + template + afterSlashCommand;
-        setQuery(newQuery);
-        
-        // Set cursor position to the first template field
-        setTimeout(() => {
-          if (textareaRef.current) {
-            const templateFieldPosition = beforeSlashCommand.length;
-            const templateFieldLength = template.length;
-            textareaRef.current.focus();
-            textareaRef.current.setSelectionRange(templateFieldPosition, templateFieldPosition + templateFieldLength);
-            setCursorPosition(templateFieldPosition);
-          }
-        }, 0);
-      }
+      setQuery(newQuery);
+      
+      // Set cursor position after the colon
+      setTimeout(() => {
+        if (textareaRef.current) {
+          const newCursorPosition = beforeSlashCommand.length + commandType.length + 1; // +1 for the colon
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
+          setCursorPosition(newCursorPosition);
+        }
+      }, 0);
     } else {
       // Replace the search term with the selected suggestion
       const beforePattern = query.substring(0, cursorPosition - searchTerm.length);
