@@ -199,14 +199,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                     }} 
                   />
                 </div>
-                {message.timestamp && (
-                  <span className="text-xs text-muted-foreground px-2">
-                    {new Intl.DateTimeFormat('en-US', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    }).format(message.timestamp)}
-                  </span>
-                )}
+                {/* Removed the timestamp display that was here */}
               </div>
             ))}
             {/* Only show the typing indicator when loading and after at least one message */}
