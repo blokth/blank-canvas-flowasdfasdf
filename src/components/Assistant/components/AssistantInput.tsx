@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -24,13 +23,11 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
   
-  // Command buttons for quick access
+  // Command buttons for quick access - removed "Compare" and "Forecast"
   const commandButtons = [
     { label: "Stock", command: "stock:" },
-    { label: "Compare", command: "compare stock:" },
     { label: "Timeframe", command: "timeframe:" },
     { label: "Sector", command: "sector:" },
-    { label: "Forecast", command: "forecast stock:" },
   ];
   
   // Sample data for suggestions
@@ -154,8 +151,6 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
       // Handle command quick templates
       const templates: Record<string, string> = {
         'stock': 'Show me data for stock:',
-        'compare': 'Compare stock: with stock:',
-        'forecast': 'Forecast for stock: for timeframe:',
         'sector': 'Show performance of sector:'
       };
       
@@ -220,7 +215,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   const filteredSuggestions = suggestionType 
     ? suggestions[suggestionType].filter(item => 
         item.toLowerCase().includes(searchTerm.toLowerCase()))
-    : ['stock', 'compare', 'forecast', 'sector'].filter(item => 
+    : ['stock', 'sector'].filter(item => 
         item.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { PieChart, LineChart, BarChart2, Wallet, BarChart, TrendingUp, Calendar, PiggyBank, BadgeDollarSign, Coins, WalletCards, ChevronDown, ChevronUp } from 'lucide-react';
+import { PieChart, LineChart, BarChart2, Wallet, BarChart, Calendar, PiggyBank, BadgeDollarSign, Coins, WalletCards, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ActionPillsProps {
@@ -34,7 +34,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={() => onPillClick("Compare my top stocks")}
+        onClick={() => onPillClick("Show me my top stocks")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <BarChart2 size={14} className="mr-1" /> Stocks
@@ -66,7 +66,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
     </div>
   );
 
-  // All pills in a 3-column grid
+  // All pills in a 3-column grid - removed compare and forecast
   const allPills = (
     <div className="grid grid-cols-3 gap-2 mb-2">
       <Button 
@@ -88,7 +88,7 @@ const ActionPills: React.FC<ActionPillsProps> = ({
       <Button 
         size="sm" 
         variant="outline" 
-        onClick={() => onPillClick("Compare my top stocks")}
+        onClick={() => onPillClick("Show me my top stocks")}
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <BarChart2 size={14} className="mr-1" /> Stocks
@@ -140,14 +140,6 @@ const ActionPills: React.FC<ActionPillsProps> = ({
         className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
       >
         <BarChart size={14} className="mr-1" /> Income
-      </Button>
-      <Button 
-        size="sm" 
-        variant="outline" 
-        onClick={() => onPillClick("Show me a financial forecast")}
-        className="text-xs h-8 rounded-full border-border/20 whitespace-nowrap"
-      >
-        <TrendingUp size={14} className="mr-1" /> Forecast
       </Button>
       <Button 
         size="sm" 
