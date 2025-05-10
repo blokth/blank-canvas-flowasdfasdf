@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 
@@ -10,6 +10,7 @@ interface SuggestionPopupProps {
   selectedIndex?: number;
 }
 
+// Use memo to prevent unnecessary re-renders
 const SuggestionPopup: React.FC<SuggestionPopupProps> = ({
   suggestionType,
   filteredSuggestions,
@@ -30,7 +31,7 @@ const SuggestionPopup: React.FC<SuggestionPopupProps> = ({
   };
 
   return (
-    <div className="absolute left-0 right-0 bottom-full mb-1 z-50 animate-fade-in">
+    <div className="absolute left-0 right-0 bottom-full mb-1 z-50">
       <Command className="rounded-lg border shadow-md bg-popover">
         <CommandList>
           <CommandGroup heading={getHeadingText()}>
@@ -58,4 +59,4 @@ const SuggestionPopup: React.FC<SuggestionPopupProps> = ({
   );
 };
 
-export default SuggestionPopup;
+export default memo(SuggestionPopup);

@@ -16,9 +16,15 @@ export const processStream = (
   // Track accumulated text for handling partial chunks
   let accumulatedText = '';
   
+  // Use a throttle mechanism to avoid too frequent UI updates
+  let lastProcessTime = 0;
+  const THROTTLE_MS = 50; // Minimum 50ms between UI updates
+  
   // Function to process chunks without awaiting
   function pump(): void {
     reader.read().then(({ value, done }) => {
+      const now = Date.now();
+      
       if (done) {
         console.log('Stream finished.');
         
@@ -32,20 +38,22 @@ export const processStream = (
       const text = decoder.decode(value, { stream: true });
       accumulatedText += text;
       
-      // Look for complete responses (might be JSON objects or complete sentences)
-      if (accumulatedText.trim()) {
+      // Only process chunks at a reasonable rate to avoid UI flicker
+      if (accumulatedText.trim() && (now - lastProcessTime >= THROTTLE_MS)) {
+        lastProcessTime = now;
+        
         try {
           // Try parsing as JSON first
           JSON.parse(accumulatedText);
           // If successful, process the full chunk
-          console.log('Processing complete JSON chunk:', accumulatedText);
+          console.log('Processing complete JSON chunk');
           processChunk(accumulatedText);
           accumulatedText = '';
         } catch (e) {
           // Not valid JSON, could be partial or plain text
           // Process the current accumulated text but don't clear it
-          // This way we keep building the complete message
-          console.log('Processing partial text chunk:', accumulatedText);
+          // This way we keep building the complete message incrementally
+          console.log('Processing partial text chunk');
           processChunk(accumulatedText);
           // Don't reset accumulatedText - we're building the complete message incrementally
         }

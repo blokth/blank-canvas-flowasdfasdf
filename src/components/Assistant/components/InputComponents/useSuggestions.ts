@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface SuggestionsHookProps {
   query: string;
@@ -32,78 +31,112 @@ export const useSuggestions = ({
   const [suggestionType, setSuggestionType] = useState<'stock' | 'timeframe' | 'sector' | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [templateField, setTemplateField] = useState<string | null>(null);
+  // Add debounce timer to prevent frequent UI updates
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // Keep track of the previous query to prevent unnecessary updates
+  const prevQueryRef = useRef<string>('');
+  const prevCursorPosRef = useRef<number>(0);
   
-  // Check for autocompletion trigger
+  // Check for autocompletion trigger with debounce
   useEffect(() => {
-    const checkForTrigger = () => {
-      // Exit early if cursor position is not set
-      if (!cursorPosition) return;
-      
-      // Check if cursor is inside a template field
-      const templatePattern = /\{\{(stock|timeframe|sector)\}\}/g;
-      let match;
-      while ((match = templatePattern.exec(query)) !== null) {
-        const startPos = match.index;
-        const endPos = startPos + match[0].length;
-        
-        if (cursorPosition >= startPos && cursorPosition <= endPos) {
-          // Cursor is inside a template field
-          setSuggestionType(match[1] as 'stock' | 'timeframe' | 'sector');
-          setSearchTerm('');
-          setTemplateField(match[0]);
-          setShowSuggestions(true);
-          return;
-        }
-      }
-      
-      // Get text before the cursor
-      const textBeforeCursor = query.substring(0, cursorPosition);
-      
-      // Check for specific patterns
-      const stockMatch = /stock:(\w*)$/.exec(textBeforeCursor);
-      const timeframeMatch = /timeframe:(\w*)$/.exec(textBeforeCursor);
-      const sectorMatch = /sector:(\w*)$/.exec(textBeforeCursor);
-      
-      if (stockMatch) {
-        setSuggestionType('stock');
-        setSearchTerm(stockMatch[1] || '');
-        setTemplateField(null);
-        setShowSuggestions(true);
-        return;
-      } else if (timeframeMatch) {
-        setSuggestionType('timeframe');
-        setSearchTerm(timeframeMatch[1] || '');
-        setTemplateField(null);
-        setShowSuggestions(true);
-        return;
-      } else if (sectorMatch) {
-        setSuggestionType('sector');
-        setSearchTerm(sectorMatch[1] || '');
-        setTemplateField(null);
-        setShowSuggestions(true);
-        return;
-      }
-      
-      // Check for slash command
-      const slashMatch = /\/(\w*)$/.exec(textBeforeCursor);
-      if (slashMatch && !showSuggestions) {
-        // Show quick templates
-        setShowSuggestions(true);
-        setSuggestionType(null);
-        setSearchTerm(slashMatch[1] || '');
-        setTemplateField(null);
-        return;
-      }
-      
-      // If no matches, hide suggestions
-      if (showSuggestions) {
-        setShowSuggestions(false);
-      }
-      setTemplateField(null);
-    };
+    // Skip if no changes in inputs that would affect suggestions
+    if (
+      prevQueryRef.current === query && 
+      prevCursorPosRef.current === cursorPosition &&
+      !showSuggestions
+    ) {
+      return;
+    }
     
-    checkForTrigger();
-  }, [query, cursorPosition, showSuggestions, setShowSuggestions]);
+    // Update refs
+    prevQueryRef.current = query;
+    prevCursorPosRef.current = cursorPosition;
+    
+    // Clear any existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    // Set a new debounce timer
+    debounceTimerRef.current = setTimeout(() => {
+      checkForTrigger();
+    }, 100); // 100ms debounce
+    
+    // Cleanup on unmount
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [query, cursorPosition, showSuggestions]);
+  
+  // The actual check function - extracted to keep code clean
+  const checkForTrigger = () => {
+    // Exit early if cursor position is not set
+    if (!cursorPosition) return;
+    
+    // Check if cursor is inside a template field
+    const templatePattern = /\{\{(stock|timeframe|sector)\}\}/g;
+    let match;
+    while ((match = templatePattern.exec(query)) !== null) {
+      const startPos = match.index;
+      const endPos = startPos + match[0].length;
+      
+      if (cursorPosition >= startPos && cursorPosition <= endPos) {
+        // Cursor is inside a template field
+        setSuggestionType(match[1] as 'stock' | 'timeframe' | 'sector');
+        setSearchTerm('');
+        setTemplateField(match[0]);
+        setShowSuggestions(true);
+        return;
+      }
+    }
+    
+    // Get text before the cursor
+    const textBeforeCursor = query.substring(0, cursorPosition);
+    
+    // Check for specific patterns
+    const stockMatch = /stock:(\w*)$/.exec(textBeforeCursor);
+    const timeframeMatch = /timeframe:(\w*)$/.exec(textBeforeCursor);
+    const sectorMatch = /sector:(\w*)$/.exec(textBeforeCursor);
+    
+    if (stockMatch) {
+      setSuggestionType('stock');
+      setSearchTerm(stockMatch[1] || '');
+      setTemplateField(null);
+      setShowSuggestions(true);
+      return;
+    } else if (timeframeMatch) {
+      setSuggestionType('timeframe');
+      setSearchTerm(timeframeMatch[1] || '');
+      setTemplateField(null);
+      setShowSuggestions(true);
+      return;
+    } else if (sectorMatch) {
+      setSuggestionType('sector');
+      setSearchTerm(sectorMatch[1] || '');
+      setTemplateField(null);
+      setShowSuggestions(true);
+      return;
+    }
+    
+    // Check for slash command
+    const slashMatch = /\/(\w*)$/.exec(textBeforeCursor);
+    if (slashMatch) {
+      // Show quick templates
+      setShowSuggestions(true);
+      setSuggestionType(null);
+      setSearchTerm(slashMatch[1] || '');
+      setTemplateField(null);
+      return;
+    }
+    
+    // If no matches, hide suggestions
+    if (showSuggestions) {
+      setShowSuggestions(false);
+    }
+    setTemplateField(null);
+  };
   
   return {
     suggestionType,

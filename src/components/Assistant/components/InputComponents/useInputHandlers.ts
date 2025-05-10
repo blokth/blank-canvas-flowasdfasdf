@@ -1,4 +1,3 @@
-
 import { useState, useEffect, RefObject } from 'react';
 import { moveToNextTemplateField } from './TemplateNavigator';
 import { suggestions } from './useSuggestions';
@@ -34,15 +33,33 @@ export const useInputHandlers = ({
 }: InputHandlersProps) => {
   // Add transitioning state to prevent multiple rapid submissions
   const [isTransitioning, setIsTransitioning] = useState(false);
+  // Add a debounce timer to prevent frequent cursor position updates
+  const [cursorUpdateTimer, setCursorUpdateTimer] = useState<NodeJS.Timeout | null>(null);
   
-  // Auto-resize textarea height
+  // Auto-resize textarea height with debounced cursor updates
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
-      setCursorPosition(textareaRef.current.selectionStart);
+      
+      // Debounce the cursor position update to reduce re-renders
+      if (cursorUpdateTimer) {
+        clearTimeout(cursorUpdateTimer);
+      }
+      
+      const timer = setTimeout(() => {
+        setCursorPosition(textareaRef.current?.selectionStart || 0);
+      }, 50); // 50ms debounce
+      
+      setCursorUpdateTimer(timer);
     }
-  }, [query, setCursorPosition, textareaRef]);
+    
+    return () => {
+      if (cursorUpdateTimer) {
+        clearTimeout(cursorUpdateTimer);
+      }
+    };
+  }, [query, setCursorPosition, textareaRef, cursorUpdateTimer]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Handle tab navigation between template fields
@@ -106,24 +123,39 @@ export const useInputHandlers = ({
       setShowSuggestions(false);
     }
     
-    // Update cursor position on arrow keys
+    // Use a debounced update for arrow key cursor position changes
     if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
-      // Use setTimeout to get updated cursor position after default action
-      setTimeout(() => {
+      // Clear existing timer
+      if (cursorUpdateTimer) {
+        clearTimeout(cursorUpdateTimer);
+      }
+      
+      // Add small delay to ensure DOM updates first
+      const timer = setTimeout(() => {
         if (textareaRef.current) {
-          setCursorPosition(textareaRef.current.selectionStart);
+          setCursorPosition(textareaRef.current.selectionStart || 0);
         }
-      }, 0);
+      }, 50);
+      
+      setCursorUpdateTimer(timer);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setQuery(e.target.value);
     
-    // Update cursor position
-    if (textareaRef.current) {
-      setCursorPosition(textareaRef.current.selectionStart);
+    // Only update cursor position after a debounce
+    if (cursorUpdateTimer) {
+      clearTimeout(cursorUpdateTimer);
     }
+    
+    const timer = setTimeout(() => {
+      if (textareaRef.current) {
+        setCursorPosition(textareaRef.current.selectionStart || 0);
+      }
+    }, 50);
+    
+    setCursorUpdateTimer(timer);
   };
 
   const handleSuggestionSelect = (value: string) => {

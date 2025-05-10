@@ -8,13 +8,23 @@ export const useChunkProcessor = () => {
   const [chunks, setChunks] = useState<string[]>([]);
   const processingRef = useRef<boolean>(false);
   const accumulatedTextRef = useRef<string>('');
+  // Add throttling for UI updates
+  const lastProcessTimeRef = useRef<number>(0);
+  const throttleDelayMs = 50; // Minimum 50ms between UI updates
   
-  // Process chunk function that updates chunks array
+  // Process chunk function that updates chunks array with throttling
   const processChunk = useCallback((chunk: string) => {
     // Skip empty chunks
     if (!chunk.trim()) return;
     
-    console.log('Processing chunk:', chunk);
+    const now = Date.now();
+    // Skip updates that are too frequent to reduce UI flicker
+    if (now - lastProcessTimeRef.current < throttleDelayMs) {
+      return;
+    }
+    lastProcessTimeRef.current = now;
+    
+    console.log('Processing chunk');
     
     try {
       // Try to parse as JSON for structured data
@@ -38,7 +48,7 @@ export const useChunkProcessor = () => {
       // Update response with the current chunk (which contains the full message so far)
       setResponse(chunk);
       
-      // Update chunks for streaming display
+      // Update chunks for streaming display with throttling
       setChunks(prev => {
         // Start fresh if we're in a new conversation or if we explicitly reset
         if (processingRef.current === false) {
@@ -66,6 +76,7 @@ export const useChunkProcessor = () => {
     setChunks([]);
     processingRef.current = false;
     accumulatedTextRef.current = '';
+    lastProcessTimeRef.current = 0;
   }, []);
   
   return {
