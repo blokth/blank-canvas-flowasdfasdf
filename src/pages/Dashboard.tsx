@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 import PortfolioOverview from '../components/Dashboard/PortfolioOverview';
@@ -28,6 +29,19 @@ const Dashboard = () => {
   const [showFullscreenChart, setShowFullscreenChart] = useState(false);
   const [activeDataType, setActiveDataType] = useState<'wealth' | 'cash'>('wealth');
 
+  // Handle template selection from DashboardActions
+  const handleTemplateSelection = (template: string) => {
+    setQuery(template);
+    
+    // Focus the input element
+    const inputElement = document.querySelector('textarea');
+    if (inputElement) {
+      setTimeout(() => {
+        inputElement.focus();
+      }, 0);
+    }
+  };
+
   return (
     <div className="pb-28 max-w-lg mx-auto"> {/* Increased bottom padding to make room for assistant */}
       {/* Portfolio Overview with Tabs */}
@@ -46,7 +60,7 @@ const Dashboard = () => {
       
       {/* Action Pills with Selection Templates */}
       <DashboardActions 
-        setQuery={setQuery}
+        setQuery={handleTemplateSelection}
         setActiveVisualization={setActiveVisualization}
         setResponse={setResponse}
       />
@@ -59,7 +73,7 @@ const Dashboard = () => {
         setShowFullscreenChart={setShowFullscreenChart}
       />
       
-      {/* Assistant Input - now positioned at the bottom */}
+      {/* Assistant Input - now positioned at the bottom with notion-like selectors */}
       <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto">
         <DashboardAssistant
           setActiveVisualization={setActiveVisualization}
