@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import PortfolioSummary from '../components/Dashboard/PortfolioSummary';
 import PerformanceChart from '../components/Dashboard/PerformanceChart';
@@ -259,7 +260,7 @@ const Dashboard = () => {
 
   return (
     <div className="pb-16 max-w-lg mx-auto">
-      {/* Top Tabs for Wealth/Cash Toggle */}
+      {/* Tabs for Wealth/Cash Toggle with integrated portfolio summary */}
       <Tabs 
         value={activeDataType} 
         onValueChange={(value) => setActiveDataType(value as 'wealth' | 'cash')}
@@ -269,30 +270,53 @@ const Dashboard = () => {
           <TabsTrigger value="wealth">Wealth</TabsTrigger>
           <TabsTrigger value="cash">Cash</TabsTrigger>
         </TabsList>
-      </Tabs>
-
-      <div className="bg-background/50 rounded-xl p-6 my-4 shadow-sm">
-        {/* Financial dashboard with StockChart */}
-        <PortfolioSummary 
-          totalValue={activeDataType === 'wealth' ? portfolioValue : personalFinanceValue}
-          changePercentage={activeDataType === 'wealth' ? portfolioChangePercent : personalFinanceChangePercent}
-          changeValue={activeDataType === 'wealth' ? portfolioChange : personalFinanceChange}
-          className="mb-4"
-          minimal={true}
-          type={activeDataType}
-        />
         
-        {/* StockChart now receives activeDataType as prop */}
-        <div className="mb-6">
-          <StockChart 
-            data={stockChartData} 
-            isPositive={activeDataType === 'wealth' ? isPositive : isPersonalFinancePositive} 
-            activeDataType={activeDataType}
-            cashData={personalFinanceChartData}
-            isCashPositive={isPersonalFinancePositive}
-          />
-        </div>
-      </div>
+        <TabsContent value="wealth" className="mt-2">
+          <div className="bg-background/50 rounded-xl p-6 shadow-sm">
+            <PortfolioSummary 
+              totalValue={portfolioValue}
+              changePercentage={portfolioChangePercent}
+              changeValue={portfolioChange}
+              className="mb-4"
+              minimal={true}
+              type="wealth"
+            />
+            
+            <div className="mb-6">
+              <StockChart 
+                data={stockChartData} 
+                isPositive={isPositive} 
+                activeDataType="wealth"
+                cashData={personalFinanceChartData}
+                isCashPositive={isPersonalFinancePositive}
+              />
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="cash" className="mt-2">
+          <div className="bg-background/50 rounded-xl p-6 shadow-sm">
+            <PortfolioSummary 
+              totalValue={personalFinanceValue}
+              changePercentage={personalFinanceChangePercent}
+              changeValue={personalFinanceChange}
+              className="mb-4"
+              minimal={true}
+              type="cash"
+            />
+            
+            <div className="mb-6">
+              <StockChart 
+                data={stockChartData} 
+                isPositive={isPersonalFinancePositive} 
+                activeDataType="cash"
+                cashData={personalFinanceChartData}
+                isCashPositive={isPersonalFinancePositive}
+              />
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
       
       {/* All Actions as Pills */}
       <div className="my-4 overflow-x-auto pb-2">
