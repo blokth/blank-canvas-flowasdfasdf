@@ -12,7 +12,9 @@ interface MessageListProps {
 
 const MessageList: React.FC<MessageListProps> = ({ messages, isLoading }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -30,6 +32,24 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading }) => {
     : messages.slice(Math.max(0, messages.length - recentMessagesCount));
 
   const hasHistory = messages.length > recentMessagesCount;
+
+  // Handle scroll events to automatically show history when scrolling up
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return;
+    
+    const { scrollTop } = scrollContainerRef.current;
+    
+    // When user scrolls up past a threshold, show history
+    if (scrollTop < 60 && hasHistory && !showHistory) {
+      setShowHistory(true);
+    }
+
+    // Track if user is actively scrolling
+    if (!isScrolling) {
+      setIsScrolling(true);
+      setTimeout(() => setIsScrolling(false), 150); // Debounce the scroll state
+    }
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -73,7 +93,15 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading }) => {
       )}
       
       {/* Always visible messages (recent ones) */}
-      <div className="space-y-6 overflow-y-auto pb-6">
+      <div 
+        className="space-y-6 overflow-y-auto pb-6 relative"
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+      >
+        {/* Fade effect at the top */}
+        <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-background to-transparent pointer-events-none z-10"></div>
+        
+        {/* Only show if history is expanded or we're showing recent messages */}
         {visibleMessages.map((message) => (
           <Message
             key={message.id}

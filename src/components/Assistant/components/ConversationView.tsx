@@ -78,13 +78,17 @@ const ConversationView: React.FC<ConversationViewProps> = ({
 
   return (
     <div className="flex flex-col h-full border border-border/20 rounded-xl bg-background/80 shadow-sm overflow-hidden">
-      <ScrollArea className="flex-1 p-4 h-[calc(100vh-220px)] md:h-[450px]">
+      <div className="flex-1 h-[calc(100vh-220px)] md:h-[450px] overflow-hidden">
         {messages.length === 0 ? (
-          <EmptyConversation onPillClick={handlePillClick} />
+          <ScrollArea className="p-4 h-full">
+            <EmptyConversation onPillClick={handlePillClick} />
+          </ScrollArea>
         ) : (
-          <MessageList messages={messages} isLoading={isLoading} />
+          <div className="p-4 h-full">
+            <MessageList messages={messages} isLoading={isLoading} />
+          </div>
         )}
-      </ScrollArea>
+      </div>
       
       {/* Input area */}
       <div className="border-t border-border/10 p-4 bg-background/95">
