@@ -71,8 +71,11 @@ const Message: React.FC<MessageProps> = ({ role, content, id }) => {
                   return <MermaidRenderer code={String(children).replace(/\n$/, '')} />;
                 }
                 
+                // Check if this is an inline code block by examining props
+                const isInline = props.node?.position?.start.line === props.node?.position?.end.line;
+                
                 // For other code blocks
-                return !props.inline ? (
+                return !isInline ? (
                   <pre className={cn("p-2 rounded bg-slate-800 dark:bg-slate-900 overflow-auto", className)}>
                     <code className={cn("text-sm", className)} {...props}>
                       {children}
