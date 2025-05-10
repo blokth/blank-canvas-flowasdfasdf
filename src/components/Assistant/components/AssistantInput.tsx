@@ -1,8 +1,9 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
+import NotionLikeSelect from './NotionLikeSelect';
 
 interface AssistantInputProps {
   query: string;
@@ -18,12 +19,39 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   isLoading,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [showStockSelector, setShowStockSelector] = useState(false);
+  const [showTimeframeSelector, setShowTimeframeSelector] = useState(false);
+  const [selectedStock, setSelectedStock] = useState("");
+  const [selectedTimeframe, setSelectedTimeframe] = useState("");
+  
+  // Sample data for selections
+  const stocks = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META'];
+  const timeframes = ['1 week', '1 month', '3 months', '6 months', '1 year'];
 
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
     }
+    
+    // Check if query contains trigger words for selectors
+    const checkForTriggers = () => {
+      // Simple detection for stock placeholder
+      if (query.includes("{{stock}}")) {
+        setShowStockSelector(true);
+      } else {
+        setShowStockSelector(false);
+      }
+      
+      // Simple detection for timeframe placeholder
+      if (query.includes("{{timeframe}}")) {
+        setShowTimeframeSelector(true);
+      } else {
+        setShowTimeframeSelector(false);
+      }
+    };
+    
+    checkForTriggers();
   }, [query]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -40,6 +68,20 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     }
   };
 
+  // Handle stock selection
+  const handleStockSelect = (stock: string) => {
+    setSelectedStock(stock);
+    const updatedQuery = query.replace("{{stock}}", stock);
+    setQuery(updatedQuery);
+  };
+
+  // Handle timeframe selection
+  const handleTimeframeSelect = (timeframe: string) => {
+    setSelectedTimeframe(timeframe);
+    const updatedQuery = query.replace("{{timeframe}}", timeframe);
+    setQuery(updatedQuery);
+  };
+
   // Set a template in the assistant input
   const setTemplate = (template: string) => {
     setQuery(template);
@@ -52,8 +94,8 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
 
   // Quick template buttons
   const quickTemplates = [
-    { label: "Stock", template: "Show me AAPL performance for the past 3 months" },
-    { label: "Forecast", template: "Show me a forecast for MSFT" }
+    { label: "Stock", template: "Show me {{stock}} performance for the past {{timeframe}}" },
+    { label: "Forecast", template: "Show me a forecast for {{stock}}" }
   ];
 
   return (
@@ -95,6 +137,28 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
             <Send size={16} className={isLoading ? 'opacity-50' : ''} />
           </Button>
         </div>
+
+        {/* Selectors that appear when placeholders are detected */}
+        {(showStockSelector || showTimeframeSelector) && (
+          <div className="flex gap-2 px-1">
+            {showStockSelector && (
+              <NotionLikeSelect
+                options={stocks}
+                onSelect={handleStockSelect}
+                placeholder="Select stock"
+                value={selectedStock}
+              />
+            )}
+            {showTimeframeSelector && (
+              <NotionLikeSelect
+                options={timeframes}
+                onSelect={handleTimeframeSelect}
+                placeholder="Select timeframe"
+                value={selectedTimeframe}
+              />
+            )}
+          </div>
+        )}
       </div>
     </form>
   );
