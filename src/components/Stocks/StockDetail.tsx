@@ -1,26 +1,8 @@
 
 import React from 'react';
-import { ArrowLeft, TrendingUp } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
-import StockChart from '../common/StockChart';
 import { Button } from '@/components/ui/button';
-
-// Sample data for charts
-const generateChartData = (baseValue: number, volatility: number, points: number) => {
-  const data = [];
-  let currentValue = baseValue;
-  
-  for (let i = 0; i < points; i++) {
-    const change = (Math.random() - 0.5) * volatility;
-    currentValue = Math.max(currentValue + change, 1); // Ensure value stays above 1
-    data.push({
-      name: i.toString(),
-      value: parseFloat(currentValue.toFixed(2)),
-    });
-  }
-  
-  return data;
-};
 
 // Sample stock data
 const STOCKS = {
@@ -30,11 +12,6 @@ const STOCKS = {
     price: 191.33,
     change: 1.25,
     changePercent: 0.65,
-    high: 192.43,
-    low: 190.21,
-    volume: '58.3M',
-    marketCap: '2.94T',
-    peRatio: 31.55,
   },
   'msft': {
     name: 'Microsoft Corporation',
@@ -42,11 +19,6 @@ const STOCKS = {
     price: 418.20,
     change: -2.30,
     changePercent: -0.55,
-    high: 421.35,
-    low: 417.50,
-    volume: '22.1M',
-    marketCap: '3.11T',
-    peRatio: 35.2,
   },
   'googl': {
     name: 'Alphabet Inc.',
@@ -54,11 +26,6 @@ const STOCKS = {
     price: 170.87,
     change: 2.54,
     changePercent: 1.51,
-    high: 171.45,
-    low: 168.29,
-    volume: '28.5M',
-    marketCap: '2.15T',
-    peRatio: 25.7,
   },
   'amzn': {
     name: 'Amazon.com Inc.',
@@ -66,11 +33,6 @@ const STOCKS = {
     price: 178.12,
     change: -1.23,
     changePercent: -0.69,
-    high: 180.32,
-    low: 177.89,
-    volume: '33.7M',
-    marketCap: '1.84T',
-    peRatio: 48.3,
   },
   'meta': {
     name: 'Meta Platforms Inc.',
@@ -78,11 +40,6 @@ const STOCKS = {
     price: 474.88,
     change: 3.45,
     changePercent: 0.73,
-    high: 476.23,
-    low: 471.12,
-    volume: '15.6M',
-    marketCap: '1.22T',
-    peRatio: 32.1,
   },
 };
 
@@ -105,80 +62,55 @@ const StockDetail: React.FC = () => {
   
   const stock = STOCKS[id as keyof typeof STOCKS];
   const isPositive = stock.changePercent >= 0;
-  const changeColor = isPositive ? 'text-tr-green' : 'text-tr-red';
-  
-  // Generate chart data for different time periods
-  const chartData = {
-    '1D': generateChartData(stock.price - stock.change, 0.5, 24),
-    '1W': generateChartData(stock.price - stock.change * 5, 2, 7),
-    '1M': generateChartData(stock.price - stock.change * 20, 5, 30),
-    '3M': generateChartData(stock.price - stock.change * 60, 10, 90),
-    '1Y': generateChartData(stock.price - stock.change * 200, 20, 365),
-    'All': generateChartData(stock.price / 2, 50, 1500),
-  };
   
   return (
-    <div className="animate-fade-in">
-      <div className="flex items-center mb-4">
-        <Link to="/stocks" className="mr-3">
-          <ArrowLeft size={20} className="text-muted-foreground" />
+    <div className="flex flex-col min-h-screen bg-white text-black pb-24">
+      <div className="flex justify-between items-center py-4 px-4">
+        <Link to="/stocks">
+          <ArrowLeft size={20} className="text-black" />
         </Link>
-        <h1 className="text-xl font-bold">{stock.name}</h1>
+        <button className="text-sm font-medium">Follow</button>
       </div>
       
-      <div className="mb-6">
-        <div className="flex items-baseline">
-          <h2 className="text-3xl font-bold mr-3">${stock.price.toFixed(2)}</h2>
-          <div className={`flex items-center ${changeColor}`}>
-            {isPositive ? (
-              <TrendingUp size={16} className="mr-1" />
-            ) : (
-              <TrendingUp size={16} className="mr-1 rotate-180" />
-            )}
-            <span className="font-medium">
-              {isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%
-            </span>
-          </div>
-        </div>
-        <p className="text-sm text-muted-foreground">{stock.symbol}</p>
-      </div>
-      
-      <StockChart data={chartData} isPositive={isPositive} />
-      
-      <div className="mt-6 tr-card">
-        <h3 className="font-medium mb-4">Stock Information</h3>
+      <div className="px-4">
+        <h1 className="text-2xl font-bold mb-1">{stock.name}</h1>
         
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <p className="text-sm text-muted-foreground">High</p>
-            <p className="font-medium">${stock.high}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Low</p>
-            <p className="font-medium">${stock.low}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Volume</p>
-            <p className="font-medium">{stock.volume}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Market Cap</p>
-            <p className="font-medium">{stock.marketCap}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">P/E Ratio</p>
-            <p className="font-medium">{stock.peRatio}</p>
-          </div>
+        <div className="flex items-baseline gap-2 mb-4">
+          <span className="text-2xl font-bold">${stock.price.toFixed(2)}</span>
+          <span className="text-sm">
+            {isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%
+          </span>
+        </div>
+        
+        <div className="flex mb-8 overflow-x-auto space-x-2">
+          <button className="rounded-full bg-black text-white px-3 py-1 text-sm">1D</button>
+          <button className="rounded-full bg-gray-100 text-black px-3 py-1 text-sm">1W</button>
+          <button className="rounded-full bg-gray-100 text-black px-3 py-1 text-sm">1M</button>
+          <button className="rounded-full bg-gray-100 text-black px-3 py-1 text-sm">1Y</button>
+          <button className="rounded-full bg-gray-100 text-black px-3 py-1 text-sm">Max</button>
+        </div>
+        
+        <div className="h-64 -mx-4 mb-8">
+          <svg viewBox="0 0 400 150" className="w-full h-full" preserveAspectRatio="none">
+            <path 
+              d="M0,75 C50,50 100,100 150,75 C200,50 250,100 300,75 C350,50 400,75 400,75" 
+              stroke="black" 
+              strokeWidth="1.5" 
+              fill="none" 
+            />
+          </svg>
         </div>
       </div>
       
-      <div className="fixed bottom-20 inset-x-0 px-4">
-        <div className="flex gap-3 mb-4">
-          <Button className="flex-1 bg-tr-green hover:bg-tr-green/90">
-            Buy
+      <div className="fixed bottom-24 inset-x-0 px-4">
+        <div className="flex gap-3">
+          <Button variant="outline" className="flex-1 rounded-full gap-2 bg-black text-white hover:bg-black/90">
+            <Save size={20} />
+            Save
           </Button>
-          <Button className="flex-1" variant="outline">
-            Sell
+          <Button className="flex-1 rounded-full gap-2 bg-black text-white hover:bg-black/90">
+            Buy
+            <ArrowRight size={20} />
           </Button>
         </div>
       </div>
