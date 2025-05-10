@@ -9,40 +9,71 @@ type MCPResponse = {
   visualization?: VisualizationType | null;
 };
 
+// MCP configuration with default values
+const MCP_CONFIG = {
+  baseUrl: process.env.REACT_APP_MCP_URL || 'http://localhost:8000',
+  healthEndpoint: '/health',
+  chatEndpoint: '/chat',
+  checkInterval: 30000, // 30 seconds
+};
+
 export const useMCPConnection = () => {
   const [response, setResponse] = useState<string | null>(null);
   const [visualizationType, setVisualizationType] = useState<VisualizationType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   
   // Check server connection on initial load
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        const response = await fetch('http://localhost:8000/health', { 
+        console.log(`Checking MCP connection at ${MCP_CONFIG.baseUrl}${MCP_CONFIG.healthEndpoint}`);
+        
+        // Make the request with mode: 'cors' explicitly set
+        const response = await fetch(`${MCP_CONFIG.baseUrl}${MCP_CONFIG.healthEndpoint}`, { 
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
+          mode: 'cors', // Explicitly request CORS
         });
-
-        console.log(response);
+        
+        console.log('MCP health check response:', response);
         
         setIsConnected(response.ok);
+        setConnectionError(null);
         
         if (!response.ok) {
+          const errorMessage = `Server returned ${response.status}: ${response.statusText}`;
+          setConnectionError(errorMessage);
+          console.warn('MCP Server Error:', errorMessage);
           toast({
             title: "MCP Server Error",
-            description: "Could not connect to MCP server at localhost:8000",
+            description: `Could not connect to MCP server (${response.status})`,
             variant: "destructive"
           });
         }
       } catch (error) {
         console.error('Failed to check MCP server status:', error);
         setIsConnected(false);
+        
+        // Handle CORS errors specifically
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const isCorsError = errorMessage.includes('CORS') || 
+                           (error instanceof TypeError && errorMessage.includes('Network'));
+        
+        setConnectionError(
+          isCorsError 
+            ? "CORS error: The MCP server needs to enable cross-origin requests" 
+            : `Connection error: ${errorMessage}`
+        );
+        
         toast({
-          title: "MCP Server Error",
-          description: "Could not connect to MCP server at localhost:8000",
+          title: "MCP Connection Error",
+          description: isCorsError 
+            ? "CORS policy blocked connection to MCP server" 
+            : "Could not connect to MCP server",
           variant: "destructive"
         });
       }
@@ -51,7 +82,7 @@ export const useMCPConnection = () => {
     checkConnection();
     
     // Set up periodic connection check
-    const intervalId = setInterval(checkConnection, 30000); // Check every 30 seconds
+    const intervalId = setInterval(checkConnection, MCP_CONFIG.checkInterval);
     
     return () => clearInterval(intervalId);
   }, []);
@@ -63,12 +94,13 @@ export const useMCPConnection = () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://localhost:8000/chat', {
+      const response = await fetch(`${MCP_CONFIG.baseUrl}${MCP_CONFIG.chatEndpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ message: query }),
+        mode: 'cors', // Explicitly request CORS
       });
       
       if (!response.ok) {
@@ -87,14 +119,24 @@ export const useMCPConnection = () => {
       }
       
       setIsConnected(true);
+      setConnectionError(null);
       return true;
     } catch (error) {
       console.error('Error sending message to MCP server:', error);
+      
+      // Check if this is a CORS error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const isCorsError = errorMessage.includes('CORS') || 
+                         (error instanceof TypeError && errorMessage.includes('Network'));
+      
       toast({
         title: "MCP Server Error",
-        description: "Failed to get a response from the MCP server",
+        description: isCorsError 
+          ? "CORS policy blocked connection to MCP server" 
+          : "Failed to get a response from the MCP server",
         variant: "destructive"
       });
+      
       setIsConnected(false);
       return false;
     } finally {
@@ -107,6 +149,7 @@ export const useMCPConnection = () => {
     visualizationType,
     isLoading,
     isConnected,
+    connectionError,
     sendMessage,
     setResponse,
     setVisualizationType

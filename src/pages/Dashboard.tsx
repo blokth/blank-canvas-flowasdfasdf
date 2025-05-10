@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 import PortfolioOverview from '../components/Dashboard/PortfolioOverview';
@@ -6,6 +7,7 @@ import DashboardVisualization from '../components/Dashboard/DashboardVisualizati
 import DashboardAssistant from '../components/Dashboard/DashboardAssistant';
 import { generateChartData, generatePersonalFinanceData } from '../utils/chartDataGenerators';
 import { useMCPConnection } from '../hooks/useMCPConnection';
+import { AlertCircle } from 'lucide-react';
 
 const Dashboard = () => {
   // Generate chart data
@@ -32,6 +34,7 @@ const Dashboard = () => {
     visualizationType, 
     isLoading: mcpLoading, 
     isConnected, 
+    connectionError,
     sendMessage,
     setResponse,
     setVisualizationType
@@ -123,10 +126,20 @@ const Dashboard = () => {
       
       {/* MCP Connection Status Indicator */}
       <div className="mx-4 mb-2">
-        <div className={`px-2 py-1 text-xs rounded-full inline-flex items-center ${isConnected ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-          <div className={`w-2 h-2 rounded-full mr-1 ${isConnected ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-          {isConnected ? 'MCP Connected' : 'MCP Offline - Using Fallback Mode'}
-        </div>
+        {connectionError ? (
+          <div className="px-3 py-2 text-xs rounded-md bg-amber-50 text-amber-800 border border-amber-200">
+            <div className="flex items-center gap-1 mb-1">
+              <AlertCircle size={12} />
+              <span className="font-medium">MCP Connection Issue</span>
+            </div>
+            <p className="text-xs opacity-90">{connectionError}</p>
+          </div>
+        ) : (
+          <div className={`px-2 py-1 text-xs rounded-full inline-flex items-center ${isConnected ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+            <div className={`w-2 h-2 rounded-full mr-1 ${isConnected ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+            {isConnected ? 'MCP Connected' : 'MCP Offline - Using Fallback Mode'}
+          </div>
+        )}
       </div>
       
       {/* Action Pills with Selection Templates */}
