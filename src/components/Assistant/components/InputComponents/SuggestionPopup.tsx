@@ -1,5 +1,5 @@
 
-import React, { memo } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +17,9 @@ const SuggestionPopup: React.FC<SuggestionPopupProps> = ({
   onSuggestionSelect,
   selectedIndex = 0
 }) => {
+  // Reference to track popup visibility and prevent unnecessary animations
+  const popupRef = useRef<HTMLDivElement>(null);
+  
   // Customize heading based on suggestion type and context
   const getHeadingText = () => {
     if (!suggestionType) return "Commands";
@@ -29,9 +32,27 @@ const SuggestionPopup: React.FC<SuggestionPopupProps> = ({
     
     return typeLabels[suggestionType] || `${suggestionType.charAt(0).toUpperCase() + suggestionType.slice(1)} suggestions`;
   };
+  
+  // Help stabilize the popup from re-renders
+  useEffect(() => {
+    const popupElement = popupRef.current;
+    if (popupElement) {
+      popupElement.style.opacity = '0';
+      
+      // Micro-delay to let the component fully render before showing
+      const timer = setTimeout(() => {
+        popupElement.style.opacity = '1';
+      }, 50);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [suggestionType]); // Only when suggestion type changes to prevent flicker
 
   return (
-    <div className="absolute left-0 right-0 bottom-full mb-1 z-50">
+    <div 
+      ref={popupRef}
+      className="absolute left-0 right-0 bottom-full mb-1 z-50 transition-opacity duration-150"
+    >
       <Command className="rounded-lg border shadow-md bg-popover">
         <CommandList>
           <CommandGroup heading={getHeadingText()}>
@@ -59,4 +80,17 @@ const SuggestionPopup: React.FC<SuggestionPopupProps> = ({
   );
 };
 
-export default memo(SuggestionPopup);
+// Use React.memo with custom comparison to prevent unnecessary re-renders
+export default memo(SuggestionPopup, (prevProps, nextProps) => {
+  // Only re-render when these specific props change
+  return (
+    prevProps.suggestionType === nextProps.suggestionType &&
+    prevProps.selectedIndex === nextProps.selectedIndex &&
+    prevProps.filteredSuggestions.length === nextProps.filteredSuggestions.length &&
+    // Only check first/last items for performance
+    (prevProps.filteredSuggestions.length === 0 || 
+      (prevProps.filteredSuggestions[0] === nextProps.filteredSuggestions[0] &&
+       prevProps.filteredSuggestions[prevProps.filteredSuggestions.length - 1] === 
+       nextProps.filteredSuggestions[nextProps.filteredSuggestions.length - 1]))
+  );
+});

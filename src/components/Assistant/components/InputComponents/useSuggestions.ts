@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 
 interface SuggestionsHookProps {
@@ -20,6 +21,13 @@ const suggestions = {
   stock: ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'TSLA', 'JPM', 'V', 'WMT'],
   timeframe: ['1d', '1w', '1m', '3m', '6m', '1y', '5y', 'ytd'],
   sector: ['Technology', 'Healthcare', 'Finance', 'Energy', 'Consumer', 'Industrial', 'Telecom', 'Materials', 'Utilities', 'Real Estate']
+};
+
+// Command suggestions mapping
+const commandSuggestions = {
+  '/stock': 'stock',
+  '/timeframe': 'timeframe',
+  '/sector': 'sector'
 };
 
 export const useSuggestions = ({ 
@@ -95,7 +103,20 @@ export const useSuggestions = ({
     // Get text before the cursor
     const textBeforeCursor = query.substring(0, cursorPosition);
     
-    // Check for specific patterns
+    // Check for enhanced command suggestions - directly detect command patterns
+    const commandMatch = /\/(stock|timeframe|sector)(\w*)$/.exec(textBeforeCursor);
+    if (commandMatch) {
+      const commandType = commandMatch[1] as 'stock' | 'timeframe' | 'sector';
+      const commandParam = commandMatch[2] || '';
+      
+      setSuggestionType(commandType);
+      setSearchTerm(commandParam);
+      setTemplateField(null);
+      setShowSuggestions(true);
+      return;
+    }
+    
+    // Check for specific patterns (original behavior)
     const stockMatch = /stock:(\w*)$/.exec(textBeforeCursor);
     const timeframeMatch = /timeframe:(\w*)$/.exec(textBeforeCursor);
     const sectorMatch = /sector:(\w*)$/.exec(textBeforeCursor);
@@ -120,7 +141,7 @@ export const useSuggestions = ({
       return;
     }
     
-    // Check for slash command
+    // Check for basic slash command
     const slashMatch = /\/(\w*)$/.exec(textBeforeCursor);
     if (slashMatch) {
       // Show quick templates
