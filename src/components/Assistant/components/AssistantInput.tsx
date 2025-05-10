@@ -9,6 +9,8 @@ interface AssistantInputProps {
   setQuery: (query: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   isLoading: boolean;
+  streamingChunks?: string[];
+  isStreaming?: boolean;
 }
 
 const AssistantInput: React.FC<AssistantInputProps> = ({
@@ -16,6 +18,8 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   setQuery,
   onSubmit,
   isLoading,
+  streamingChunks,
+  isStreaming
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -68,6 +72,8 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
           handleSuggestionSelect={handleSuggestionSelect}
           textareaRef={textareaRef}
           templateField={templateField}
+          streamingChunks={streamingChunks}
+          isStreaming={isStreaming}
         />
       </div>
     </form>

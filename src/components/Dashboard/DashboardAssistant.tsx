@@ -26,7 +26,6 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
   const [internalQuery, setInternalQuery] = useState('');
   const [internalIsLoading, setInternalIsLoading] = useState(false);
   const [isInTransition, setIsInTransition] = useState(false);
-  const [showChunks, setShowChunks] = useState(false);
   
   // Use either external or internal state
   const query = externalQuery !== undefined ? externalQuery : internalQuery;
@@ -67,29 +66,18 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
     }, 550); // Changed from 1100ms to 550ms (slightly longer than animation duration)
   };
 
+  // Determine if we're actively streaming (have chunks and are loading)
+  const isStreaming = isLoading && chunks && chunks.length > 0;
+
   return (
     <div className="relative">
-      {chunks && chunks.length > 0 && showChunks && (
-        <div className="mb-2 p-2 bg-slate-50 border rounded-md overflow-auto max-h-32">
-          <h3 className="font-medium text-xs mb-1">Stream Chunks:</h3>
-          <pre className="text-xs whitespace-pre-wrap">{chunks.join('')}</pre>
-        </div>
-      )}
-      
-      {chunks && chunks.length > 0 && (
-        <button 
-          onClick={() => setShowChunks(!showChunks)} 
-          className="mb-2 text-xs text-blue-600 hover:text-blue-800"
-        >
-          {showChunks ? 'Hide' : 'Show'} Stream Data
-        </button>
-      )}
-      
       <AssistantInput
         query={query}
         setQuery={setQuery}
         onSubmit={handleSubmit}
         isLoading={isLoading}
+        streamingChunks={chunks}
+        isStreaming={isStreaming}
       />
     </div>
   );

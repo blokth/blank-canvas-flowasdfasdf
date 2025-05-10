@@ -19,6 +19,8 @@ interface InputAreaProps {
   handleSuggestionSelect: (value: string) => void;
   textareaRef: React.RefObject<HTMLTextAreaElement>;
   templateField: string | null;
+  streamingChunks?: string[];
+  isStreaming?: boolean;
 }
 
 const InputArea: React.FC<InputAreaProps> = ({
@@ -33,7 +35,9 @@ const InputArea: React.FC<InputAreaProps> = ({
   filteredSuggestions,
   handleSuggestionSelect,
   textareaRef,
-  templateField
+  templateField,
+  streamingChunks,
+  isStreaming
 }) => {
   // Track currently selected suggestion
   const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -111,7 +115,11 @@ const InputArea: React.FC<InputAreaProps> = ({
         />
         
         {/* Visible div for highlighting */}
-        <InputDisplay query={query} />
+        <InputDisplay 
+          query={query} 
+          streamingChunks={streamingChunks}
+          isStreaming={isStreaming}
+        />
       </div>
       
       <Button 
