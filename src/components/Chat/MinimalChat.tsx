@@ -12,7 +12,8 @@ const MinimalChat: React.FC = () => {
     input, 
     setInput, 
     isLoading, 
-    sendMessage 
+    sendMessage,
+    chunks 
   } = useChat();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -20,7 +21,7 @@ const MinimalChat: React.FC = () => {
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, chunks]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +50,7 @@ const MinimalChat: React.FC = () => {
               />
             ))
           )}
-          {isLoading && <ChatBubble message="" isUser={false} isLoading={true} />}
+          {isLoading && chunks.length === 0 && <ChatBubble message="" isUser={false} isLoading={true} />}
           <div ref={messagesEndRef} />
         </div>
         

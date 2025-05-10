@@ -1,6 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { processStream } from '@/utils/streamProcessor';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -11,6 +12,7 @@ export const useChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [chunks, setChunks] = useState<string[]>([]);
   const { toast } = useToast();
   
   const sendMessage = useCallback(async () => {
@@ -25,13 +27,14 @@ export const useChat = () => {
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
     setInput(''); // Clear input field
+    setChunks([]); // Reset chunks
     
     try {
       // Send request to chat endpoint
       const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json', // Added correct Content-Type header
+          'Content-Type': 'application/json',
           'Accept': 'text/event-stream',
         },
         body: JSON.stringify({ message: input }),
@@ -58,29 +61,24 @@ export const useChat = () => {
         throw new Error('Unable to read response');
       }
       
-      // Read stream chunks
-      while (true) {
-        const { done, value } = await reader.read();
+      // Use the streamProcessor utility
+      processStream(reader, decoder, (chunk: string) => {
+        // Add the new chunk to the chunks array
+        setChunks(prev => [...prev, chunk]);
         
-        if (done) {
-          break;
-        }
-        
-        // Decode chunk
-        const chunk = decoder.decode(value, { stream: true });
-        
-        // Update the last assistant message
+        // Update the last assistant message with the accumulated content
         setMessages(prev => {
           const newMessages = [...prev];
           const lastMessage = newMessages[newMessages.length - 1];
           
           if (lastMessage && lastMessage.role === 'assistant') {
-            lastMessage.content += chunk;
+            lastMessage.content = chunk;
           }
           
           return newMessages;
         });
-      }
+      });
+      
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -112,6 +110,7 @@ export const useChat = () => {
     input,
     setInput,
     isLoading,
-    sendMessage
+    sendMessage,
+    chunks
   };
 };
