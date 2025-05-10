@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import VisualizationManager, { VisualizationType } from '../Assistant/components/VisualizationManager';
 import VisualizationDisplay from '../Assistant/components/VisualizationDisplay';
+import AssistantInput from '../Assistant/components/AssistantInput';
 
 interface DashboardVisualizationProps {
   response: string | null;

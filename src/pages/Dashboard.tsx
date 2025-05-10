@@ -1,60 +1,11 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 import PortfolioOverview from '../components/Dashboard/PortfolioOverview';
-
-// Simple data generator function
-const generateChartData = () => {
-  const generateDataPoints = (baseValue: number, points: number) => {
-    const data = [];
-    let value = baseValue;
-    
-    for (let i = 0; i < points; i++) {
-      value = Math.max(value + (Math.random() * 20 - 10), baseValue * 0.8);
-      data.push({
-        name: i.toString(),
-        value: parseFloat(value.toFixed(2))
-      });
-    }
-    
-    return data;
-  };
-  
-  return {
-    '1D': generateDataPoints(10000, 24),
-    '1W': generateDataPoints(9800, 7),
-    '1M': generateDataPoints(9500, 30),
-    '3M': generateDataPoints(9000, 90),
-    '1Y': generateDataPoints(8500, 365),
-    'All': generateDataPoints(7500, 500),
-  };
-};
-
-// Simple data generator for personal finance
-const generatePersonalFinanceData = () => {
-  const generateDataPoints = (baseValue: number, points: number) => {
-    const data = [];
-    let value = baseValue;
-    
-    for (let i = 0; i < points; i++) {
-      value = Math.max(value + (Math.random() * 10 - 5), baseValue * 0.8);
-      data.push({
-        name: i.toString(),
-        value: parseFloat(value.toFixed(2))
-      });
-    }
-    
-    return data;
-  };
-  
-  return {
-    '1D': generateDataPoints(5000, 24),
-    '1W': generateDataPoints(4900, 7),
-    '1M': generateDataPoints(4800, 30),
-    '3M': generateDataPoints(4700, 90),
-    '1Y': generateDataPoints(4500, 365),
-    'All': generateDataPoints(4000, 500),
-  };
-};
+import DashboardVisualization from '../components/Dashboard/DashboardVisualization';
+import ConversationView from '../components/Assistant/components/ConversationView';
+import { generateChartData, generatePersonalFinanceData } from '../utils/chartDataGenerators';
+import { useMCPConnection } from '../hooks/useMCPConnection';
 
 const Dashboard = () => {
   // Memoize chart data to prevent regeneration on every render
@@ -65,28 +16,85 @@ const Dashboard = () => {
   const portfolioValue = 10800;
   const portfolioChange = 800;
   const portfolioChangePercent = 8.0;
+  
   const personalFinanceValue = 5350;
   const personalFinanceChange = 350;
   const personalFinanceChangePercent = 7.0;
-  
-  // State for active data type
+
+  // Assistant state
+  const [query, setQuery] = useState('');
   const [activeDataType, setActiveDataType] = useState<'wealth' | 'cash'>('wealth');
+  const [showFullscreenChart, setShowFullscreenChart] = useState(false);
+
+  // MCP connection using the updated hook
+  const { 
+    response, 
+    visualizationType, 
+    isLoading, 
+    chunks,
+    sendMessage,
+    setResponse,
+    setVisualizationType
+  } = useMCPConnection();
+  
+  const [activeVisualization, setActiveVisualization] = useState<VisualizationType>(null);
+
+  // Update active visualization when MCP provides one
+  useEffect(() => {
+    if (visualizationType) {
+      setActiveVisualization(visualizationType);
+    }
+  }, [visualizationType]);
+
+  // Handle assistant submission
+  const handleAssistantSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      sendMessage(query);
+    }
+  };
 
   return (
     <div className="pb-28 w-full">
+      {/* Page Title */}
+      <h3 className="text-lg font-medium mb-4">Ask me about your finances</h3>
+      
       {/* Portfolio Overview with Tabs */}
       <PortfolioOverview 
-        stockChartData={stockChartData} 
-        personalFinanceChartData={personalFinanceChartData} 
-        portfolioValue={portfolioValue} 
-        portfolioChange={portfolioChange} 
-        portfolioChangePercent={portfolioChangePercent} 
-        personalFinanceValue={personalFinanceValue} 
-        personalFinanceChange={personalFinanceChange} 
-        personalFinanceChangePercent={personalFinanceChangePercent} 
-        activeDataType={activeDataType} 
-        setActiveDataType={setActiveDataType} 
+        stockChartData={stockChartData}
+        personalFinanceChartData={personalFinanceChartData}
+        portfolioValue={portfolioValue}
+        portfolioChange={portfolioChange}
+        portfolioChangePercent={portfolioChangePercent}
+        personalFinanceValue={personalFinanceValue}
+        personalFinanceChange={personalFinanceChange}
+        personalFinanceChangePercent={personalFinanceChangePercent}
+        activeDataType={activeDataType}
+        setActiveDataType={setActiveDataType}
       />
+      
+      {/* Visualization Display */}
+      <DashboardVisualization
+        response={response}
+        activeVisualization={activeVisualization}
+        showFullscreenChart={false}
+        setShowFullscreenChart={() => {}}
+        query={query}
+        setQuery={setQuery}
+        onSubmit={handleAssistantSubmit}
+        isLoading={isLoading}
+      />
+      
+      {/* Chat Experience (moved below charts) */}
+      <div className="mt-4">
+        <ConversationView
+          chunks={chunks}
+          isLoading={isLoading}
+          query={query}
+          setQuery={setQuery}
+          onSubmit={handleAssistantSubmit}
+        />
+      </div>
     </div>
   );
 };
