@@ -1,4 +1,3 @@
-
 import { useState, useEffect, RefObject } from 'react';
 import { moveToNextTemplateField } from './TemplateNavigator';
 import { suggestions } from './useSuggestions';
@@ -135,22 +134,22 @@ export const useInputHandlers = ({
     }
     
     if (!suggestionType) {
-      // Handle command quick templates
+      // Handle command quick templates - modified to not include "show me the data for"
       const templates: Record<string, string> = {
-        'stock': 'Show me data for {{stock}}',
-        'sector': 'Show performance of {{sector}}',
-        'timeframe': 'Show data for the past {{timeframe}}'
+        'stock': '{{stock}}',
+        'sector': '{{sector}}',
+        'timeframe': '{{timeframe}}'
       };
       
       if (templates[value.toLowerCase()]) {
         const template = templates[value.toLowerCase()];
         // Insert at cursor position
-        const newQuery = query.substring(0, cursorPosition - (searchTerm.length + 1)) + 
-                        template + 
-                        query.substring(cursorPosition);
+        const textBeforeCursor = query.substring(0, cursorPosition - (searchTerm.length + 1)); 
+        const textAfterCursor = query.substring(cursorPosition);
+        const newQuery = textBeforeCursor + template + textAfterCursor;
         setQuery(newQuery);
         
-        // Set cursor position to the first template field
+        // Set cursor position to the template field
         setTimeout(() => {
           const fieldPattern = /\{\{(stock|timeframe|sector)\}\}/;
           const match = fieldPattern.exec(newQuery);
