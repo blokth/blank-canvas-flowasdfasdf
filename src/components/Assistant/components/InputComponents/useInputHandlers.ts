@@ -50,7 +50,7 @@ export const useInputHandlers = ({
     setCursorPosition
   });
   
-  // Use suggestion selection logic
+  // Use suggestion selection logic - pass the setSuggestionType and setSearchTerm
   const { handleSuggestionSelect } = useSuggestionSelection({
     query,
     setQuery,
@@ -59,7 +59,9 @@ export const useInputHandlers = ({
     setCursorPosition,
     setShowSuggestions,
     suggestionType,
-    searchTerm
+    searchTerm,
+    setSuggestionType,
+    setSearchTerm
   });
   
   // Use keyboard handling logic
@@ -91,12 +93,6 @@ export const useInputHandlers = ({
     setSuggestionType,
     setSearchTerm,
     showSuggestions
-  });
-  
-  // Use suggestion filtering logic
-  const { filteredSuggestions } = useSuggestionFiltering({
-    suggestionType,
-    searchTerm
   });
 
   // Handle input changes

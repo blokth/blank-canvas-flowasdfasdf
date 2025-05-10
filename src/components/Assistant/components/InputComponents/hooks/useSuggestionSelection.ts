@@ -10,6 +10,8 @@ interface SuggestionSelectionProps {
   setShowSuggestions: (show: boolean) => void;
   suggestionType: 'stock' | 'timeframe' | 'sector' | null;
   searchTerm: string;
+  setSuggestionType?: (type: 'stock' | 'timeframe' | 'sector' | null) => void;
+  setSearchTerm?: (term: string) => void;
 }
 
 export const useSuggestionSelection = ({
@@ -20,11 +22,18 @@ export const useSuggestionSelection = ({
   setCursorPosition,
   setShowSuggestions,
   suggestionType,
-  searchTerm
+  searchTerm,
+  setSuggestionType,
+  setSearchTerm
 }: SuggestionSelectionProps) => {
   
   const handleSuggestionSelect = (value: string) => {
-    // Handle field: style selections
+    // If there's no active cursor position, don't do anything
+    if (cursorPosition === null || cursorPosition === undefined) {
+      return;
+    }
+
+    // Handle field: style selections (when cursor is right after the colon)
     if (/(stock|timeframe|sector):$/.test(query.substring(0, cursorPosition))) {
       // Find the field: pattern before the cursor
       const match = /(stock|timeframe|sector):$/.exec(query.substring(0, cursorPosition));
@@ -40,7 +49,7 @@ export const useSuggestionSelection = ({
         setQuery(newQuery);
         
         // Set cursor position AFTER the inserted value
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           if (textareaRef.current) {
             const newPosition = fieldPos + field.length + value.length;
             textareaRef.current.focus();
@@ -50,20 +59,26 @@ export const useSuggestionSelection = ({
             // After inserting, hide suggestions by default
             setShowSuggestions(false);
           }
-        }, 0);
+        });
         return;
       }
     }
     
-    // Extract value from pattern like stock:AAPL to find field type
+    // Handle when cursor is within an existing field value
+    // Example: cursor is at "stock:A|PPL" (where | is the cursor)
     const fieldValuePattern = /(stock|timeframe|sector):(\w*)/.exec(query.substring(0, cursorPosition));
     if (fieldValuePattern && suggestionType) {
       const fieldType = fieldValuePattern[1];
       const fieldWithColon = fieldType + ':';
       const fieldStartPos = query.substring(0, cursorPosition).lastIndexOf(fieldWithColon);
-      const fieldEndPos = fieldStartPos + fieldWithColon.length + (fieldValuePattern[2] || '').length;
       
-      // Replace existing value with new selection
+      // Find where this field value ends (either at whitespace or end of string)
+      let fieldEndPos = query.indexOf(' ', fieldStartPos);
+      if (fieldEndPos === -1 || fieldEndPos > query.length) {
+        fieldEndPos = query.length;
+      }
+      
+      // Replace ONLY this field value with the new selection
       const beforeField = query.substring(0, fieldStartPos + fieldWithColon.length);
       const afterField = query.substring(fieldEndPos);
       const newQuery = beforeField + value + afterField;
@@ -71,7 +86,7 @@ export const useSuggestionSelection = ({
       setQuery(newQuery);
       
       // Position cursor after the inserted value
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         if (textareaRef.current) {
           const newPosition = fieldStartPos + fieldWithColon.length + value.length;
           textareaRef.current.focus();
@@ -81,7 +96,7 @@ export const useSuggestionSelection = ({
           // Hide suggestions after selection
           setShowSuggestions(false);
         }
-      }, 0);
+      });
       return;
     }
     
@@ -95,7 +110,7 @@ export const useSuggestionSelection = ({
       setQuery(newQuery);
       
       // Set cursor position after the colon
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         if (textareaRef.current) {
           const newCursorPosition = beforeSlashCommand.length + commandType.length + 1; // +1 for the colon
           textareaRef.current.focus();
@@ -103,11 +118,15 @@ export const useSuggestionSelection = ({
           setCursorPosition(newCursorPosition);
           
           // Show suggestions for this field type
-          setSuggestionType(commandType as 'stock' | 'timeframe' | 'sector');
+          if (setSuggestionType) {
+            setSuggestionType(commandType as 'stock' | 'timeframe' | 'sector');
+          }
           setShowSuggestions(true);
-          setSearchTerm('');
+          if (setSearchTerm) {
+            setSearchTerm('');
+          }
         }
-      }, 0);
+      });
     } else {
       // Replace the search term with the selected suggestion
       const beforePattern = query.substring(0, cursorPosition - searchTerm.length);
@@ -116,7 +135,7 @@ export const useSuggestionSelection = ({
       setQuery(newQuery);
       
       // Set cursor position after the inserted suggestion
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         if (textareaRef.current) {
           const newPosition = beforePattern.length + value.length;
           textareaRef.current.focus();
@@ -126,18 +145,8 @@ export const useSuggestionSelection = ({
           // Hide suggestions after selection
           setShowSuggestions(false);
         }
-      }, 0);
+      });
     }
-  };
-
-  // Add function to set SearchTerm
-  const setSuggestionType = (type: 'stock' | 'timeframe' | 'sector' | null) => {
-    // This function will be provided by the parent component
-  };
-
-  // Add function to set SearchTerm
-  const setSearchTerm = (term: string) => {
-    // This function will be provided by the parent component
   };
   
   return {
