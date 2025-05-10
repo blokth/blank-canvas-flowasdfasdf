@@ -15,11 +15,24 @@ const SuggestionPopup: React.FC<SuggestionPopupProps> = ({
   onSuggestionSelect,
   selectedIndex = 0
 }) => {
+  // Customize heading based on suggestion type and context
+  const getHeadingText = () => {
+    if (!suggestionType) return "Commands";
+    
+    const typeLabels = {
+      'stock': 'Stock symbols',
+      'timeframe': 'Time periods',
+      'sector': 'Market sectors'
+    };
+    
+    return typeLabels[suggestionType] || `${suggestionType.charAt(0).toUpperCase() + suggestionType.slice(1)} suggestions`;
+  };
+
   return (
     <div className="absolute left-0 right-0 bottom-full mb-1 z-50">
       <Command className="rounded-lg border shadow-md bg-popover">
         <CommandList>
-          <CommandGroup heading={suggestionType ? `${suggestionType.charAt(0).toUpperCase() + suggestionType.slice(1)} suggestions` : "Commands"}>
+          <CommandGroup heading={getHeadingText()}>
             {filteredSuggestions.length > 0 ? (
               filteredSuggestions.map((item, index) => (
                 <CommandItem 

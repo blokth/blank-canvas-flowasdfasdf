@@ -13,6 +13,7 @@ interface SuggestionsHookResult {
   searchTerm: string;
   setSuggestionType: (type: 'stock' | 'timeframe' | 'sector' | null) => void;
   setSearchTerm: (term: string) => void;
+  templateField: string | null;
 }
 
 // Sample data for suggestions
@@ -30,6 +31,7 @@ export const useSuggestions = ({
 }: SuggestionsHookProps): SuggestionsHookResult => {
   const [suggestionType, setSuggestionType] = useState<'stock' | 'timeframe' | 'sector' | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [templateField, setTemplateField] = useState<string | null>(null);
   
   // Check for autocompletion trigger
   useEffect(() => {
@@ -40,6 +42,19 @@ export const useSuggestions = ({
       // Get text before the cursor
       const textBeforeCursor = query.substring(0, cursorPosition);
       
+      // Check for template fields
+      const templateMatch = /\{\{(\w+)\}\}/.exec(textBeforeCursor);
+      if (templateMatch) {
+        const fieldType = templateMatch[1].toLowerCase();
+        if (['stock', 'timeframe', 'sector'].includes(fieldType)) {
+          setSuggestionType(fieldType as 'stock' | 'timeframe' | 'sector');
+          setSearchTerm('');
+          setTemplateField(templateMatch[0]);
+          setShowSuggestions(true);
+          return;
+        }
+      }
+      
       // Check for specific patterns
       const stockMatch = /stock:(\w*)$/.exec(textBeforeCursor);
       const timeframeMatch = /timeframe:(\w*)$/.exec(textBeforeCursor);
@@ -48,16 +63,19 @@ export const useSuggestions = ({
       if (stockMatch) {
         setSuggestionType('stock');
         setSearchTerm(stockMatch[1] || '');
+        setTemplateField(null);
         setShowSuggestions(true);
         return;
       } else if (timeframeMatch) {
         setSuggestionType('timeframe');
         setSearchTerm(timeframeMatch[1] || '');
+        setTemplateField(null);
         setShowSuggestions(true);
         return;
       } else if (sectorMatch) {
         setSuggestionType('sector');
         setSearchTerm(sectorMatch[1] || '');
+        setTemplateField(null);
         setShowSuggestions(true);
         return;
       }
@@ -69,6 +87,7 @@ export const useSuggestions = ({
         setShowSuggestions(true);
         setSuggestionType(null);
         setSearchTerm(slashMatch[1] || '');
+        setTemplateField(null);
         return;
       }
       
@@ -76,6 +95,7 @@ export const useSuggestions = ({
       if (showSuggestions) {
         setShowSuggestions(false);
       }
+      setTemplateField(null);
     };
     
     checkForTrigger();
@@ -85,7 +105,8 @@ export const useSuggestions = ({
     suggestionType,
     searchTerm,
     setSuggestionType,
-    setSearchTerm
+    setSearchTerm,
+    templateField
   };
 };
 

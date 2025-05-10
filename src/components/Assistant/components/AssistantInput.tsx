@@ -1,5 +1,5 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import CommandButtons from './InputComponents/CommandButtons';
 import InputArea from './InputComponents/InputArea';
 import { useSuggestions, suggestions } from './InputComponents/useSuggestions';
@@ -21,15 +21,15 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
   
-  // Command buttons for quick access - removed "Compare" and "Forecast"
+  // Command buttons for quick access
   const commandButtons = [
-    { label: "Stock", command: "stock:" },
-    { label: "Timeframe", command: "timeframe:" },
-    { label: "Sector", command: "sector:" },
+    { label: "Stock", command: "{{stock}}" },
+    { label: "Timeframe", command: "{{timeframe}}" },
+    { label: "Sector", command: "{{sector}}" },
   ];
   
   // Use the extracted suggestions hook
-  const { suggestionType, searchTerm, setSearchTerm } = useSuggestions({
+  const { suggestionType, searchTerm, setSearchTerm, templateField } = useSuggestions({
     query,
     cursorPosition,
     showSuggestions,
@@ -37,7 +37,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   });
 
   // Auto-resize textarea height
-  React.useEffect(() => {
+  useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
@@ -45,9 +45,56 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     }
   }, [query]);
 
+  // Move to next template field
+  const moveToNextTemplateField = () => {
+    const fieldPattern = /\{\{(stock|timeframe|sector)\}\}/g;
+    let match;
+    let firstMatch = null;
+    let nextMatch = null;
+    
+    // Find the next template field after the cursor
+    while ((match = fieldPattern.exec(query)) !== null) {
+      if (firstMatch === null) {
+        firstMatch = match;
+      }
+      
+      if (match.index > cursorPosition) {
+        nextMatch = match;
+        break;
+      }
+    }
+    
+    // If no next match but we have a first match, cycle back to beginning
+    if (!nextMatch && firstMatch) {
+      nextMatch = firstMatch;
+    }
+    
+    // Move cursor to the beginning of the next template field
+    if (nextMatch && textareaRef.current) {
+      const newPosition = nextMatch.index;
+      textareaRef.current.focus();
+      textareaRef.current.setSelectionRange(newPosition, newPosition + nextMatch[0].length);
+      setCursorPosition(newPosition);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Handle tab navigation between template fields
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      moveToNextTemplateField();
+      return;
+    }
+    
     // When suggestions are shown, Enter key behavior is managed in InputArea component
     if (e.key === 'Enter' && !e.shiftKey) {
+      // Check if we're in a template field
+      if (templateField) {
+        e.preventDefault();
+        moveToNextTemplateField();
+        return;
+      }
+      
       // Only submit if there are no suggestions showing
       if (!showSuggestions) {
         e.preventDefault();
@@ -100,11 +147,34 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
 
   // Handle click on a suggestion
   const handleSuggestionSelect = (value: string) => {
+    // Handle template field selections
+    if (templateField) {
+      // Replace the template field with the selected value
+      const beforeTemplate = query.substring(0, query.indexOf(templateField));
+      const afterTemplate = query.substring(query.indexOf(templateField) + templateField.length);
+      const newQuery = beforeTemplate + value + afterTemplate;
+      setQuery(newQuery);
+      
+      // Set cursor position after the inserted value
+      setTimeout(() => {
+        if (textareaRef.current) {
+          const newPosition = beforeTemplate.length + value.length;
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(newPosition, newPosition);
+          setCursorPosition(newPosition);
+          moveToNextTemplateField();
+        }
+      }, 0);
+      setShowSuggestions(false);
+      return;
+    }
+    
     if (!suggestionType) {
       // Handle command quick templates
       const templates: Record<string, string> = {
-        'stock': 'Show me data for stock:',
-        'sector': 'Show performance of sector:'
+        'stock': 'Show me data for {{stock}}',
+        'sector': 'Show performance of {{sector}}',
+        'timeframe': 'Show data for the past {{timeframe}}'
       };
       
       if (templates[value.toLowerCase()]) {
@@ -115,33 +185,18 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
                         query.substring(cursorPosition);
         setQuery(newQuery);
         
-        // Set cursor position after the template
+        // Set cursor position to the first template field
         setTimeout(() => {
-          if (textareaRef.current) {
-            const newPosition = cursorPosition - (searchTerm.length + 1) + template.length;
+          const fieldPattern = /\{\{(stock|timeframe|sector)\}\}/;
+          const match = fieldPattern.exec(newQuery);
+          
+          if (match && textareaRef.current) {
+            const fieldPos = match.index;
             textareaRef.current.focus();
-            textareaRef.current.setSelectionRange(newPosition, newPosition);
-            setCursorPosition(newPosition);
-          }
-        }, 0);
-      }
-    } else if (suggestionType === 'stock') {
-      // For stock suggestions, just use the stock symbol without prefix
-      // Find the position of 'stock:' before the cursor
-      const beforeCursor = query.substring(0, cursorPosition);
-      const stockCommandIndex = beforeCursor.lastIndexOf('stock:');
-      
-      if (stockCommandIndex !== -1) {
-        // Replace everything from 'stock:' to cursor with just the stock symbol
-        const beforeCommand = query.substring(0, stockCommandIndex);
-        const afterCursor = query.substring(cursorPosition);
-        const newQuery = beforeCommand + value + afterCursor;
-        setQuery(newQuery);
-        
-        // Set cursor position after inserted symbol
-        setTimeout(() => {
-          if (textareaRef.current) {
-            const newPosition = beforeCommand.length + value.length;
+            textareaRef.current.setSelectionRange(fieldPos, fieldPos + match[0].length);
+            setCursorPosition(fieldPos);
+          } else if (textareaRef.current) {
+            const newPosition = cursorPosition - (searchTerm.length + 1) + template.length;
             textareaRef.current.focus();
             textareaRef.current.setSelectionRange(newPosition, newPosition);
             setCursorPosition(newPosition);
@@ -176,13 +231,12 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
     const newQuery = query.substring(0, insertPosition) + command + query.substring(insertPosition);
     setQuery(newQuery);
     
-    // Set cursor position after the inserted command
+    // Set cursor position to the inserted template field
     setTimeout(() => {
       if (textareaRef.current) {
-        const newPosition = insertPosition + command.length;
         textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(newPosition, newPosition);
-        setCursorPosition(newPosition);
+        textareaRef.current.setSelectionRange(insertPosition, insertPosition + command.length);
+        setCursorPosition(insertPosition);
       }
     }, 0);
   };
@@ -191,7 +245,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   const filteredSuggestions = suggestionType 
     ? suggestions[suggestionType].filter(item => 
         item.toLowerCase().includes(searchTerm.toLowerCase()))
-    : ['stock', 'sector'].filter(item => 
+    : ['stock', 'sector', 'timeframe'].filter(item => 
         item.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
@@ -215,6 +269,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
           filteredSuggestions={filteredSuggestions}
           handleSuggestionSelect={handleSuggestionSelect}
           textareaRef={textareaRef}
+          templateField={templateField}
         />
       </div>
     </form>
