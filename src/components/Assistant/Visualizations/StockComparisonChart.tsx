@@ -12,13 +12,14 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 
+// More distinctive data with better separation between stocks and finances values
 const data = [
   { name: 'Jan', stocks: 4000, finances: 2400 },
-  { name: 'Feb', stocks: 3000, finances: 2210 },
-  { name: 'Mar', stocks: 5000, finances: 2290 },
-  { name: 'Apr', stocks: 4500, finances: 2000 },
-  { name: 'May', stocks: 6000, finances: 2500 },
-  { name: 'Jun', stocks: 5500, finances: 2800 },
+  { name: 'Feb', stocks: 3000, finances: 2800 },
+  { name: 'Mar', stocks: 5000, finances: 3200 },
+  { name: 'Apr', stocks: 4500, finances: 3800 },
+  { name: 'May', stocks: 6000, finances: 4500 },
+  { name: 'Jun', stocks: 5500, finances: 5200 },
 ];
 
 const stocksData = [
@@ -65,6 +66,7 @@ const StockComparisonChart: React.FC = () => {
               type="monotone" 
               dataKey="stocks" 
               stroke="#9b87f5" 
+              strokeWidth={2}
               fillOpacity={1} 
               fill="url(#colorStocks)" 
               name="Stocks"
@@ -73,6 +75,7 @@ const StockComparisonChart: React.FC = () => {
               type="monotone" 
               dataKey="finances" 
               stroke="#7E69AB" 
+              strokeWidth={2}
               fillOpacity={1} 
               fill="url(#colorFinances)" 
               name="Personal Finances"
