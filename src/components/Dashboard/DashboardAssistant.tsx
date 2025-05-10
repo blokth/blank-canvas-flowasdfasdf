@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { VisualizationType } from '../Assistant/components/VisualizationManager';
 import AssistantInput from '../Assistant/components/AssistantInput';
-import { MessageSquare } from 'lucide-react';
 
 interface DashboardAssistantProps {
   setActiveVisualization: (visualization: VisualizationType) => void;
@@ -20,7 +19,6 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
   query: externalQuery,
   setQuery: setExternalQuery,
   onSubmit: parentOnSubmit,
-  isConnected = false,
   isLoading: externalIsLoading = false
 }) => {
   const [internalQuery, setInternalQuery] = useState('');
@@ -68,13 +66,6 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
 
   return (
     <div className="relative">
-      {isConnected && (
-        <div className="absolute -top-6 left-2 text-xs text-green-600 flex items-center">
-          <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
-          <MessageSquare size={12} className="mr-1" />
-          MCP Ready
-        </div>
-      )}
       <AssistantInput
         query={query}
         setQuery={setQuery}
