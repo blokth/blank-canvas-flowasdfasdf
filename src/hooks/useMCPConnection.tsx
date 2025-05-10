@@ -19,7 +19,7 @@ interface CloseEvent {
 }
 
 // Constants for API requests
-const API_BASE_URL = process.env.API_BASE_URL || '';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const API_RETRY_COUNT = 3;
 const API_TIMEOUT = 30000; // 30 seconds
 const MAX_RETRIES = 3;
