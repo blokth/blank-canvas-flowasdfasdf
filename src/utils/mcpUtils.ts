@@ -15,7 +15,7 @@ export type StreamResponse = {
 
 // MCP configuration with default values
 export const MCP_CONFIG = {
-  baseUrl: import.meta.env.VITE_APP_MCP_URL || 'http://localhost:8000',
+  baseUrl: 'http://localhost:8000',
   healthEndpoint: '/health',
   chatEndpoint: '/chat',
 };
