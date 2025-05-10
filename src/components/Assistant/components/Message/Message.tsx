@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import mermaid from 'mermaid';
 
 // Initialize mermaid
@@ -74,6 +75,7 @@ const Message: React.FC<MessageProps> = ({ role, content, id }) => {
       )}>
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
             components={{
               code({ node, className, children, ...props }) {
                 const match = /language-(\w+)/.exec(className || '');
@@ -149,6 +151,21 @@ const Message: React.FC<MessageProps> = ({ role, content, id }) => {
               },
               hr() {
                 return <hr className="my-4 border-slate-300" />;
+              },
+              // GFM specific components
+              del({ children }) {
+                return <del className="line-through">{children}</del>;
+              },
+              input({ checked, disabled, ...props }) {
+                return (
+                  <input 
+                    type="checkbox" 
+                    checked={checked} 
+                    disabled={true} 
+                    className="mr-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" 
+                    {...props} 
+                  />
+                );
               },
             }}
           >
