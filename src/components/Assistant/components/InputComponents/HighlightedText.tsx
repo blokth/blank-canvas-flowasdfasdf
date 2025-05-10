@@ -18,12 +18,12 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({
     );
   }
 
-  // Process the query to highlight patterns with {{field}} visual style
+  // Process the query to highlight patterns with field values
   const parts = [];
   let lastIndex = 0;
   
   // Match patterns: stock:value, timeframe:value, sector:value
-  const pattern = /(stock:|timeframe:|sector:)(\w*)/g;
+  const pattern = /(stock:|timeframe:|sector:)(\w+)/g;
   let match;
   
   while ((match = pattern.exec(query)) !== null) {
@@ -40,17 +40,14 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({
     const fieldType = match[1].slice(0, -1) as 'stock' | 'timeframe' | 'sector'; // Remove the colon
     const value = match[2];
     
-    // Create the visual representation with {{field}} style
+    // Create the visual representation showing the actual value with highlighting
     parts.push(
       <span 
         key={`field-${match.index}`} 
         className="bg-primary/10 px-1 rounded cursor-pointer text-primary"
         onClick={() => onFieldClick && onFieldClick(fieldType, match.index)}
       >
-        {/* Display as {{field}} with just the field name in bold */}
-        {'{{'}
-        <span className="font-bold">{fieldType}</span>
-        {'}}'}
+        {value}
       </span>
     );
     
