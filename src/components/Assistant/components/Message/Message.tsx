@@ -62,17 +62,17 @@ const Message: React.FC<MessageProps> = ({ role, content, id }) => {
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <ReactMarkdown
             components={{
-              code({ node, inline, className, children, ...props }) {
+              code({ node, className, children, ...props }) {
                 const match = /language-(\w+)/.exec(className || '');
                 const language = match && match[1];
                 
                 // Handle mermaid code blocks
-                if (!inline && language === 'mermaid') {
+                if (language === 'mermaid') {
                   return <MermaidRenderer code={String(children).replace(/\n$/, '')} />;
                 }
                 
                 // For other code blocks
-                return !inline ? (
+                return !props.inline ? (
                   <pre className={cn("p-2 rounded bg-slate-800 dark:bg-slate-900 overflow-auto", className)}>
                     <code className={cn("text-sm", className)} {...props}>
                       {children}
