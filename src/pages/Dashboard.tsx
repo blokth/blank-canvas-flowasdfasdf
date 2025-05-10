@@ -28,6 +28,7 @@ const Dashboard = () => {
   const [activeVisualization, setActiveVisualization] = useState<VisualizationType>(null);
   const [showFullscreenChart, setShowFullscreenChart] = useState(false);
   const [activeDataType, setActiveDataType] = useState<'wealth' | 'cash'>('wealth');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Handle template selection from DashboardActions
   const handleTemplateSelection = (template: string) => {
@@ -43,14 +44,46 @@ const Dashboard = () => {
   };
 
   // Handle assistant submission with fullscreen toggle
-  const handleAssistantSubmit = () => {
-    if (activeVisualization) {
+  const handleAssistantSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+    
+    setIsLoading(true);
+    
+    // Process query to determine visualization and response
+    setTimeout(() => {
+      // Set visualization based on query keywords (similar to DashboardAssistant logic)
+      if (query.toLowerCase().includes('portfolio') && query.toLowerCase().includes('breakdown')) {
+        setActiveVisualization('portfolio-breakdown');
+        setResponse(`Here's your portfolio breakdown by sector:`);
+      } else if (query.toLowerCase().includes('compare')) {
+        setActiveVisualization('stock-comparison');
+        setResponse(`Comparing stocks in your portfolio:`);
+      } else if (query.toLowerCase().includes('performance') || query.toLowerCase().includes('trend')) {
+        setActiveVisualization('performance-trend');
+        setResponse(`Here's the performance trend:`);
+      } else if (query.toLowerCase().includes('forecast') || query.toLowerCase().includes('prediction')) {
+        setActiveVisualization('forecast');
+        setResponse(`Based on current market trends, here's a forecast:`);
+      } else if (query.toLowerCase().includes('expense') || query.toLowerCase().includes('spending')) {
+        setActiveVisualization('expense-categories');
+        setResponse(`Here's a breakdown of your spending by category:`);
+      } else if (query.toLowerCase().includes('income') || query.toLowerCase().includes('earnings')) {
+        setActiveVisualization('income-sources');
+        setResponse(`Here's a breakdown of your income sources:`);
+      } else {
+        setActiveVisualization(null);
+        setResponse("I can help you analyze your finances. Try asking about portfolio breakdowns, performance trends, or stock comparisons.");
+      }
+      
+      // Automatically show fullscreen on successful response
       setShowFullscreenChart(true);
-    }
+      setIsLoading(false);
+    }, 800);
   };
 
   return (
-    <div className="pb-28 max-w-lg mx-auto"> {/* Increased bottom padding to make room for assistant */}
+    <div className="pb-28 max-w-lg mx-auto">
       {/* Portfolio Overview with Tabs */}
       <PortfolioOverview 
         stockChartData={stockChartData}
@@ -79,18 +112,25 @@ const Dashboard = () => {
         showFullscreenChart={showFullscreenChart}
         setShowFullscreenChart={setShowFullscreenChart}
         query={query}
+        setQuery={setQuery}
+        onSubmit={handleAssistantSubmit}
+        isLoading={isLoading}
       />
       
-      {/* Assistant Input - now positioned at the bottom with notion-like selectors */}
-      <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto">
-        <DashboardAssistant
-          setActiveVisualization={setActiveVisualization}
-          setResponse={setResponse}
-          query={query}
-          setQuery={setQuery}
-          onSubmit={handleAssistantSubmit}
-        />
-      </div>
+      {/* Assistant Input - shown when not in fullscreen mode */}
+      {!showFullscreenChart && (
+        <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto">
+          <DashboardAssistant
+            setActiveVisualization={setActiveVisualization}
+            setResponse={setResponse}
+            query={query}
+            setQuery={setQuery}
+            onSubmit={() => {
+              handleAssistantSubmit({ preventDefault: () => {} } as React.FormEvent);
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };

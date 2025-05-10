@@ -5,13 +5,17 @@ import { Button } from '@/components/ui/button';
 import VisualizationManager, { VisualizationType } from '../Assistant/components/VisualizationManager';
 import VisualizationDisplay from '../Assistant/components/VisualizationDisplay';
 import AssistantDialog from '../Assistant/components/AssistantDialog';
+import AssistantInput from '../Assistant/components/AssistantInput';
 
 interface DashboardVisualizationProps {
   response: string | null;
   activeVisualization: VisualizationType;
   showFullscreenChart: boolean;
   setShowFullscreenChart: (value: boolean) => void;
-  query?: string;
+  query: string;
+  setQuery: (query: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  isLoading?: boolean;
 }
 
 const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
@@ -19,7 +23,10 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   activeVisualization,
   showFullscreenChart,
   setShowFullscreenChart,
-  query
+  query,
+  setQuery,
+  onSubmit,
+  isLoading = false
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   
@@ -57,7 +64,7 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
       </div>
       
       {/* Display visualization if available */}
-      <div className={`${isFullscreen ? 'h-[calc(100%-80px)]' : ''}`}>
+      <div className={`${isFullscreen ? 'h-[calc(100%-120px)]' : ''}`}>
         <VisualizationDisplay
           response={response}
           visualization={<VisualizationManager activeVisualization={activeVisualization} />}
@@ -67,16 +74,28 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
         />
       </div>
       
-      {/* Display query at the bottom of fullscreen view */}
-      {isFullscreen && query && (
-        <div className="absolute bottom-4 left-4 right-4 bg-muted/30 p-3 rounded-lg border border-border/30">
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium">Query:</span> {query}
-          </p>
+      {/* Input area in fullscreen mode */}
+      {isFullscreen && (
+        <div className="absolute bottom-4 left-4 right-4">
+          <AssistantInput
+            query={query}
+            setQuery={setQuery}
+            onSubmit={onSubmit}
+            isLoading={isLoading}
+          />
+          
+          {/* Show the last query above the input area */}
+          {query && response && (
+            <div className="mb-4 bg-muted/30 p-3 rounded-lg border border-border/30">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium">Previous query:</span> {query}
+              </p>
+            </div>
+          )}
         </div>
       )}
       
-      {/* Fullscreen chart dialog */}
+      {/* Fullscreen chart dialog - no longer needed as we use direct fullscreen mode */}
       <AssistantDialog
         open={showFullscreenChart && !isFullscreen}
         onOpenChange={setShowFullscreenChart}
