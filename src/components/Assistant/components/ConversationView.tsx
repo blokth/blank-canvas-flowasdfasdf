@@ -1,6 +1,5 @@
 
 import React, { useEffect, useRef } from 'react';
-import { cn } from '@/lib/utils';
 
 interface ConversationViewProps {
   chunks: string[];
@@ -10,7 +9,7 @@ interface ConversationViewProps {
 const ConversationView: React.FC<ConversationViewProps> = ({ chunks, isLoading }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when new content arrives
+  // Auto-scroll to bottom when new chunks arrive
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;

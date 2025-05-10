@@ -7,20 +7,19 @@ export const useChunkProcessor = () => {
   const [visualizationType, setVisualizationType] = useState<VisualizationType | null>(null);
   const [chunks, setChunks] = useState<string[]>([]);
   
-  // Process individual chunks of data from FastAPI stream
+  // Process chunks from FastAPI StreamingResponse
   const processChunk = useCallback((chunk: string) => {
-    // Log each raw chunk received from FastAPI
-    console.log('Raw chunk received:', chunk);
+    console.log('Processing chunk:', chunk);
     
-    // Add chunk to chunks state for real-time display
+    // Add the raw chunk to our chunks collection
     setChunks(prevChunks => [...prevChunks, chunk]);
     
     try {
-      // Try to parse as JSON if possible (for structured responses)
+      // Try to parse as JSON for structured data
       const jsonData = JSON.parse(chunk);
-      console.log('Received JSON data:', jsonData);
+      console.log('Parsed JSON data:', jsonData);
       
-      // Update response state with content
+      // Handle structured content if available
       if (jsonData.content) {
         setResponse(jsonData.content);
       }
@@ -30,14 +29,10 @@ export const useChunkProcessor = () => {
         setVisualizationType(jsonData.visualization);
       }
     } catch (e) {
-      // If not JSON, treat as plain text content
-      // We've already added this to chunks above for display
-      
-      // For FastAPI text streams, we might want to set the full text as well
-      setResponse(prevResponse => {
-        if (!prevResponse) return chunk;
-        return prevResponse + chunk;
-      });
+      // For plain text streams, just accumulate the content
+      setResponse(prevResponse => 
+        prevResponse ? prevResponse + chunk : chunk
+      );
     }
   }, []);
   

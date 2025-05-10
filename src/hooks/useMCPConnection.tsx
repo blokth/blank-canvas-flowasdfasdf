@@ -21,12 +21,13 @@ export const useMCPConnection = () => {
   const { mutate: sendMessage, isPending: isLoading } = useMutation({
     mutationFn: makeStreamRequest,
     onMutate: () => {
+      // Reset state before new request
       setResponse(null);
       setVisualizationType(null);
       setChunks([]);
     },
     onSuccess: async (result) => {
-      // Handle non-streaming response (MCPResponse type)
+      // Handle non-streaming response
       if ('content' in result) {
         setResponse(result.content);
         if (result.visualization) {
@@ -35,28 +36,26 @@ export const useMCPConnection = () => {
         return;
       }
       
-      // Handle FastAPI StreamingResponse - non-blocking
+      // Handle FastAPI StreamingResponse
       if ('reader' in result && 'decoder' in result) {
+        // Process the stream without awaiting
         processStream(
           result.reader, 
           result.decoder, 
-          (chunk) => {
-            // Process each chunk as it arrives from FastAPI
-            processChunk(chunk);
-          }
+          processChunk
         ).catch(error => {
-          console.error("FastAPI stream processing error:", error);
+          console.error("Stream processing error:", error);
           setResponse("Error streaming the response.");
         });
       }
     },
     onError: (error) => {
-      console.error('Error sending message to MCP server:', error);
+      console.error('Error sending message to MCP:', error);
       setResponse("Failed to connect to the server.");
     }
   });
 
-  // Check MCP server health on mount
+  // Check MCP health on mount
   useEffect(() => {
     checkMCPHealth();
   }, []);
