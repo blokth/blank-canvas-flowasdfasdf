@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -122,7 +123,7 @@ const InputArea: React.FC<InputAreaProps> = ({
       )}
       
       <div className="relative border border-input rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-        {/* Hidden textarea for actual input */}
+        {/* Hidden textarea for actual input - make it truly invisible but still interactive */}
         <Textarea
           ref={textareaRef}
           placeholder="Ask about your finances or portfolio... (Type / for commands)"
@@ -130,7 +131,7 @@ const InputArea: React.FC<InputAreaProps> = ({
           onChange={handleChangeWithCursor}
           onKeyDown={handleKeyDownWithSuggestion}
           onClick={handleInputClick}
-          className="resize-none text-sm min-h-10 py-3 bg-transparent pr-10 z-10 opacity-100 caret-transparent"
+          className="resize-none text-sm min-h-10 py-3 bg-transparent pr-10 z-10 absolute inset-0 opacity-0 caret-transparent"
           rows={1}
         />
         
