@@ -39,21 +39,25 @@ export const useSuggestions = ({
       // Exit early if cursor position is not set
       if (!cursorPosition) return;
       
-      // Get text before the cursor
-      const textBeforeCursor = query.substring(0, cursorPosition);
-      
-      // Check for template fields
-      const templateMatch = /\{\{(\w+)\}\}/.exec(textBeforeCursor);
-      if (templateMatch) {
-        const fieldType = templateMatch[1].toLowerCase();
-        if (['stock', 'timeframe', 'sector'].includes(fieldType)) {
-          setSuggestionType(fieldType as 'stock' | 'timeframe' | 'sector');
+      // Check if cursor is inside a template field
+      const templatePattern = /\{\{(stock|timeframe|sector)\}\}/g;
+      let match;
+      while ((match = templatePattern.exec(query)) !== null) {
+        const startPos = match.index;
+        const endPos = startPos + match[0].length;
+        
+        if (cursorPosition >= startPos && cursorPosition <= endPos) {
+          // Cursor is inside a template field
+          setSuggestionType(match[1] as 'stock' | 'timeframe' | 'sector');
           setSearchTerm('');
-          setTemplateField(templateMatch[0]);
+          setTemplateField(match[0]);
           setShowSuggestions(true);
           return;
         }
       }
+      
+      // Get text before the cursor
+      const textBeforeCursor = query.substring(0, cursorPosition);
       
       // Check for specific patterns
       const stockMatch = /stock:(\w*)$/.exec(textBeforeCursor);
