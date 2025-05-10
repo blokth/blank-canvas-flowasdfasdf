@@ -16,13 +16,21 @@ interface ChartRendererProps {
   };
 }
 
+// Create component ID to ensure stable props comparison
+const getChartKey = (chartType: ChartType, data: any[], config: any) => {
+  return `${chartType}-${JSON.stringify(config)}`;
+};
+
 const ChartRenderer: React.FC<ChartRendererProps> = ({ 
   chartType, 
   data, 
   height = 300,
   config 
 }) => {
-  // Use useMemo to prevent re-rendering if data and config remain the same
+  // Generate a stable key for this chart configuration
+  const chartKey = useMemo(() => getChartKey(chartType, data, config), [chartType, config]);
+  
+  // Use useMemo to prevent re-rendering if inputs remain the same
   const memoizedContent = useMemo(() => {
     if (!data || data.length === 0) {
       return (
@@ -120,10 +128,18 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
           </div>
         );
     }
-  }, [chartType, data, height, config]);
+  }, [chartType, data, height, config, chartKey]);
   
   return memoizedContent;
 };
 
-// Apply memo to prevent unnecessary re-renders
-export default memo(ChartRenderer);
+// Apply strict memo comparison to prevent unnecessary re-renders
+export default memo(ChartRenderer, (prevProps, nextProps) => {
+  // Only re-render if key aspects actually change
+  return (
+    prevProps.chartType === nextProps.chartType &&
+    prevProps.height === nextProps.height &&
+    prevProps.data === nextProps.data &&
+    JSON.stringify(prevProps.config) === JSON.stringify(nextProps.config)
+  );
+});

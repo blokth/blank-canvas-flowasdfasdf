@@ -1,5 +1,4 @@
-
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { ChartRenderer, ChartType } from '@/components/Charts';
 
 // Sample chart data - would be replaced with LLM data in real implementation
@@ -142,15 +141,28 @@ const visualizationToChartMap: Record<NonNullable<VisualizationType>, {
   }
 };
 
+// Generate chart data once outside the component to prevent regeneration
+const cachedChartData = new Map<VisualizationType, any[]>();
+
 const VisualizationManager: React.FC<VisualizationManagerProps> = ({ activeVisualization }) => {
   if (!activeVisualization) return null;
   
   const visualConfig = visualizationToChartMap[activeVisualization];
   if (!visualConfig) return null;
   
-  const { chartType, getData, config } = visualConfig;
-  // Memoize data generation by moving it outside the component
-  const data = getData();
+  const { chartType, config } = visualConfig;
+  
+  // Use useMemo to memoize the data generation
+  const data = useMemo(() => {
+    // Check if we already have cached data for this visualization type
+    if (!cachedChartData.has(activeVisualization)) {
+      const { getData } = visualConfig;
+      // Generate the data once and store it in the cache
+      cachedChartData.set(activeVisualization, getData());
+    }
+    // Return the cached data
+    return cachedChartData.get(activeVisualization);
+  }, [activeVisualization, visualConfig]);
   
   return (
     <div className="w-full h-full p-2">
@@ -164,5 +176,7 @@ const VisualizationManager: React.FC<VisualizationManagerProps> = ({ activeVisua
   );
 };
 
-// Use React.memo to prevent re-renders when props don't change
-export default memo(VisualizationManager);
+// Use strict memo comparison to prevent re-renders when activeVisualization doesn't change
+export default memo(VisualizationManager, (prevProps, nextProps) => {
+  return prevProps.activeVisualization === nextProps.activeVisualization;
+});

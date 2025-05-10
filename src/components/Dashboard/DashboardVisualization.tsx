@@ -16,8 +16,11 @@ interface DashboardVisualizationProps {
   isLoading?: boolean;
 }
 
-// Use memo to prevent re-renders when props don't change
-const MemoizedVisualizationManager = memo(VisualizationManager);
+// Create a stable memoized version outside the component to prevent re-renders
+const MemoizedVisualizationManager = memo(VisualizationManager, (prevProps, nextProps) => {
+  // Only re-render if activeVisualization actually changes
+  return prevProps.activeVisualization === nextProps.activeVisualization;
+});
 
 const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   response,
@@ -74,4 +77,12 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   );
 };
 
-export default memo(DashboardVisualization);
+// Apply strict memo comparison to prevent re-renders
+export default memo(DashboardVisualization, (prevProps, nextProps) => {
+  return (
+    prevProps.response === nextProps.response &&
+    prevProps.activeVisualization === nextProps.activeVisualization &&
+    prevProps.isLoading === nextProps.isLoading
+    // Intentionally NOT comparing query/setQuery/onSubmit since they don't affect visualization rendering
+  );
+});
