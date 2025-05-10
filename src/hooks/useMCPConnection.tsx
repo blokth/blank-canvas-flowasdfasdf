@@ -6,49 +6,6 @@ import { checkMCPHealth, makeStreamRequest, StreamResponse, MCPResponse } from '
 import { useToast } from './use-toast';
 import { processStream } from '../utils/streamProcessor';
 
-// Define the types for streaming data
-interface ProgressEvent {
-  type: string;
-  complete: boolean;
-  progress: number;
-}
-
-interface CloseEvent {
-  type: string;
-  result: string | string[];
-}
-
-// Constants for API requests
-const API_RETRY_COUNT = 3;
-const API_TIMEOUT = 30000; // 30 seconds
-const MAX_RETRIES = 3;
-
-/**
- * Parse a Server-Sent Event string according to the SSE specification
- */
-function parseSSEEvent(eventString: string): { event?: string; data?: string } | null {
-  if (!eventString.trim()) return null;
-
-  const result: { event?: string; data?: string } = {};
-  const lines = eventString.split('\n');
-  let dataLines: string[] = [];
-
-  for (const line of lines) {
-    if (line.startsWith('event:')) {
-      result.event = line.substring(6).trim();
-    } else if (line.startsWith('data:')) {
-      dataLines.push(line.substring(5).trim());
-    }
-    // Ignore other SSE fields like id: and retry: for now as they're not used
-  }
-
-  if (dataLines.length > 0) {
-    result.data = dataLines.join('\n');
-  }
-
-  return result;
-}
-
 export const useMCPConnection = () => {
   const { toast } = useToast();
   
@@ -56,10 +13,8 @@ export const useMCPConnection = () => {
   const {
     response,
     visualizationType,
-    chunks,
     setResponse,
     setVisualizationType,
-    setChunks,
     processChunk,
     reset,
   } = useChunkProcessor();
@@ -109,7 +64,6 @@ export const useMCPConnection = () => {
     response,
     visualizationType,
     isLoading,
-    chunks,
     sendMessage: (query: string) => {
       if (query.trim()) {
         sendMessage(query);

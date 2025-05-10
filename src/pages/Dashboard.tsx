@@ -3,7 +3,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 import PortfolioOverview from '../components/Dashboard/PortfolioOverview';
 import DashboardVisualization from '../components/Dashboard/DashboardVisualization';
-import ConversationView from '../components/Assistant/components/ConversationView';
 import { generateChartData, generatePersonalFinanceData } from '../utils/chartDataGenerators';
 import { useMCPConnection } from '../hooks/useMCPConnection';
 
@@ -31,7 +30,6 @@ const Dashboard = () => {
     response, 
     visualizationType, 
     isLoading, 
-    chunks,
     sendMessage,
     setResponse,
     setVisualizationType
@@ -57,7 +55,7 @@ const Dashboard = () => {
   return (
     <div className="pb-28 w-full">
       {/* Page Title */}
-      <h3 className="text-lg font-medium mb-4">Ask me about your finances</h3>
+      <h3 className="text-lg font-medium mb-4">Financial Overview</h3>
       
       {/* Portfolio Overview with Tabs */}
       <PortfolioOverview 
@@ -84,17 +82,6 @@ const Dashboard = () => {
         onSubmit={handleAssistantSubmit}
         isLoading={isLoading}
       />
-      
-      {/* Chat Experience (moved below charts) */}
-      <div className="mt-4">
-        <ConversationView
-          chunks={chunks}
-          isLoading={isLoading}
-          query={query}
-          setQuery={setQuery}
-          onSubmit={handleAssistantSubmit}
-        />
-      </div>
     </div>
   );
 };
