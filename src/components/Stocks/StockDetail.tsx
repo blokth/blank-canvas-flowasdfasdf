@@ -9,36 +9,77 @@ import {
   ToggleGroupItem
 } from "@/components/ui/toggle-group";
 
-// Updated function to generate more realistic market data with sharper price movements
+// Updated function to generate highly realistic market data with sharp price movements
 const generateChartData = (baseValue: number, volatility: number, points: number) => {
   const data = [];
   let currentValue = baseValue;
   
-  for (let i = 0; i < points; i++) {
-    // More pronounced changes with less smoothing
-    const randomFactor = Math.random();
+  // For realistic stock price movements
+  const getNextValue = (current: number, vol: number) => {
+    // Random walk with occasional jumps and mean reversion
+    const random = Math.random();
     let change;
     
-    // Create occasional larger spikes and drops
-    if (randomFactor > 0.85) {
-      // Large movement (15% chance)
-      change = (Math.random() * 2 - 1) * volatility * 2.5;
-    } else if (randomFactor > 0.6) {
-      // Medium movement (25% chance) 
-      change = (Math.random() * 2 - 1) * volatility * 1.5;
-    } else {
-      // Regular movement (60% chance)
-      change = (Math.random() * 2 - 1) * volatility;
+    if (random > 0.97) { // Major event (3% chance)
+      change = (Math.random() * 2 - 1) * vol * 4;
+    } else if (random > 0.85) { // Significant move (12% chance)
+      change = (Math.random() * 2 - 1) * vol * 2;
+    } else if (random > 0.6) { // Medium move (25% chance)
+      change = (Math.random() * 2 - 1) * vol * 1.2;
+    } else { // Small move (60% chance)
+      change = (Math.random() * 2 - 1) * vol * 0.7;
     }
     
-    currentValue = Math.max(currentValue + change, 1); // Ensure value stays above 1
+    // Mean reversion component - pull slightly toward base value
+    const meanReversion = (baseValue - current) * 0.005;
+    
+    return Math.max(current + change + meanReversion, 1);
+  };
+  
+  for (let i = 0; i < points; i++) {
+    currentValue = getNextValue(currentValue, volatility);
+    
+    // Generate data point label based on period
+    let label;
+    if (points <= 24) { // 1D with hourly data
+      const hour = Math.floor(i * (24 / points));
+      label = `${hour}:00`;
+    } else if (points <= 100) { // Short periods
+      label = i.toString();
+    } else { // Longer periods
+      label = '';
+    }
+    
     data.push({
-      name: i.toString(),
+      name: label,
       value: parseFloat(currentValue.toFixed(2)),
     });
   }
   
   return data;
+};
+
+// Generate detailed datasets for different time periods
+const generateTimeSeriesData = (stock: any) => {
+  return {
+    // 1D - minute by minute data (390 trading minutes in a day)
+    '1D': generateChartData(stock.price, stock.price * 0.001, 390),
+    
+    // 1W - hourly data (5 trading days * ~7 hours = 35 points)
+    '1W': generateChartData(stock.price - stock.change * 5, stock.price * 0.003, 35),
+    
+    // 1M - daily data (~22 trading days)
+    '1M': generateChartData(stock.price - stock.change * 20, stock.price * 0.007, 22),
+    
+    // 3M - daily data (~66 trading days)
+    '3M': generateChartData(stock.price - stock.change * 60, stock.price * 0.01, 66),
+    
+    // 1Y - daily data (~252 trading days)
+    '1Y': generateChartData(stock.price - stock.change * 200, stock.price * 0.015, 252),
+    
+    // All - weekly data (several years worth)
+    'All': generateChartData(stock.price / 2, stock.price * 0.025, 260),
+  };
 };
 
 // Sample stock data
@@ -127,24 +168,17 @@ const StockDetail: React.FC = () => {
   const isPositive = stock.changePercent >= 0;
   const changeColor = isPositive ? 'text-tr-green' : 'text-tr-red';
   
-  // Generate chart data for different time periods
-  const chartData = {
-    '1D': generateChartData(stock.price - stock.change, 0.5, 24),
-    '1W': generateChartData(stock.price - stock.change * 5, 2, 7),
-    '1M': generateChartData(stock.price - stock.change * 20, 5, 30),
-    '3M': generateChartData(stock.price - stock.change * 60, 10, 90),
-    '1Y': generateChartData(stock.price - stock.change * 200, 20, 365),
-    'All': generateChartData(stock.price / 2, 50, 1500),
-  };
+  // Generate chart data with the new function
+  const chartData = generateTimeSeriesData(stock);
   
-  // Generate sample cash data (similar structure but slightly different values)
+  // Generate sample cash data (similar structure but different values)
   const cashData = {
-    '1D': generateChartData(stock.price / 2 - stock.change / 2, 0.3, 24),
-    '1W': generateChartData(stock.price / 2 - stock.change * 2, 1, 7),
-    '1M': generateChartData(stock.price / 2 - stock.change * 10, 3, 30),
-    '3M': generateChartData(stock.price / 2 - stock.change * 30, 5, 90),
-    '1Y': generateChartData(stock.price / 2 - stock.change * 100, 10, 365),
-    'All': generateChartData(stock.price / 4, 25, 1500),
+    '1D': generateChartData(stock.price / 2, stock.price * 0.0008, 390),
+    '1W': generateChartData(stock.price / 2 - stock.change * 2, stock.price * 0.002, 35),
+    '1M': generateChartData(stock.price / 2 - stock.change * 10, stock.price * 0.005, 22),
+    '3M': generateChartData(stock.price / 2 - stock.change * 30, stock.price * 0.008, 66),
+    '1Y': generateChartData(stock.price / 2 - stock.change * 100, stock.price * 0.012, 252),
+    'All': generateChartData(stock.price / 4, stock.price * 0.02, 260),
   };
   
   const isCashPositive = true; // For demo purposes

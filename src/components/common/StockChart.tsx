@@ -120,21 +120,26 @@ const StockChart: React.FC<StockChartProps> = ({
                 axisLine={false}
                 tick={{ fontSize: 10, fill: '#8E9196' }}
                 interval="preserveStartEnd"
-                minTickGap={30}
+                minTickGap={60}
+                height={20}
+                padding={{ left: 0, right: 0 }}
+                tickCount={5}
               />
               <YAxis 
                 hide={true}
-                domain={['dataMin - 5', 'dataMax + 5']}
+                domain={['auto', 'auto']}
               />
               <Tooltip content={<CustomTooltip />} />
               <Area
-                type="linear" // Changed from "monotone" to "linear" for sharper angles
+                type="linear"
                 dataKey="value"
                 stroke={chartColor}
                 strokeWidth={1.5}
                 fillOpacity={1}
                 fill={`url(#${gradientId})`}
-                connectNulls={false} // Ensures the line breaks at null/undefined points
+                dot={false}
+                connectNulls={false}
+                isAnimationActive={false}
               />
             </AreaChart>
           </ResponsiveContainer>

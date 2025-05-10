@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import PortfolioSummary from '../components/Dashboard/PortfolioSummary';
 import PerformanceChart from '../components/Dashboard/PerformanceChart';
@@ -16,120 +15,81 @@ import {
   TabsTrigger
 } from "@/components/ui/tabs";
 
-// Updated sample data for chart with sharper angles and more realistic market movements
-const chartData = [
-  { name: '9:30', value: 10000 },
-  { name: '10:00', value: 10140 },
-  { name: '10:30', value: 10080 },
-  { name: '11:00', value: 10220 },
-  { name: '11:30', value: 10150 },
-  { name: '12:00', value: 10310 },
-  { name: '12:30', value: 10250 },
-  { name: '13:00', value: 10420 },
-  { name: '13:30', value: 10370 },
-  { name: '14:00', value: 10580 },
-  { name: '14:30', value: 10520 },
-  { name: '15:00', value: 10650 },
-  { name: '15:30', value: 10780 },
-  { name: '16:00', value: 10800 },
-];
-
-// Updated realistic StockChart data with sharper angles and volatility
-const stockChartData = {
-  '1D': [
-    { name: '9:30', value: 10000 },
-    { name: '10:00', value: 10180 },
-    { name: '10:30', value: 10120 },
-    { name: '11:00', value: 10240 },
-    { name: '11:30', value: 10190 },
-    { name: '12:00', value: 10350 },
-    { name: '12:30', value: 10270 },
-    { name: '13:00', value: 10420 },
-    { name: '13:30', value: 10380 },
-    { name: '14:00', value: 10520 },
-    { name: '14:30', value: 10630 },
-    { name: '15:00', value: 10580 },
-    { name: '15:30', value: 10730 },
-    { name: '16:00', value: 10800 },
-  ],
-  '1W': [
-    { name: 'Mon', value: 10000 },
-    { name: 'Tue', value: 10240 },
-    { name: 'Wed', value: 10180 },
-    { name: 'Thu', value: 10450 },
-    { name: 'Fri', value: 10800 },
-  ],
-  '1M': [
-    { name: 'Week 1', value: 9800 },
-    { name: 'Week 2', value: 10270 },
-    { name: 'Week 3', value: 10120 },
-    { name: 'Week 4', value: 10800 },
-  ],
-  '3M': [
-    { name: 'Jan', value: 9500 },
-    { name: 'Feb', value: 9850 },
-    { name: 'Mar', value: 10800 },
-  ],
-  '1Y': [
-    { name: 'Q1', value: 9000 },
-    { name: 'Q2', value: 9650 },
-    { name: 'Q3', value: 10100 },
-    { name: 'Q4', value: 10800 },
-  ],
-  'All': [
-    { name: '2023', value: 8500 },
-    { name: '2024', value: 9300 },
-    { name: '2025', value: 10800 },
-  ],
+// Generate realistic time series data with many data points
+const generateRealisticStockData = (baseValue: number, volatility: number, points: number) => {
+  const data = [];
+  let currentValue = baseValue;
+  
+  // For realistic stock price movements
+  const getNextValue = (current: number, vol: number) => {
+    // Random walk with occasional jumps
+    const random = Math.random();
+    let change;
+    
+    if (random > 0.97) { // Major event (3% chance)
+      change = (Math.random() * 2 - 1) * vol * 3.5;
+    } else if (random > 0.85) { // Significant move (12% chance)
+      change = (Math.random() * 2 - 1) * vol * 1.8;
+    } else if (random > 0.6) { // Medium move (25% chance)
+      change = (Math.random() * 2 - 1) * vol * 1.2;
+    } else { // Small move (60% chance)
+      change = (Math.random() * 2 - 1) * vol * 0.6;
+    }
+    
+    return Math.max(current + change, 1);
+  };
+  
+  for (let i = 0; i < points; i++) {
+    currentValue = getNextValue(currentValue, volatility);
+    
+    let label;
+    if (points <= 24) {
+      const hour = Math.floor(9 + (i * 7/24)); // Trading hours 9:30 - 16:00
+      const minute = (i % 4) * 15;
+      label = `${hour}:${minute === 0 ? '00' : minute}`;
+    } else if (points <= 100) {
+      label = i.toString();
+    } else {
+      label = '';
+    }
+    
+    data.push({
+      name: label,
+      value: parseFloat(currentValue.toFixed(2))
+    });
+  }
+  
+  return data;
 };
 
-// Updated realistic personal finances chart data with sharper angles
+// Generate detailed datasets for different time periods
+const stockChartData = {
+  // 1D - minute by minute data (390 trading minutes in a day)
+  '1D': generateRealisticStockData(10000, 15, 390),
+  
+  // 1W - hourly data (5 trading days * ~7 hours = 35 points)
+  '1W': generateRealisticStockData(9800, 45, 35),
+  
+  // 1M - daily data (~22 trading days)
+  '1M': generateRealisticStockData(9500, 80, 22),
+  
+  // 3M - daily data (~66 trading days)
+  '3M': generateRealisticStockData(9000, 120, 66),
+  
+  // 1Y - daily data (~252 trading days)
+  '1Y': generateRealisticStockData(8500, 200, 252),
+  
+  // All - weekly data (several years worth)
+  'All': generateRealisticStockData(7500, 300, 260),
+};
+
 const personalFinanceChartData = {
-  '1D': [
-    { name: '9:30', value: 5000 },
-    { name: '10:00', value: 5070 },
-    { name: '10:30', value: 5040 },
-    { name: '11:00', value: 5090 },
-    { name: '11:30', value: 5120 },
-    { name: '12:00', value: 5080 },
-    { name: '12:30', value: 5150 },
-    { name: '13:00', value: 5180 },
-    { name: '13:30', value: 5210 },
-    { name: '14:00', value: 5190 },
-    { name: '14:30', value: 5270 },
-    { name: '15:00', value: 5310 },
-    { name: '15:30', value: 5290 },
-    { name: '16:00', value: 5350 },
-  ],
-  '1W': [
-    { name: 'Mon', value: 5000 },
-    { name: 'Tue', value: 5080 },
-    { name: 'Wed', value: 5170 },
-    { name: 'Thu', value: 5120 },
-    { name: 'Fri', value: 5350 },
-  ],
-  '1M': [
-    { name: 'Week 1', value: 4900 },
-    { name: 'Week 2', value: 5020 },
-    { name: 'Week 3', value: 4980 },
-    { name: 'Week 4', value: 5350 },
-  ],
-  '3M': [
-    { name: 'Jan', value: 4800 },
-    { name: 'Feb', value: 4970 },
-    { name: 'Mar', value: 5350 },
-  ],
-  '1Y': [
-    { name: 'Q1', value: 4500 },
-    { name: 'Q2', value: 4720 },
-    { name: 'Q3', value: 4950 },
-    { name: 'Q4', value: 5350 },
-  ],
-  'All': [
-    { name: '2023', value: 4200 },
-    { name: '2024', value: 4680 },
-    { name: '2025', value: 5350 },
-  ],
+  '1D': generateRealisticStockData(5000, 7, 390),
+  '1W': generateRealisticStockData(4900, 20, 35),
+  '1M': generateRealisticStockData(4800, 40, 22),
+  '3M': generateRealisticStockData(4700, 60, 66),
+  '1Y': generateRealisticStockData(4500, 100, 252),
+  'All': generateRealisticStockData(4000, 150, 260),
 };
 
 // We're no longer defining VisualizationType here, using the imported one instead
