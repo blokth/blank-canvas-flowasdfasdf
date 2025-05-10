@@ -1,5 +1,5 @@
 
-import { useState, useEffect, RefObject } from 'react';
+import { useState, useEffect, RefObject, useCallback } from 'react';
 
 interface CursorHandlingProps {
   query: string;
@@ -20,45 +20,46 @@ export const useCursorHandling = ({
   setSearchTerm,
   showSuggestions
 }: CursorHandlingProps) => {
-  // Add a debounce timer to prevent frequent cursor position updates
-  const [cursorUpdateTimer, setCursorUpdateTimer] = useState<NodeJS.Timeout | null>(null);
+  // Use animation frame request ID instead of timer
+  const [rafId, setRafId] = useState<number | null>(null);
   
   // Handle input changes with debounced cursor position updates
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     
-    // Only update cursor position after a debounce
-    if (cursorUpdateTimer) {
-      clearTimeout(cursorUpdateTimer);
+    // Cancel any pending animation frame
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
     }
     
-    const timer = setTimeout(() => {
+    // Use requestAnimationFrame instead of setTimeout
+    const id = requestAnimationFrame(() => {
       if (textareaRef.current) {
         setCursorPosition(textareaRef.current.selectionStart || 0);
       }
-    }, 50);
+    });
     
-    setCursorUpdateTimer(timer);
+    setRafId(id);
     
     return newValue;
-  };
+  }, [textareaRef, setCursorPosition, rafId]);
   
   // Handle cursor position changes from arrow keys
-  const handleCursorPositionChange = () => {
-    // Clear existing timer
-    if (cursorUpdateTimer) {
-      clearTimeout(cursorUpdateTimer);
+  const handleCursorPositionChange = useCallback(() => {
+    // Cancel any pending animation frame
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
     }
     
-    // Add small delay to ensure DOM updates first
-    const timer = setTimeout(() => {
+    // Use requestAnimationFrame instead of setTimeout
+    const id = requestAnimationFrame(() => {
       if (textareaRef.current) {
         setCursorPosition(textareaRef.current.selectionStart || 0);
       }
-    }, 50);
+    });
     
-    setCursorUpdateTimer(timer);
-  };
+    setRafId(id);
+  }, [textareaRef, setCursorPosition, rafId]);
   
   // Auto-resize textarea with the cursor position update
   useEffect(() => {
@@ -67,13 +68,16 @@ export const useCursorHandling = ({
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
       
-      // Debounce the cursor position update to reduce re-renders
-      if (cursorUpdateTimer) {
-        clearTimeout(cursorUpdateTimer);
+      // Cancel any pending animation frame
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
       }
       
-      const timer = setTimeout(() => {
-        const cursorPos = textareaRef.current?.selectionStart || 0;
+      // Use requestAnimationFrame instead of setTimeout to avoid React update loop
+      const id = requestAnimationFrame(() => {
+        if (!textareaRef.current) return;
+        
+        const cursorPos = textareaRef.current.selectionStart || 0;
         setCursorPosition(cursorPos);
         
         // Check if cursor is positioned after a field: pattern
@@ -99,26 +103,25 @@ export const useCursorHandling = ({
           } else if (showSuggestions) {
             // Don't hide suggestions if we're navigating within them
             // Only hide if we've moved to a position without a field: or / pattern
-            if (!textareaRef.current?.selectionDirection) {
+            if (!textareaRef.current.selectionDirection) {
               setShowSuggestions(false);
             }
           }
         }
-      }, 50); // 50ms debounce
+      });
       
-      setCursorUpdateTimer(timer);
+      setRafId(id);
     }
     
     return () => {
-      if (cursorUpdateTimer) {
-        clearTimeout(cursorUpdateTimer);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
       }
     };
-  }, [query, textareaRef, cursorUpdateTimer]);
+  }, [query, textareaRef, setSuggestionType, setSearchTerm, setShowSuggestions, showSuggestions, setCursorPosition, rafId]);
 
   return {
     handleChange,
-    handleCursorPositionChange,
-    cursorUpdateTimer
+    handleCursorPositionChange
   };
 };

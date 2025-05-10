@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { useToast } from '@/hooks/use-toast';
 import ConversationView from './components/ConversationView';
-
-// Import smaller components
 import AssistantInput from './components/AssistantInput';
 
 const FinanceAssistant: React.FC = () => {
@@ -17,7 +15,7 @@ const FinanceAssistant: React.FC = () => {
   const [chunks, setChunks] = useState<string[]>([]);
   const { toast } = useToast();
 
-  // Handle query submission
+  // Handle query submission with minimized setTimeout usage
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
@@ -25,41 +23,42 @@ const FinanceAssistant: React.FC = () => {
     // Store current query before clearing
     const currentQuery = query.trim();
     
-    // Mock response generation
+    // Start loading and prepare for response
     setIsLoading(true);
     
-    // Simulate streaming response
+    // Generate mock responses based on query content
     let mockChunks: string[] = [];
     
-    setTimeout(() => {
-      if (currentQuery.toLowerCase().includes('portfolio')) {
-        mockChunks = ['Here is', 'Here is your', 'Here is your portfolio', 'Here is your portfolio breakdown'];
-      } else if (currentQuery.toLowerCase().includes('invest')) {
-        mockChunks = ['Based on', 'Based on your', 'Based on your risk profile', 'Based on your risk profile, I recommend'];
-      } else {
-        mockChunks = ['I can', 'I can help', 'I can help you', 'I can help you with your financial questions'];
-      }
-      
-      // Simulate streaming chunks
+    if (currentQuery.toLowerCase().includes('portfolio')) {
+      mockChunks = ['Here is', 'Here is your', 'Here is your portfolio', 'Here is your portfolio breakdown'];
+    } else if (currentQuery.toLowerCase().includes('invest')) {
+      mockChunks = ['Based on', 'Based on your', 'Based on your risk profile', 'Based on your risk profile, I recommend'];
+    } else {
+      mockChunks = ['I can', 'I can help', 'I can help you', 'I can help you with your financial questions'];
+    }
+    
+    // Use a single timeout to start streaming chunks
+    const chunkInterval = 300; // milliseconds between chunks
+    
+    // Simulate streaming with a fixed delay instead of multiple setTimeout calls
+    const streamChunks = () => {
       mockChunks.forEach((chunk, index) => {
+        // Use a single timeout with calculated delay
+        const delay = index * chunkInterval + 500;
+        
         setTimeout(() => {
-          setChunks(prev => {
-            if (index === 0) {
-              return [chunk];
-            } else {
-              return [chunk];
-            }
-          });
+          setChunks([chunk]);
           
           if (index === mockChunks.length - 1) {
             setResponse(chunk);
             setIsLoading(false);
           }
-        }, index * 300);
+        }, delay);
       });
-    }, 500);
+    };
     
-    // Query will be cleared by the ConversationView component
+    // Start the streaming process
+    streamChunks();
   };
 
   // Cleanup on unmount

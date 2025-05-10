@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { VisualizationType } from '../Assistant/components/VisualizationManager';
 import ConversationView from '../Assistant/components/ConversationView';
 
@@ -32,7 +32,7 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
   const setQuery = setExternalQuery !== undefined ? setExternalQuery : setInternalQuery;
   const isLoading = externalIsLoading || internalIsLoading;
 
-  // Handle submit - if parent provided onSubmit use that, otherwise handle locally
+  // Handle submit without nested setTimeouts
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -44,43 +44,42 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
     // Store current query before it gets cleared
     const currentQuery = query.trim(); 
 
-    // Clear response immediately to prevent seeing the previous response
+    // Clear response immediately
     setResponse(null);
     
-    // Clear query immediately (IMPORTANT: do this BEFORE calling parentOnSubmit)
+    // Clear query immediately
     if (setExternalQuery) {
       setExternalQuery('');
     } else {
       setInternalQuery('');
     }
 
-    // We'll use a small timeout to ensure the query clearing has been processed
-    setTimeout(() => {
-      if (parentOnSubmit) {
-        parentOnSubmit(e);
-      } else {
-        setInternalIsLoading(true);
-        
-        // Simulate AI response delay
-        setTimeout(() => {
-          // Demo responses based on certain keywords
-          if (currentQuery.toLowerCase().includes('portfolio')) {
-            setActiveVisualization('portfolio-breakdown');
-            setResponse("Here's your portfolio breakdown by sector:");
-          } else {
-            setActiveVisualization(null);
-            setResponse("I can help you analyze your finances. Try asking about portfolio breakdowns.");
-          }
-          setInternalIsLoading(false);
-          submissionInProgressRef.current = false;
-        }, 1000);
-      }
-    }, 0);
-    
-    // Reset submission flag after a short delay to prevent rapid submissions
-    setTimeout(() => {
-      submissionInProgressRef.current = false;
-    }, 500);
+    // Handle submission based on whether a parent handler exists
+    if (parentOnSubmit) {
+      // Call the parent submit handler directly
+      parentOnSubmit(e);
+      // Reset submission flag after a short delay
+      setTimeout(() => {
+        submissionInProgressRef.current = false;
+      }, 500);
+    } else {
+      // Handle locally - simulate AI response
+      setInternalIsLoading(true);
+      
+      // Use a single timeout for the response simulation
+      setTimeout(() => {
+        // Demo responses based on certain keywords
+        if (currentQuery.toLowerCase().includes('portfolio')) {
+          setActiveVisualization('portfolio-breakdown');
+          setResponse("Here's your portfolio breakdown by sector:");
+        } else {
+          setActiveVisualization(null);
+          setResponse("I can help you analyze your finances. Try asking about portfolio breakdowns.");
+        }
+        setInternalIsLoading(false);
+        submissionInProgressRef.current = false;
+      }, 1000);
+    }
   };
 
   return (

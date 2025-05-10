@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 
 export interface Message {
   role: 'user' | 'assistant';
@@ -16,7 +16,7 @@ export const useMessageHandler = (chunks: string[] = []) => {
   const submissionTimeRef = useRef<number>(0); // Track when the last submission happened
 
   // Process incoming chunks and update messages
-  const processChunks = () => {
+  const processChunks = useCallback(() => {
     if (chunks.length === 0) return;
     
     const latestChunk = chunks[chunks.length - 1];
@@ -66,7 +66,7 @@ export const useMessageHandler = (chunks: string[] = []) => {
         return newMessages;
       });
     }
-  };
+  }, [chunks, currentAssistantMessage, messages]);
 
   // Process query to replace patterns with just values
   const processQuery = (query: string): string => {
@@ -74,7 +74,7 @@ export const useMessageHandler = (chunks: string[] = []) => {
   };
 
   // Handle form submission to add user message
-  const addUserMessage = (query: string) => {
+  const addUserMessage = useCallback((query: string) => {
     if (!query.trim()) return;
     
     // Process the query to replace patterns with just values
@@ -101,10 +101,10 @@ export const useMessageHandler = (chunks: string[] = []) => {
     
     // Reset chunks tracking
     lastChunkRef.current = '';
-  };
+  }, []);
 
   // Reset assistant state
-  const handleLoadingChange = (isLoading: boolean) => {
+  const handleLoadingChange = useCallback((isLoading: boolean) => {
     if (isLoading) {
       inSubmissionRef.current = true;
       // Mark the time of submission to prevent race conditions
@@ -116,7 +116,7 @@ export const useMessageHandler = (chunks: string[] = []) => {
       // After loading is complete, allow processing new chunks
       inSubmissionRef.current = false;
     }
-  };
+  }, []);
 
   return {
     messages,

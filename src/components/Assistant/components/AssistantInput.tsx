@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useMemo } from 'react';
 import InputArea from './InputComponents/InputArea';
 import { useSuggestions } from './InputComponents/useSuggestions';
 import { useInputHandlers } from './InputComponents/useInputHandlers';
@@ -22,29 +22,21 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   const [cursorPosition, setCursorPosition] = useState(0);
   
   // Process query for display (show only values) while maintaining original for submission
-  const processedQuery = useCallback((q: string) => {
+  const processedQuery = useMemo(() => {
     // Replace patterns like "stock:TSLA" with just "TSLA" for display and processing
-    return q.replace(/(stock:|timeframe:|sector:)(\w+)/g, "$2");
-  }, []);
+    return query.replace(/(stock:|timeframe:|sector:)(\w+)/g, "$2");
+  }, [query]);
   
   // Submit handler that processes the query
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
-    const processedQuery = query.replace(/(stock:|timeframe:|sector:)(\w+)/g, "$2");
     
     // Create a new form event to pass to the onSubmit handler
     const newEvent = { ...e, preventDefault: () => {} };
     
-    // Use the processed query text for the actual submission
-    const originalQuery = query;
-    setQuery(processedQuery);
-    
-    // Use setTimeout to ensure React has time to process state updates
-    setTimeout(() => {
-      onSubmit(newEvent);
-      // If needed, we can restore the original query format after submission
-    }, 0);
-  }, [query, setQuery, onSubmit]);
+    // Call the submit handler directly
+    onSubmit(newEvent);
+  }, [onSubmit]);
   
   // Use the extracted suggestions hook
   const { 
@@ -93,7 +85,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
           query={query}
           setQuery={setQuery}
           isLoading={isLoading}
-          handleSubmit={handleSubmit} // Use our custom submit handler
+          handleSubmit={handleSubmit}
           handleKeyDown={handleKeyDown}
           handleChange={handleChange}
           showSuggestions={showSuggestions}

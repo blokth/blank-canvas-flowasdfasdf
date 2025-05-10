@@ -29,12 +29,10 @@ const ConversationView: React.FC<ConversationViewProps> = ({
   const handlePillClick = (templateQuery: string) => {
     setQuery(templateQuery);
     
-    // Focus the input element
+    // Focus the input element directly without setTimeout
     const inputElement = document.querySelector('textarea');
     if (inputElement) {
-      setTimeout(() => {
-        inputElement.focus();
-      }, 0);
+      inputElement.focus();
     }
   };
 
@@ -65,15 +63,12 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     // Add user message to the conversation with processed query
     addUserMessage(processedQuery);
     
-    // Clear the query input
+    // Clear the query input and immediately submit
     setQuery('');
     
-    // Use setTimeout to ensure React has time to process state updates
-    setTimeout(() => {
-      // Create a new form event to pass to the onSubmit handler
-      const newEvent = { ...e, preventDefault: () => {} };
-      onSubmit(newEvent);
-    }, 0);
+    // Create a new form event to pass to the onSubmit handler
+    const newEvent = { ...e, preventDefault: () => {} };
+    onSubmit(newEvent);
   };
 
   return (
