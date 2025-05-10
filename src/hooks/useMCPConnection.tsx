@@ -35,17 +35,17 @@ export const useMCPConnection = () => {
         return;
       }
       
-      // Handle streaming response (StreamResponse type) - non-blocking
+      // Handle FastAPI StreamingResponse - non-blocking
       if ('reader' in result && 'decoder' in result) {
         processStream(
           result.reader, 
           result.decoder, 
           (chunk) => {
-            // Process each chunk as it arrives
+            // Process each chunk as it arrives from FastAPI
             processChunk(chunk);
           }
         ).catch(error => {
-          console.error("Stream processing error:", error);
+          console.error("FastAPI stream processing error:", error);
           setResponse("Error streaming the response.");
         });
       }

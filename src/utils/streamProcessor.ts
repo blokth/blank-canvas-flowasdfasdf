@@ -4,7 +4,7 @@ import { VisualizationType } from '../components/Assistant/components/Visualizat
 type ProcessChunkFn = (chunk: string) => void;
 
 /**
- * Processes a stream of data from an MCP response
+ * Processes a stream of data from an MCP response with FastAPI StreamingResponse
  */
 export const processStream = async (
   reader: ReadableStreamDefaultReader<Uint8Array>, 
@@ -12,37 +12,29 @@ export const processStream = async (
   processChunk: ProcessChunkFn
 ): Promise<void> => {
   try {
-    console.log('Starting to process stream...');
-    let buffer = '';
+    console.log('Starting to process FastAPI stream...');
     
-    // Set up a reading loop that doesn't block the UI
+    // Set up a non-blocking reading loop for FastAPI StreamingResponse
     const readChunk = async () => {
       try {
         const { done, value } = await reader.read();
         
         if (done) {
           console.log('Stream finished.');
-          // Process any remaining data in the buffer
-          if (buffer.trim()) {
-            console.log('Processing remaining buffer:', buffer);
-            processChunk(buffer);
-          }
           return;
         }
         
-        // Process the chunk as it arrives
+        // Decode and process the chunk immediately
         const text = decoder.decode(value, { stream: true });
         console.log('Received chunk:', text);
         
-        // Immediately update with the new chunk
-        processChunk(text);
+        // Process the raw text chunk without buffering
+        // FastAPI StreamingResponse sends complete chunks
+        if (text.trim()) {
+          processChunk(text);
+        }
         
-        // Also handle line breaks for complete messages
-        buffer += text;
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || ''; // Keep the last incomplete line in the buffer
-        
-        // Continue reading without blocking
+        // Continue reading in a non-blocking way
         setTimeout(() => readChunk(), 0);
       } catch (error) {
         console.error('Error reading stream chunk:', error);
@@ -50,7 +42,7 @@ export const processStream = async (
       }
     };
     
-    // Start the reading process
+    // Start the reading process without awaiting the entire stream
     readChunk();
   } catch (error) {
     console.error('Error reading stream:', error);
