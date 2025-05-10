@@ -53,6 +53,35 @@ export const useInputHandlers = ({
       
       const timer = setTimeout(() => {
         setCursorPosition(textareaRef.current?.selectionStart || 0);
+        
+        // Check if cursor is positioned after a field: pattern
+        const textBeforeCursor = query.substring(0, textareaRef.current?.selectionStart || 0);
+        const pattern = /(stock|timeframe|sector):(\w*)$/;
+        const match = textBeforeCursor.match(pattern);
+        
+        if (match) {
+          const fieldType = match[1] as 'stock' | 'timeframe' | 'sector';
+          const searchValue = match[2] || '';
+          
+          // Only show suggestions if we're directly after a field: pattern
+          setSuggestionType(fieldType);
+          setSearchTerm(searchValue);
+          setShowSuggestions(true);
+        } else {
+          // Check for slash commands
+          const slashMatch = /\/(\w*)$/.exec(textBeforeCursor);
+          if (slashMatch) {
+            setShowSuggestions(true);
+            setSuggestionType(null); // null indicates we're showing command suggestions
+            setSearchTerm(slashMatch[1] || '');
+          } else if (showSuggestions) {
+            // Don't hide suggestions if we're navigating within them
+            // Only hide if we've moved to a position without a field: or / pattern
+            if (!textareaRef.current?.selectionDirection) {
+              setShowSuggestions(false);
+            }
+          }
+        }
       }, 50); // 50ms debounce
       
       setCursorUpdateTimer(timer);
@@ -63,7 +92,7 @@ export const useInputHandlers = ({
         clearTimeout(cursorUpdateTimer);
       }
     };
-  }, [query, setCursorPosition, textareaRef, cursorUpdateTimer]);
+  }, [query, setCursorPosition, textareaRef, cursorUpdateTimer, setShowSuggestions, setSuggestionType, setSearchTerm, showSuggestions]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Handle command conversion on space key
@@ -232,7 +261,7 @@ export const useInputHandlers = ({
         
         setQuery(newQuery);
         
-        // Set cursor position after the inserted value
+        // Set cursor position AFTER the inserted value
         setTimeout(() => {
           if (textareaRef.current) {
             const newPosition = fieldPos + field.length + value.length;
@@ -240,32 +269,42 @@ export const useInputHandlers = ({
             textareaRef.current.setSelectionRange(newPosition, newPosition);
             setCursorPosition(newPosition);
             
-            // After inserting, check if we should move to next template field or just hide suggestions
-            if (afterCursor.trim() === '') {
-              // If there's no text after the cursor, simply hide suggestions
-              setShowSuggestions(false);
-            } else {
-              // If there is text after, try to move to the next template field
-              const nextFieldPosition = moveToNextTemplateField(
-                newQuery, 
-                newPosition, 
-                textareaRef, 
-                setShowSuggestions, 
-                setSuggestionType
-              );
-              
-              if (nextFieldPosition === newPosition) {
-                // If we didn't move (no more fields), hide suggestions
-                setShowSuggestions(false);
-              } else {
-                // If we moved to a new field, reset search term
-                setSearchTerm('');
-              }
-            }
+            // After inserting, hide suggestions by default
+            setShowSuggestions(false);
           }
         }, 0);
         return;
       }
+    }
+    
+    // Extract value from pattern like stock:AAPL to find field type
+    const fieldValuePattern = /(stock|timeframe|sector):(\w*)/.exec(query.substring(0, cursorPosition));
+    if (fieldValuePattern && suggestionType) {
+      const fieldType = fieldValuePattern[1];
+      const fieldWithColon = fieldType + ':';
+      const fieldStartPos = query.substring(0, cursorPosition).lastIndexOf(fieldWithColon);
+      const fieldEndPos = fieldStartPos + fieldWithColon.length + (fieldValuePattern[2] || '').length;
+      
+      // Replace existing value with new selection
+      const beforeField = query.substring(0, fieldStartPos + fieldWithColon.length);
+      const afterField = query.substring(fieldEndPos);
+      const newQuery = beforeField + value + afterField;
+      
+      setQuery(newQuery);
+      
+      // Position cursor after the inserted value
+      setTimeout(() => {
+        if (textareaRef.current) {
+          const newPosition = fieldStartPos + fieldWithColon.length + value.length;
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(newPosition, newPosition);
+          setCursorPosition(newPosition);
+          
+          // Hide suggestions after selection
+          setShowSuggestions(false);
+        }
+      }, 0);
+      return;
     }
     
     if (!suggestionType) {
@@ -306,28 +345,8 @@ export const useInputHandlers = ({
           textareaRef.current.setSelectionRange(newPosition, newPosition);
           setCursorPosition(newPosition);
           
-          // After inserting, check if we should move to next field or just hide suggestions
-          if (afterPattern.trim() === '') {
-            // If there's no text after the cursor, simply hide suggestions
-            setShowSuggestions(false);
-          } else {
-            // Check for any template fields to navigate to
-            const nextFieldPosition = moveToNextTemplateField(
-              newQuery, 
-              newPosition, 
-              textareaRef, 
-              setShowSuggestions, 
-              setSuggestionType
-            );
-            
-            if (nextFieldPosition === newPosition) {
-              // If we didn't move (no more fields), hide suggestions
-              setShowSuggestions(false);
-            } else {
-              // If we moved to a new field, reset search term
-              setSearchTerm('');
-            }
-          }
+          // Hide suggestions after selection
+          setShowSuggestions(false);
         }
       }, 0);
     }

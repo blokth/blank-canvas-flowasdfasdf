@@ -86,6 +86,25 @@ const InputArea: React.FC<InputAreaProps> = ({
     handleKeyDown(e);
   }, [showSuggestions, filteredSuggestions, selectedIndex, handleSuggestionSelect, handleKeyDown]);
   
+  // Handle field click to show suggestions
+  const handleFieldClick = (fieldType: 'stock' | 'timeframe' | 'sector', position: number) => {
+    // Position cursor at the field
+    if (textareaRef.current) {
+      // Calculate the exact position after the field: prefix
+      const fieldLength = fieldType.length + 1; // +1 for colon
+      const cursorPos = position + fieldLength;
+      
+      textareaRef.current.focus();
+      textareaRef.current.setSelectionRange(cursorPos, cursorPos);
+      
+      // Show suggestions for this field type
+      if (fieldType) {
+        // We'll handle this through the useInputHandlers, which watches cursor position
+        // This will trigger showing suggestions for the appropriate field type
+      }
+    }
+  };
+  
   return (
     <form onSubmit={handleFormSubmit} className="relative">
       {/* Suggestion popup ABOVE the input */}
@@ -111,7 +130,10 @@ const InputArea: React.FC<InputAreaProps> = ({
         />
         
         {/* Visible div for highlighting */}
-        <InputDisplay query={query} />
+        <InputDisplay 
+          query={query} 
+          onFieldClick={handleFieldClick} 
+        />
       </div>
       
       <Button 
