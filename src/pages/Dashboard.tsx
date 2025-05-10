@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { VisualizationType } from '../components/Assistant/components/VisualizationManager';
 import PortfolioOverview from '../components/Dashboard/PortfolioOverview';
 import DashboardActions from '../components/Dashboard/DashboardActions';
 import DashboardVisualization from '../components/Dashboard/DashboardVisualization';
 import DashboardAssistant from '../components/Dashboard/DashboardAssistant';
+import AssistantInput from '../components/Assistant/components/AssistantInput';
 import { generateChartData, generatePersonalFinanceData } from '../utils/chartDataGenerators';
 import { useMCPConnection } from '../hooks/useMCPConnection';
 
