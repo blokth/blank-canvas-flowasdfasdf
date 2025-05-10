@@ -45,19 +45,27 @@ export const useSuggestions = ({
       const timeframeMatch = /timeframe:(\w*)$/.exec(textBeforeCursor);
       const sectorMatch = /sector:(\w*)$/.exec(textBeforeCursor);
       
-      if (stockMatch) {
+      // Check for template fields
+      const stockTemplateMatch = /\{\{stock(\w*)\}\}$/.exec(textBeforeCursor) || 
+                              /\{\{stock:(\w*)\}\}$/.exec(textBeforeCursor);
+      const timeframeTemplateMatch = /\{\{timeframe(\w*)\}\}$/.exec(textBeforeCursor) || 
+                                  /\{\{timeframe:(\w*)\}\}$/.exec(textBeforeCursor);
+      const sectorTemplateMatch = /\{\{sector(\w*)\}\}$/.exec(textBeforeCursor) || 
+                               /\{\{sector:(\w*)\}\}$/.exec(textBeforeCursor);
+      
+      if (stockMatch || stockTemplateMatch) {
         setSuggestionType('stock');
-        setSearchTerm(stockMatch[1] || '');
+        setSearchTerm((stockMatch?.[1] || stockTemplateMatch?.[1] || ''));
         setShowSuggestions(true);
         return;
-      } else if (timeframeMatch) {
+      } else if (timeframeMatch || timeframeTemplateMatch) {
         setSuggestionType('timeframe');
-        setSearchTerm(timeframeMatch[1] || '');
+        setSearchTerm((timeframeMatch?.[1] || timeframeTemplateMatch?.[1] || ''));
         setShowSuggestions(true);
         return;
-      } else if (sectorMatch) {
+      } else if (sectorMatch || sectorTemplateMatch) {
         setSuggestionType('sector');
-        setSearchTerm(sectorMatch[1] || '');
+        setSearchTerm((sectorMatch?.[1] || sectorTemplateMatch?.[1] || ''));
         setShowSuggestions(true);
         return;
       }
