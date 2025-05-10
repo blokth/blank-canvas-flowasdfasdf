@@ -35,20 +35,19 @@ export const useMCPConnection = () => {
         return;
       }
       
-      // Handle streaming response (StreamResponse type)
+      // Handle streaming response (StreamResponse type) - non-blocking
       if ('reader' in result && 'decoder' in result) {
-        try {
-          await processStream(
-            result.reader, 
-            result.decoder, 
-            (chunk) => {
-              // Process each chunk as it arrives
-              processChunk(chunk);
-            }
-          );
-        } catch (error) {
+        processStream(
+          result.reader, 
+          result.decoder, 
+          (chunk) => {
+            // Process each chunk as it arrives
+            processChunk(chunk);
+          }
+        ).catch(error => {
+          console.error("Stream processing error:", error);
           setResponse("Error streaming the response.");
-        }
+        });
       }
     },
     onError: (error) => {
