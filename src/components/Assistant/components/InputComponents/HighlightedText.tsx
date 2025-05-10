@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 
 interface HighlightedTextProps {
   query: string;
@@ -66,4 +66,8 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({
   return <>{parts}</>;
 };
 
-export default HighlightedText;
+// Memoize the component to prevent unnecessary re-renders
+export default memo(HighlightedText, (prevProps, nextProps) => {
+  // Only re-render if query changes
+  return prevProps.query === nextProps.query;
+});

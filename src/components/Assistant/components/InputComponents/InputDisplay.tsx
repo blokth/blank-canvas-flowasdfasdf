@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import HighlightedText from './HighlightedText';
 
 interface InputDisplayProps {
@@ -18,4 +18,8 @@ const InputDisplay: React.FC<InputDisplayProps> = ({
   );
 };
 
-export default InputDisplay;
+// Memoize the component to prevent unnecessary re-renders
+export default memo(InputDisplay, (prevProps, nextProps) => {
+  // Only re-render if the query changes
+  return prevProps.query === nextProps.query;
+});
