@@ -89,36 +89,40 @@ const StockChart: React.FC<StockChartProps> = ({
   
   return (
     <Card className="border-border/20 p-3">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-2">
-          <span className="text-xs font-medium">View:</span>
-          <ToggleGroup 
-            type="single" 
-            value={activeDataType} 
-            onValueChange={(value) => {
-              if (value) setActiveDataType(value as 'wealth' | 'cash');
-            }}
-            size="sm"
-          >
-            <ToggleGroupItem value="wealth" className="text-xs px-2 py-1 h-7">
-              Wealth
-            </ToggleGroupItem>
-            <ToggleGroupItem value="cash" className="text-xs px-2 py-1 h-7">
-              Cash
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
-        
-        <div className="flex gap-1 p-1 bg-muted/30 rounded-full">
-          {periods.map((period) => (
-            <PeriodButton
-              key={period}
-              active={activePeriod === period}
-              onClick={() => setActivePeriod(period)}
+      <div className="flex flex-col space-y-2 mb-4">
+        {/* Chart title and view selector in the same row */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium">View:</span>
+            <ToggleGroup 
+              type="single" 
+              value={activeDataType} 
+              onValueChange={(value) => {
+                if (value) setActiveDataType(value as 'wealth' | 'cash');
+              }}
+              size="sm"
             >
-              {period}
-            </PeriodButton>
-          ))}
+              <ToggleGroupItem value="wealth" className="text-xs px-2 py-1 h-7">
+                Wealth
+              </ToggleGroupItem>
+              <ToggleGroupItem value="cash" className="text-xs px-2 py-1 h-7">
+                Cash
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        
+          {/* Period selector buttons */}
+          <div className="flex gap-1 p-1 bg-muted/30 rounded-full">
+            {periods.map((period) => (
+              <PeriodButton
+                key={period}
+                active={activePeriod === period}
+                onClick={() => setActivePeriod(period)}
+              >
+                {period}
+              </PeriodButton>
+            ))}
+          </div>
         </div>
       </div>
       
