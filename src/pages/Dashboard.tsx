@@ -101,6 +101,23 @@ const Dashboard = () => {
         setResponse={setResponse}
       />
       
+      {/* Conversation View (including streaming chunks) now appears here after action pills */}
+      {!showFullscreenChart && (
+        <div className="mt-4">
+          <DashboardAssistant
+            setActiveVisualization={setVisualizationType}
+            setResponse={setResponse}
+            query={query}
+            setQuery={setQuery}
+            onSubmit={() => {
+              handleAssistantSubmit({ preventDefault: () => {} } as React.FormEvent);
+            }}
+            isLoading={isLoading}
+            chunks={chunks}
+          />
+        </div>
+      )}
+      
       {/* Visualization Display */}
       <DashboardVisualization
         response={response}
@@ -113,19 +130,19 @@ const Dashboard = () => {
         isLoading={isLoading}
       />
       
-      {/* Assistant Input - shown when not in fullscreen mode */}
+      {/* Fixed position input at the bottom */}
       {!showFullscreenChart && (
         <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto">
-          <DashboardAssistant
-            setActiveVisualization={setVisualizationType}
-            setResponse={setResponse}
-            query={query}
-            setQuery={setQuery}
-            onSubmit={() => {
-              handleAssistantSubmit({ preventDefault: () => {} } as React.FormEvent);
-            }}
-            isLoading={isLoading}
-          />
+          <div className="bg-background rounded-xl shadow-sm">
+            <AssistantInput
+              query={query}
+              setQuery={setQuery}
+              onSubmit={() => {
+                handleAssistantSubmit({ preventDefault: () => {} } as React.FormEvent);
+              }}
+              isLoading={isLoading}
+            />
+          </div>
         </div>
       )}
     </div>

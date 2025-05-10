@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { VisualizationType } from '../Assistant/components/VisualizationManager';
 import AssistantInput from '../Assistant/components/AssistantInput';
+import ConversationView from '../Assistant/components/ConversationView';
 
 interface DashboardAssistantProps {
   setActiveVisualization: (visualization: VisualizationType) => void;
@@ -72,6 +73,12 @@ const DashboardAssistant: React.FC<DashboardAssistantProps> = ({
         query={query}
         setQuery={setQuery}
         onSubmit={handleSubmit}
+        isLoading={isLoading}
+      />
+      
+      {/* Conversation View to display streaming chunks */}
+      <ConversationView
+        chunks={chunks}
         isLoading={isLoading}
       />
     </div>
