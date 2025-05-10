@@ -2,7 +2,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ActionPills from './ActionPills';
 import AssistantInput from './AssistantInput';
-import { Bot, User } from 'lucide-react';
 
 interface ConversationViewProps {
   chunks: string[];
@@ -104,39 +103,22 @@ const ConversationView: React.FC<ConversationViewProps> = ({
             {messages.map((message, index) => (
               <div 
                 key={index} 
-                className={`flex items-start gap-3 ${
-                  message.type === 'user' ? 'justify-end' : 'justify-start'
-                }`}
+                className={message.type === 'user' ? 'self-end' : 'w-full'}
               >
-                {message.type === 'assistant' && (
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Bot size={18} className="text-primary" />
-                  </div>
-                )}
-                
                 <div 
-                  className={`p-3 rounded-lg max-w-[80%] ${
+                  className={`p-3 rounded-lg ${
                     message.type === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
+                      ? 'bg-primary text-primary-foreground max-w-[80%] ml-auto'
+                      : 'bg-muted w-full'
                   }`}
                 >
                   {message.content}
                 </div>
-                
-                {message.type === 'user' && (
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                    <User size={18} className="text-primary-foreground" />
-                  </div>
-                )}
               </div>
             ))}
             
             {isLoading && (
-              <div className="flex items-start gap-3 justify-start">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Bot size={18} className="text-primary" />
-                </div>
+              <div className="w-full">
                 <div className="p-3 rounded-lg bg-muted">
                   <div className="flex gap-1">
                     <div className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce"></div>
