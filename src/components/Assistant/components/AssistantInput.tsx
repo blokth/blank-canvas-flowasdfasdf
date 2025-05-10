@@ -53,7 +53,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
   const filteredSuggestions = getFilteredSuggestions();
 
   return (
-    <form onSubmit={onSubmit} className="bg-background border border-border/20 rounded-xl shadow-sm w-full">
+    <div className="bg-background border border-border/40 rounded-xl shadow-sm hover:border-border/60 transition-colors duration-200 w-full">
       <div className="flex flex-col gap-2 p-2">
         <InputArea
           query={query}
@@ -70,7 +70,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
           templateField={templateField}
         />
       </div>
-    </form>
+    </div>
   );
 };
 

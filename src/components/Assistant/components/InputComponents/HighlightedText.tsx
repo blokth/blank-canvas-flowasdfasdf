@@ -33,7 +33,7 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ query }) => {
     parts.push(
       <span 
         key={`field-${match.index}`} 
-        className="bg-primary/20 text-primary rounded px-1"
+        className="bg-primary/15 text-primary rounded px-1 py-0.5"
       >
         {match[0]}
       </span>

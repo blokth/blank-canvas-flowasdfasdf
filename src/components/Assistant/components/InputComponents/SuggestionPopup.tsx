@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
+import { cn } from '@/lib/utils';
 
 interface SuggestionPopupProps {
   suggestionType: 'stock' | 'timeframe' | 'sector' | null;
@@ -29,7 +30,7 @@ const SuggestionPopup: React.FC<SuggestionPopupProps> = ({
   };
 
   return (
-    <div className="absolute left-0 right-0 bottom-full mb-1 z-50">
+    <div className="absolute left-0 right-0 bottom-full mb-1 z-50 animate-fade-in">
       <Command className="rounded-lg border shadow-md bg-popover">
         <CommandList>
           <CommandGroup heading={getHeadingText()}>
@@ -39,7 +40,10 @@ const SuggestionPopup: React.FC<SuggestionPopupProps> = ({
                   key={item} 
                   value={item}
                   onSelect={() => onSuggestionSelect(item)}
-                  className={`cursor-pointer ${index === selectedIndex ? 'bg-accent text-accent-foreground' : ''}`}
+                  className={cn(
+                    "cursor-pointer transition-colors duration-150",
+                    index === selectedIndex ? "bg-accent text-accent-foreground" : ""
+                  )}
                 >
                   {item}
                 </CommandItem>

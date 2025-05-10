@@ -1,6 +1,6 @@
 
 import React from 'react';
-import ActionPills from '../Assistant/components/ActionPills';
+import { ActionPills } from '../Assistant/components/ActionPills';
 import { VisualizationType } from '../Assistant/components/VisualizationManager';
 
 interface DashboardActionsProps {

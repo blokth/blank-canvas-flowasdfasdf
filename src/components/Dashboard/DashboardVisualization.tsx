@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import VisualizationManager, { VisualizationType } from '../Assistant/components/VisualizationManager';
+import { VisualizationType } from '../Assistant/components/VisualizationManager';
 import VisualizationDisplay from '../Assistant/components/VisualizationDisplay';
 import AssistantInput from '../Assistant/components/AssistantInput';
+import { VisualizationManager } from '../Assistant/components/VisualizationManager';
 
 interface DashboardVisualizationProps {
   response: string | null;
@@ -40,7 +41,7 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
   if (!response) return null;
   
   return (
-    <div className="mb-20">
+    <div className="mb-20 animate-fade-in">
       {/* Hidden preloader that renders offscreen */}
       {response && !isPreloaded && (
         <div className="fixed opacity-0 pointer-events-none" aria-hidden="true">
@@ -52,9 +53,9 @@ const DashboardVisualization: React.FC<DashboardVisualizationProps> = ({
         {/* Display visualization if available */}
         <div>
           <VisualizationDisplay
-            response={response}
             visualization={<VisualizationManager activeVisualization={activeVisualization} />}
             minimal={true}
+            response={response}
           />
         </div>
       </div>

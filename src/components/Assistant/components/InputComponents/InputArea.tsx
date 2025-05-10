@@ -106,7 +106,7 @@ const InputArea: React.FC<InputAreaProps> = ({
           value={query}
           onChange={handleChange}
           onKeyDown={handleKeyDownWithSuggestion}
-          className="resize-none text-sm border-0 focus-visible:ring-0 shadow-none min-h-10 py-3 bg-transparent pr-10 absolute inset-0 opacity-0"
+          className="resize-none text-sm border-0 focus-visible:ring-1 focus-visible:ring-primary/30 shadow-none min-h-10 py-3 bg-transparent pr-10 absolute inset-0 opacity-0"
           rows={1}
         />
         
@@ -118,8 +118,8 @@ const InputArea: React.FC<InputAreaProps> = ({
         type="submit" 
         size="icon" 
         disabled={isLoading || !query.trim() || isInTransition}
-        className="absolute right-1 bottom-1 shrink-0 h-8 w-8 rounded-full"
-        variant="ghost"
+        className="absolute right-2 bottom-2 shrink-0 h-8 w-8 rounded-full transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+        variant={query.trim() ? "default" : "ghost"}
       >
         <Send size={16} className={isLoading || isInTransition ? 'opacity-50' : ''} />
       </Button>

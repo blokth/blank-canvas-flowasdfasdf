@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  timestamp?: Date;
 }
 
 interface ConversationViewProps {
@@ -30,6 +31,16 @@ const ConversationView: React.FC<ConversationViewProps> = ({
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentAssistantMessage, setCurrentAssistantMessage] = useState<string>('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Auto-scroll to bottom when new messages arrive
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
   
   // Handle pills click
   const handlePillClick = (templateQuery: string) => {
@@ -59,7 +70,11 @@ const ConversationView: React.FC<ConversationViewProps> = ({
         // Add to messages only if this is a new assistant response
         // (i.e., not a continuation of the current one)
         if (messages.length === 0 || messages[messages.length - 1].role !== 'assistant') {
-          setMessages(prev => [...prev, { role: 'assistant', content: latestChunk }]);
+          setMessages(prev => [...prev, { 
+            role: 'assistant', 
+            content: latestChunk,
+            timestamp: new Date()
+          }]);
         }
       }
       
@@ -81,7 +96,11 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     if (!query.trim()) return;
     
     // Add user message to the conversation
-    setMessages(prev => [...prev, { role: 'user', content: query }]);
+    setMessages(prev => [...prev, { 
+      role: 'user', 
+      content: query,
+      timestamp: new Date()
+    }]);
     
     // Reset current assistant message
     setCurrentAssistantMessage('');
@@ -106,12 +125,12 @@ const ConversationView: React.FC<ConversationViewProps> = ({
               <div 
                 key={index}
                 className={cn(
-                  "flex flex-col space-y-2",
+                  "flex flex-col space-y-2 animate-fade-in",
                   message.role === 'user' ? "items-end" : "items-start"
                 )}
               >
                 <div className={cn(
-                  "px-4 py-3 rounded-lg max-w-[80%]",
+                  "px-4 py-3 rounded-lg max-w-[80%] shadow-sm",
                   message.role === 'user' 
                     ? "bg-primary text-primary-foreground rounded-br-none" 
                     : "bg-muted rounded-bl-none"
@@ -123,6 +142,14 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                     }} 
                   />
                 </div>
+                {message.timestamp && (
+                  <span className="text-xs text-muted-foreground px-2">
+                    {new Intl.DateTimeFormat('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }).format(message.timestamp)}
+                  </span>
+                )}
               </div>
             ))}
             {/* Only show the typing indicator when loading and after at least one message */}
@@ -135,12 +162,13 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
         )}
       </ScrollArea>
       
       {/* Input area */}
-      <div className="border-t border-border/10 p-4">
+      <div className="border-t border-border/10 p-4 bg-background/95">
         <AssistantInput
           query={query}
           setQuery={setQuery}
