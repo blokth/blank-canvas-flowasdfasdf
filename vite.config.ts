@@ -9,12 +9,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    cors: {
-      origin: "https://blokth.com", // Allow all origins
-      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-      preflightContinue: false,
-      optionsSuccessStatus: 204
-    }
+    cors: false
   },
   plugins: [
     react(),
