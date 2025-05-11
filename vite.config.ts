@@ -9,7 +9,15 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    cors: false
+    cors: true,  // Enable CORS for all origins
+    proxy: {
+      // Add proxy for MCP requests if needed
+      '/api/mcp': {
+        target: 'https://blokth.com:8080',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/mcp/, '')
+      }
+    }
   },
   plugins: [
     react(),

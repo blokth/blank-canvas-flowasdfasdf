@@ -1,54 +1,14 @@
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useChunkProcessor } from './useChunkProcessor';
 import { checkMCPHealth, makeStreamRequest, StreamResponse, MCPResponse } from '../utils/mcpUtils';
 import { useToast } from './use-toast';
 import { processStream } from '../utils/streamProcessor';
 
-// Define the types for streaming data
-interface ProgressEvent {
-  type: string;
-  complete: boolean;
-  progress: number;
-}
-
-interface CloseEvent {
-  type: string;
-  result: string | string[];
-}
-
-// Constants for API requests
-const API_RETRY_COUNT = 3;
-const API_TIMEOUT = 30000; // 30 seconds
-const MAX_RETRIES = 3;
-
 /**
- * Parse a Server-Sent Event string according to the SSE specification
+ * Custom hook to handle MCP connection and communication
  */
-function parseSSEEvent(eventString: string): { event?: string; data?: string } | null {
-  if (!eventString.trim()) return null;
-
-  const result: { event?: string; data?: string } = {};
-  const lines = eventString.split('\n');
-  let dataLines: string[] = [];
-
-  for (const line of lines) {
-    if (line.startsWith('event:')) {
-      result.event = line.substring(6).trim();
-    } else if (line.startsWith('data:')) {
-      dataLines.push(line.substring(5).trim());
-    }
-    // Ignore other SSE fields like id: and retry: for now as they're not used
-  }
-
-  if (dataLines.length > 0) {
-    result.data = dataLines.join('\n');
-  }
-
-  return result;
-}
-
 export const useMCPConnection = () => {
   const { toast } = useToast();
   
@@ -67,8 +27,20 @@ export const useMCPConnection = () => {
   // Send message mutation
   const { mutate: sendMessage, isPending: isLoading } = useMutation({
     mutationFn: async (query: string) => {
-      const result = await makeStreamRequest(query);
-      return result;
+      try {
+        const result = await makeStreamRequest(query);
+        return result;
+      } catch (error) {
+        // Handle specific error types and provide user-friendly messages
+        if (error.message.includes('CORS')) {
+          throw new Error('Unable to connect to the AI server due to CORS restrictions. Please check your network settings.');
+        } else if (error.message.includes('Network') || error.message.includes('Failed to fetch')) {
+          throw new Error('Network error: Unable to connect to the AI server. It may be down or unreachable.');
+        } else if (error.message.includes('timed out')) {
+          throw new Error('Connection to the AI server timed out. Please try again later.');
+        }
+        throw error;
+      }
     },
     onMutate: () => {
       // Reset state before new request
@@ -91,19 +63,44 @@ export const useMCPConnection = () => {
     },
     onError: (error) => {
       console.error('Error sending message to MCP:', error);
-      setResponse("Failed to connect to the server.");
+      let errorMessage = "Failed to connect to the server. Please try again later.";
+      
+      // Use custom error messages if available
+      if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setResponse(errorMessage);
       toast({
         title: "Connection Error",
-        description: "Failed to connect to the server. Please try again later.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
   });
 
+  // Function to check server health and notify user
+  const checkServerHealth = useCallback(async () => {
+    const isHealthy = await checkMCPHealth();
+    if (!isHealthy) {
+      console.warn('MCP server is not responding. Features requiring AI may not work properly.');
+      // Only show toast once to avoid spamming the user
+      toast({
+        title: "Server Connection Issue",
+        description: "The AI server is not responding. Some features might be limited.",
+        variant: "warning",
+        duration: 10000, // Show for 10 seconds
+      });
+    }
+  }, [toast]);
+
   // Check MCP health on mount
   useEffect(() => {
-    checkMCPHealth();
-  }, []);
+    checkServerHealth();
+    // Set up periodic health check every 5 minutes
+    const healthCheckInterval = setInterval(checkServerHealth, 5 * 60 * 1000);
+    return () => clearInterval(healthCheckInterval);
+  }, [checkServerHealth]);
 
   return {
     response,
