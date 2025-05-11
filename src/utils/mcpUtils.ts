@@ -15,7 +15,7 @@ export type StreamResponse = {
 
 // MCP configuration with default values
 export const MCP_CONFIG = {
-  baseUrl: 'http://blokth.com:8080',
+  baseUrl: 'https://blokth.com:8080',
   healthEndpoint: '/health',
   chatEndpoint: '/chat',
   connectionTimeout: 10000, // 10 second timeout
