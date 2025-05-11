@@ -88,7 +88,7 @@ export const useMCPConnection = () => {
       toast({
         title: "Server Connection Issue",
         description: "The AI server is not responding. Some features might be limited.",
-        variant: "warning",
+        variant: "default", // Changed from "warning" to "default"
         duration: 10000, // Show for 10 seconds
       });
     }
