@@ -15,7 +15,7 @@ export type StreamResponse = {
 
 // MCP configuration with default values
 export const MCP_CONFIG = {
-  baseUrl: 'https://172.104.147.240:8000',
+  baseUrl: 'https://blokth.com:8000',
   healthEndpoint: '/health',
   chatEndpoint: '/chat',
 };
